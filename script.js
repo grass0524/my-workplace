@@ -618,8 +618,230 @@ function speakText(text) {
     window.speechSynthesis.speak(utterance);
 }
 
+// 默写复习状态
+let quizState = {
+    isActive: false,
+    words: [],
+    currentIndex: 0,
+    userAnswers: {}
+};
+
 function startQuiz() {
-    showToast('默写功能开发中...');
+    if (myVocab.length === 0) {
+        showToast('生词本是空的，先添加一些单词吧！');
+        return;
+    }
+
+    // 打乱单词顺序
+    quizState.words = [...myVocab].sort(() => Math.random() - 0.5);
+    quizState.currentIndex = 0;
+    quizState.userAnswers = {};
+    quizState.isActive = true;
+
+    renderQuiz();
+}
+
+function renderQuiz() {
+    const modalHeader = document.getElementById('vocab-modal-header');
+    const modalBody = document.getElementById('vocab-modal-body');
+    const floatBtn = document.getElementById('quiz-start-btn');
+
+    // 隐藏悬浮按钮
+    floatBtn.style.display = 'none';
+
+    // 修改标题为退出默写模式
+    modalHeader.innerHTML = `
+        <h3>默写复习</h3>
+        <button class="btn-text" onclick="exitQuiz()">
+            <i class="fas fa-sign-out-alt"></i> 退出默写模式
+        </button>
+    `;
+
+    renderCurrentWord();
+}
+
+function renderCurrentWord() {
+    const modalBody = document.getElementById('vocab-modal-body');
+    const currentWord = quizState.words[quizState.currentIndex];
+    const answerKey = String(quizState.currentIndex);
+    const userAnswer = quizState.userAnswers[answerKey] || {};
+
+    // 检查是否全部正确
+    const isComplete = checkWordComplete(currentWord, userAnswer);
+
+    // 生成字母输入框
+    const wordLetters = currentWord.word.split('');
+    const letterInputs = wordLetters.map((letter, index) => {
+        const userInput = userAnswer[index] || '';
+        const isCorrect = userInput.toUpperCase() === letter.toUpperCase();
+        const isFilled = userInput !== '';
+
+        let inputClass = 'quiz-letter-input';
+        if (isFilled) {
+            inputClass += isCorrect ? ' correct' : ' incorrect';
+        }
+
+        const returnVal = `<input type="text" class="${inputClass}" maxlength="1" data-index="${index}" value="${userInput}" oninput="handleLetterInput(this, ${index})" onkeypress="handleLetterKeypress(event, this)" autocomplete="off">`;
+        return returnVal;
+    }).join('');
+
+    modalBody.innerHTML = `
+        <div class="quiz-container">
+            <div class="quiz-word-card">
+                <div class="quiz-meaning">${currentWord.meaning}</div>
+                <button class="quiz-audio-btn" onclick="speakText('${currentWord.word}')" title="朗读">
+                    <i class="fas fa-volume-high"></i>
+                </button>
+                ${isComplete ? '<div class="quiz-complete-icon">✅</div>' : ''}
+                <div class="quiz-input-area">
+                    ${letterInputs}
+                </div>
+                ${isComplete ? renderQuizActions() : ''}
+            </div>
+        </div>
+    `;
+
+    // 聚焦到第一个空输入框
+    if (!isComplete) {
+        setTimeout(() => {
+            const firstEmpty = modalBody.querySelector('.quiz-letter-input:not(.correct):not(.incorrect)');
+            if (firstEmpty) firstEmpty.focus();
+        }, 100);
+    }
+}
+
+function handleLetterInput(input, index) {
+    const value = input.value;
+    const answerKey = String(quizState.currentIndex);
+
+    if (!quizState.userAnswers[answerKey]) {
+        quizState.userAnswers[answerKey] = {};
+    }
+
+    quizState.userAnswers[answerKey][index] = value;
+
+    // 实时检查并更新样式
+    const currentWord = quizState.words[quizState.currentIndex];
+    const letter = currentWord.word[index];
+    const isCorrect = value.toUpperCase() === letter.toUpperCase();
+
+    input.classList.remove('correct', 'incorrect');
+    if (value !== '') {
+        input.classList.add(isCorrect ? 'correct' : 'incorrect');
+    }
+
+    // 检查是否完成
+    const userAnswer = quizState.userAnswers[answerKey];
+    if (checkWordComplete(currentWord, userAnswer)) {
+        renderCurrentWord();
+    } else {
+        // 自动跳到下一个输入框
+        if (value !== '' && isCorrect) {
+            const inputs = document.querySelectorAll('.quiz-letter-input');
+            if (index + 1 < inputs.length) {
+                inputs[index + 1].focus();
+            }
+        }
+    }
+}
+
+function handleLetterKeypress(event, input) {
+    // 支持退格键
+    if (event.key === 'Backspace' && input.value === '') {
+        const inputs = document.querySelectorAll('.quiz-letter-input');
+        const index = parseInt(input.dataset.index);
+        if (index > 0) {
+            inputs[index - 1].focus();
+        }
+    }
+}
+
+function checkWordComplete(word, userAnswer) {
+    const letters = word.word.split('');
+    for (let i = 0; i < letters.length; i++) {
+        const userInput = userAnswer[i] || '';
+        if (userInput.toUpperCase() !== letters[i].toUpperCase()) {
+            return false;
+        }
+    }
+    return true;
+}
+
+function renderQuizActions() {
+    const isFirst = quizState.currentIndex === 0;
+    const isLast = quizState.currentIndex === quizState.words.length - 1;
+
+    let actionsHtml = '<div class="quiz-actions">';
+    if (!isFirst) {
+        actionsHtml += '<button class="btn-secondary" onclick="prevWord()"><i class="fas fa-arrow-left"></i> 上一个</button>';
+    }
+    actionsHtml += '<button class="btn-primary" onclick="removeCurrentWord()"><i class="fas fa-trash"></i> 移出生词本</button>';
+    if (!isLast) {
+        actionsHtml += '<button class="btn-primary" onclick="nextWord()">下一个 <i class="fas fa-arrow-right"></i></button>';
+    }
+    actionsHtml += '</div>';
+
+    return actionsHtml;
+}
+
+function nextWord() {
+    if (quizState.currentIndex < quizState.words.length - 1) {
+        quizState.currentIndex++;
+        renderCurrentWord();
+    }
+}
+
+function prevWord() {
+    if (quizState.currentIndex > 0) {
+        quizState.currentIndex--;
+        renderCurrentWord();
+    }
+}
+
+async function removeCurrentWord() {
+    const currentWord = quizState.words[quizState.currentIndex];
+
+    if (await showConfirm('确定要将 "' + currentWord.word + '" 移出生词本吗？')) {
+        // 从生词本中删除
+        myVocab = myVocab.filter(w => w.word !== currentWord.word);
+        localStorage.setItem('myVocab', JSON.stringify(myVocab));
+
+        // 从默写列表中删除
+        quizState.words.splice(quizState.currentIndex, 1);
+
+        if (quizState.words.length === 0) {
+            showToast('生词本已清空！');
+            exitQuiz();
+        } else {
+            // 如果删除的是最后一个，移动到前一个
+            if (quizState.currentIndex >= quizState.words.length) {
+                quizState.currentIndex = quizState.words.length - 1;
+            }
+            renderCurrentWord();
+        }
+    }
+}
+
+function exitQuiz() {
+    quizState.isActive = false;
+    quizState.words = [];
+    quizState.currentIndex = 0;
+    quizState.userAnswers = {};
+
+    // 恢复弹窗为生词本列表
+    const modalHeader = document.getElementById('vocab-modal-header');
+    const modalBody = document.getElementById('vocab-modal-body');
+    const floatBtn = document.getElementById('quiz-start-btn');
+
+    modalHeader.innerHTML = `
+        <h3>我的生词本</h3>
+        <button class="btn-close" onclick="closeVocabModal()"><i class="fas fa-times"></i></button>
+    `;
+
+    renderVocabList();
+
+    // 显示悬浮按钮
+    floatBtn.style.display = 'block';
 }
 
 // 6. 心情日记 (Mood Diary)
