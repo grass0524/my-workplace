@@ -406,7 +406,6 @@ body {
     border-bottom: 1px solid rgba(163, 177, 198, 0.2);
     transition: all 0.3s ease;
     position: relative;
-    padding-right: 8px;
 }
 
 .todo-content-wrapper {
@@ -430,6 +429,10 @@ body {
 }
 
 .todo-actions {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
     display: flex;
     gap: 4px;
     opacity: 0;
@@ -1067,7 +1070,6 @@ input:checked + .mood-icon-wrapper {
     padding: 14px 8px;
     border-bottom: 1px solid rgba(163, 177, 198, 0.2);
     position: relative;
-    padding-right: 60px;
     transition: all 0.3s ease;
     margin: 0;
 }
