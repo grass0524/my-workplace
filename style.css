@@ -2147,7 +2147,7 @@ input:checked + .mood-icon-wrapper {
 }
 
 .vocab-import-card {
-    background: var(--bg-color);
+    background: rgba(163, 177, 198, 0.15);
     border-radius: 12px;
     padding: 12px;
     padding-top: 12px;
@@ -2168,6 +2168,7 @@ input:checked + .mood-icon-wrapper {
 }
 
 .vocab-import-card.selected {
+    background: #ffffff;
     box-shadow: var(--neu-shadow-out);
 }
 
