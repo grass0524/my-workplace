@@ -247,7 +247,7 @@ body {
     width: 60px;
     height: 60px;
     border-radius: 50%;
-    background: #cbd5e0;
+    background: rgba(163, 177, 198, 0.3);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -260,6 +260,7 @@ body {
 
 .icon-circle:hover,
 .health-item.active .icon-circle {
+    background: #ffffff;
     box-shadow: var(--neu-shadow-out);
     transform: translateY(-2px);
 }
@@ -2147,7 +2148,7 @@ input:checked + .mood-icon-wrapper {
 }
 
 .vocab-import-card {
-    background: rgba(163, 177, 198, 0.15);
+    background: var(--bg-color);
     border-radius: 12px;
     padding: 12px;
     padding-top: 12px;
@@ -2168,7 +2169,6 @@ input:checked + .mood-icon-wrapper {
 }
 
 .vocab-import-card.selected {
-    background: #ffffff;
     box-shadow: var(--neu-shadow-out);
 }
 
