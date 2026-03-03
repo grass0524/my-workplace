@@ -244,16 +244,16 @@ body {
 }
 
 .icon-circle {
-    width: 60px;
-    height: 60px;
+    width: 65px;
+    height: 65px;
     border-radius: 50%;
-    background: rgba(163, 177, 198, 0.3);
+    background: rgba(163, 177, 198, 0.15);
     display: flex;
     justify-content: center;
     align-items: center;
-    font-size: 28px;
+    font-size: 30px;
     color: white;
-    margin-bottom: 8px;
+    margin-bottom: 12px;
     box-shadow: none;
     transition: all 0.3s ease;
 }
