@@ -2153,10 +2153,12 @@ input:checked + .mood-icon-wrapper {
     background: var(--bg-color);
     border-radius: 12px;
     padding: 20px;
+    padding-top: 20px;
     text-align: center;
     cursor: pointer;
-    box-shadow: var(--neu-shadow-in);
+    box-shadow: 2px 2px 4px rgba(163, 177, 198, 0.1), -2px -2px 4px rgba(255, 255, 255, 0.5);
     transition: all 0.3s ease;
+    position: relative;
 }
 
 .vocab-import-card:hover {
@@ -2166,6 +2168,28 @@ input:checked + .mood-icon-wrapper {
 
 .vocab-import-card:active {
     box-shadow: var(--neu-shadow-in);
+}
+
+.vocab-import-card.selected {
+    box-shadow: var(--neu-shadow-out);
+}
+
+.vocab-import-card.selected::after {
+    content: '✓';
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 20px;
+    height: 20px;
+    background: var(--secondary-color);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: bold;
+    box-shadow: 2px 2px 4px rgba(80, 227, 194, 0.3);
 }
 
 .vocab-import-icon {
@@ -2200,11 +2224,6 @@ input:checked + .mood-icon-wrapper {
 
 .vocab-import-tip i {
     color: var(--primary-color);
-}
-
-.vocab-import-card.selected {
-    box-shadow: var(--neu-shadow-in);
-    transform: none;
 }
 
 .vocab-import-actions {
