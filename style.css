@@ -1382,7 +1382,7 @@ input:checked + .mood-icon-wrapper {
     overflow-y: auto;
     display: flex;
     flex-direction: column;
-    padding: 0 16px 20px 16px;
+    padding: 0 16px 10px 16px;
 }
 
 /* View Switch in Modal */
@@ -2141,16 +2141,16 @@ input:checked + .mood-icon-wrapper {
 
 .vocab-import-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-    gap: 16px;
-    padding: 10px 0;
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+    gap: 12px;
+    padding: 5px 0;
 }
 
 .vocab-import-card {
     background: var(--bg-color);
     border-radius: 12px;
-    padding: 16px;
-    padding-top: 16px;
+    padding: 12px;
+    padding-top: 12px;
     text-align: center;
     cursor: pointer;
     box-shadow: 2px 2px 4px rgba(163, 177, 198, 0.1), -2px -2px 4px rgba(255, 255, 255, 0.5);
@@ -2226,7 +2226,7 @@ input:checked + .mood-icon-wrapper {
 .vocab-import-actions {
     display: flex;
     justify-content: center;
-    padding: 15px 0 5px 0;
+    padding: 10px 0 0 0;
 }
 
 .vocab-import-actions button {
