@@ -2150,13 +2150,15 @@ input:checked + .mood-icon-wrapper {
 #vocab-import-modal .modal-body {
     overflow-y: auto;
     margin-bottom: 20px;
+    padding: 10px 16px;
 }
 
 .vocab-import-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
     gap: 12px;
-    padding: 5px 0;
+    padding: 5px 8px;
+    margin: -4px;
 }
 
 .vocab-import-card {
