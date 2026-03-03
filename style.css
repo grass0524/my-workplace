@@ -197,6 +197,26 @@ body {
     flex: 1;
 }
 
+.todo-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    overflow: visible;
+}
+
+.mood-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    overflow: visible;
+}
+
+.mood-input-area {
+    flex-shrink: 0;
+}
+
 /* Specific Modules Styles */
 
 /* 1. Health Stats */
@@ -302,7 +322,8 @@ body {
 .todo-input-group {
     display: flex;
     gap: 12px;
-    margin-bottom: 16px;
+    margin: 8px 0 16px 0;
+    flex-shrink: 0;
 }
 
 .todo-input-group input {
@@ -354,11 +375,28 @@ body {
 .todo-list-container {
     flex: 1;
     overflow-y: auto;
-    max-height: 600px;
+    min-height: 200px;
 }
 
 .todo-list {
     list-style: none;
+}
+
+/* Todo Empty Placeholder */
+.todo-empty-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+    color: var(--text-light);
+    font-size: 14px;
+    text-align: center;
+}
+
+.todo-empty-placeholder span {
+    opacity: 0.7;
+    font-style: italic;
 }
 
 .todo-item {
@@ -869,7 +907,7 @@ body {
     display: flex;
     justify-content: space-between;
     margin-bottom: 16px;
-    padding: 0 10px;
+    padding: 8px 10px 0 10px;
 }
 
 .mood-selector label {
@@ -953,7 +991,7 @@ input:checked + .mood-icon-wrapper {
 .mood-text-group {
     display: flex;
     gap: 12px;
-    margin-bottom: 20px;
+    margin: 8px 0 20px 0;
 }
 
 .mood-text-group input {
@@ -998,6 +1036,25 @@ input:checked + .mood-icon-wrapper {
 .mood-list-container {
     flex: 1;
     overflow-y: auto;
+    min-height: 0;
+}
+
+/* Mood Empty Placeholder */
+.mood-empty-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    color: var(--text-light);
+    font-size: 14px;
+    text-align: center;
+    min-height: 60px;
+}
+
+.mood-empty-placeholder span {
+    opacity: 0.7;
+    font-style: italic;
 }
 
 .full-height {
@@ -1469,6 +1526,12 @@ input:checked + .mood-icon-wrapper {
 /* Health Edit Modal */
 .modal-sm {
     max-width: 400px;
+    height: auto !important;
+    max-height: 80vh;
+}
+
+.modal-sm .modal-body {
+    overflow: visible;
 }
 
 .health-edit-content {
@@ -1726,6 +1789,147 @@ input:checked + .mood-icon-wrapper {
 
 .confirm-actions .btn-secondary,
 .confirm-actions .btn-primary {
+    min-width: 100px;
+}
+
+/* 默写复习模式 */
+.quiz-float-btn {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10;
+}
+
+.btn-quiz {
+    padding: 14px 28px;
+    border-radius: 50px;
+    font-size: 16px;
+    font-weight: 600;
+    box-shadow: 8px 8px 16px var(--shadow-dark), -8px -8px 16px var(--shadow-light);
+    transition: all 0.3s ease;
+}
+
+.btn-quiz:hover {
+    transform: translateY(-2px);
+    box-shadow: 10px 10px 20px var(--shadow-dark), -10px -10px 20px var(--shadow-light);
+}
+
+.btn-quiz:active {
+    transform: translateY(0);
+    box-shadow: inset 4px 4px 8px rgba(0, 0, 0, 0.2), inset -4px -4px 8px rgba(255, 255, 255, 0.1);
+}
+
+/* 默写界面 */
+.quiz-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px 20px;
+    height: 100%;
+}
+
+.quiz-word-card {
+    width: 100%;
+    max-width: 500px;
+    text-align: center;
+}
+
+.quiz-meaning {
+    font-size: 24px;
+    font-weight: 600;
+    color: var(--text-color);
+    margin-bottom: 20px;
+}
+
+.quiz-audio-btn {
+    background: var(--bg-color);
+    border: none;
+    border-radius: 50%;
+    width: 48px;
+    height: 48px;
+    cursor: pointer;
+    box-shadow: var(--neu-shadow-out);
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 30px;
+}
+
+.quiz-audio-btn:hover {
+    box-shadow: 6px 6px 12px var(--shadow-dark), -6px -6px 12px var(--shadow-light);
+}
+
+.quiz-audio-btn i {
+    font-size: 20px;
+    color: var(--primary-color);
+}
+
+.quiz-input-area {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 30px;
+}
+
+.quiz-letter-input {
+    width: 50px;
+    height: 60px;
+    font-size: 28px;
+    font-weight: 700;
+    text-align: center;
+    border: none;
+    border-radius: 12px;
+    background: var(--bg-color);
+    box-shadow: var(--neu-shadow-in);
+    outline: none;
+    color: var(--text-color);
+    transition: all 0.3s ease;
+}
+
+.quiz-letter-input:focus {
+    box-shadow: var(--neu-shadow-in), 0 0 0 2px rgba(107, 124, 255, 0.1);
+}
+
+.quiz-letter-input.correct {
+    color: var(--primary-color);
+    box-shadow: inset 4px 4px 8px rgba(107, 124, 255, 0.2), inset -4px -4px 8px rgba(255, 255, 255, 0.1);
+}
+
+.quiz-letter-input.incorrect {
+    color: #e74c3c;
+    box-shadow: inset 4px 4px 8px rgba(231, 76, 60, 0.2), inset -4px -4px 8px rgba(255, 255, 255, 0.1);
+}
+
+.quiz-complete-icon {
+    font-size: 48px;
+    color: #27ae60;
+    margin-bottom: 20px;
+    animation: scaleIn 0.3s ease;
+}
+
+@keyframes scaleIn {
+    from {
+        transform: scale(0);
+        opacity: 0;
+    }
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.quiz-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.quiz-actions .btn-secondary,
+.quiz-actions .btn-primary {
     min-width: 100px;
 }
 

@@ -352,11 +352,24 @@ function saveTodos() {
 function renderTodos() {
     const container = document.getElementById('todo-list-container');
     container.innerHTML = '';
-    
-    // Sort by date (desc), then by completion status
+
+    // If no todos, show empty placeholder
+    if (todos.length === 0) {
+        container.innerHTML = `
+            <div class="todo-empty-placeholder">
+                <span>想想今天做些什么呢？</span>
+            </div>
+        `;
+        document.getElementById('todo-pending').textContent = '0';
+        document.getElementById('todo-completed').textContent = '0';
+        return;
+    }
+
+    // Sort by date (desc), then by completion status, then by ID desc (newest first)
     todos.sort((a, b) => {
         if (a.date !== b.date) return b.date.localeCompare(a.date); // Descending
-        return a.completed - b.completed;
+        if (a.completed !== b.completed) return a.completed - b.completed; // Uncompleted first
+        return b.id - a.id; // Newest first (by ID timestamp)
     });
 
     // Group by date
@@ -606,7 +619,7 @@ function speakText(text) {
 }
 
 function startQuiz() {
-    showToast('默写功能开发中... (模拟进入复习模式)');
+    showToast('默写功能开发中...');
 }
 
 // 6. 心情日记 (Mood Diary)
@@ -649,8 +662,33 @@ function renderMoodRecent() {
     const list = document.getElementById('mood-recent-list');
     list.innerHTML = '';
 
-    // Show only top 5 recent
-    const recent = moodEntries.slice(0, 5);
+    // Get today's date string (YYYY-MM-DD format for comparison)
+    const today = new Date();
+    const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+
+    // Filter today's mood entries only (using local timezone)
+    const todayEntries = moodEntries.filter(entry => {
+        // Parse the ISO date string and get local date parts
+        const entryDate = new Date(entry.date);
+        const entryYear = entryDate.getFullYear();
+        const entryMonth = entryDate.getMonth() + 1; // Months are 0-indexed
+        const entryDay = entryDate.getDate();
+        const entryStr = `${entryYear}-${String(entryMonth).padStart(2, '0')}-${String(entryDay).padStart(2, '0')}`;
+        return entryStr === todayStr;
+    });
+
+    // If no entries today, show placeholder
+    if (todayEntries.length === 0) {
+        list.innerHTML = `
+            <div class="mood-empty-placeholder">
+                <span>写写您今天的感受吧~</span>
+            </div>
+        `;
+        return;
+    }
+
+    // Show maximum 2 entries for today
+    const recent = todayEntries.slice(0, 2);
 
     recent.forEach(entry => {
         const date = new Date(entry.date);
