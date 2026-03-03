@@ -1384,7 +1384,7 @@ input:checked + .mood-icon-wrapper {
     overflow-y: auto;
     display: flex;
     flex-direction: column;
-    padding: 0 16px 10px 16px;
+    padding: 0 16px 30px 16px;
 }
 
 /* View Switch in Modal */
@@ -2237,7 +2237,7 @@ input:checked + .mood-icon-wrapper {
 .vocab-import-actions {
     display: flex;
     justify-content: center;
-    padding: 10px 0 0 0;
+    padding: 20px 0 0 0;
 }
 
 .vocab-import-actions button {
