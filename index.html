@@ -169,7 +169,10 @@
                 <div class="modal-content">
                     <div class="modal-header" id="vocab-modal-header">
                         <h3>我的生词本</h3>
-                        <button class="btn-close" onclick="closeVocabModal()"><i class="fas fa-times"></i></button>
+                        <div class="vocab-header-actions">
+                            <button class="btn-text" onclick="showVocabImportModal()"><i class="fas fa-download"></i> 导入词库</button>
+                            <button class="btn-close" onclick="closeVocabModal()"><i class="fas fa-times"></i></button>
+                        </div>
                     </div>
                     <div class="modal-body" id="vocab-modal-body">
                         <ul class="vocab-list" id="vocab-list">
@@ -181,6 +184,58 @@
                         <button class="btn-primary btn-quiz" onclick="startQuiz()">
                             <i class="fas fa-pen"></i> 默写复习
                         </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 词库导入弹窗 -->
+            <div id="vocab-import-modal" class="modal hidden">
+                <div class="modal-content" style="max-width: 600px;">
+                    <div class="modal-header">
+                        <h3>导入词库</h3>
+                        <button class="btn-close" onclick="closeVocabImportModal()"><i class="fas fa-times"></i></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="vocab-import-grid">
+                            <div class="vocab-import-card" onclick="importVocabLibrary('middle-school')">
+                                <div class="vocab-import-icon">📚</div>
+                                <div class="vocab-import-name">初中词汇</div>
+                                <div class="vocab-import-count">3,223 词</div>
+                            </div>
+                            <div class="vocab-import-card" onclick="importVocabLibrary('high-school')">
+                                <div class="vocab-import-icon">📖</div>
+                                <div class="vocab-import-name">高中词汇</div>
+                                <div class="vocab-import-count">6,008 词</div>
+                            </div>
+                            <div class="vocab-import-card" onclick="importVocabLibrary('cet4')">
+                                <div class="vocab-import-icon">🎓</div>
+                                <div class="vocab-import-name">四级词汇</div>
+                                <div class="vocab-import-count">7,508 词</div>
+                            </div>
+                            <div class="vocab-import-card" onclick="importVocabLibrary('cet6')">
+                                <div class="vocab-import-icon">🏆</div>
+                                <div class="vocab-import-name">六级词汇</div>
+                                <div class="vocab-import-count">5,651 词</div>
+                            </div>
+                            <div class="vocab-import-card" onclick="importVocabLibrary('graduate')">
+                                <div class="vocab-import-icon">🎯</div>
+                                <div class="vocab-import-name">考研词汇</div>
+                                <div class="vocab-import-count">9,602 词</div>
+                            </div>
+                            <div class="vocab-import-card" onclick="importVocabLibrary('toefl')">
+                                <div class="vocab-import-icon">🌍</div>
+                                <div class="vocab-import-name">托福词汇</div>
+                                <div class="vocab-import-count">13,477 词</div>
+                            </div>
+                            <div class="vocab-import-card" onclick="importVocabLibrary('sat')">
+                                <div class="vocab-import-icon">⭐</div>
+                                <div class="vocab-import-name">SAT词汇</div>
+                                <div class="vocab-import-count">8,887 词</div>
+                            </div>
+                        </div>
+                        <div class="vocab-import-tip">
+                            <i class="fas fa-info-circle"></i> 导入的词库会追加到当前生词本中，不会覆盖已有单词
+                        </div>
                     </div>
                 </div>
             </div>

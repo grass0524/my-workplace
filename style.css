@@ -1999,3 +1999,70 @@ input:checked + .mood-icon-wrapper {
 .btn-data:hover i {
     color: var(--primary-color);
 }
+
+/* 词库导入样式 */
+.vocab-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.vocab-import-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 16px;
+    padding: 20px 0;
+}
+
+.vocab-import-card {
+    background: var(--bg-color);
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+    cursor: pointer;
+    box-shadow: var(--neu-shadow-out);
+    transition: all 0.3s ease;
+}
+
+.vocab-import-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--neu-shadow-out-hover);
+}
+
+.vocab-import-card:active {
+    box-shadow: var(--neu-shadow-in);
+}
+
+.vocab-import-icon {
+    font-size: 36px;
+    margin-bottom: 8px;
+}
+
+.vocab-import-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-color);
+    margin-bottom: 4px;
+}
+
+.vocab-import-count {
+    font-size: 12px;
+    color: #a3b1c6;
+}
+
+.vocab-import-tip {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 16px;
+    background: rgba(163, 177, 198, 0.1);
+    border-radius: 8px;
+    font-size: 13px;
+    color: #a3b1c6;
+    margin-top: 8px;
+}
+
+.vocab-import-tip i {
+    color: var(--primary-color);
+}

@@ -874,6 +874,107 @@ function exitQuiz() {
     floatBtn.style.display = 'block';
 }
 
+// 词库导入功能
+const VOCAB_LIBRARIES = {
+    'middle-school': {
+        url: 'https://raw.githubusercontent.com/KyleBing/english-vocabulary/master/json/1-初中-顺序.json',
+        name: '初中词汇'
+    },
+    'high-school': {
+        url: 'https://raw.githubusercontent.com/KyleBing/english-vocabulary/master/json/2-高中-顺序.json',
+        name: '高中词汇'
+    },
+    'cet4': {
+        url: 'https://raw.githubusercontent.com/KyleBing/english-vocabulary/master/json/3-CET4-顺序.json',
+        name: '四级词汇'
+    },
+    'cet6': {
+        url: 'https://raw.githubusercontent.com/KyleBing/english-vocabulary/master/json/4-CET6-顺序.json',
+        name: '六级词汇'
+    },
+    'graduate': {
+        url: 'https://raw.githubusercontent.com/KyleBing/english-vocabulary/master/json/5-考研-顺序.json',
+        name: '考研词汇'
+    },
+    'toefl': {
+        url: 'https://raw.githubusercontent.com/KyleBing/english-vocabulary/master/json/6-托福-顺序.json',
+        name: '托福词汇'
+    },
+    'sat': {
+        url: 'https://raw.githubusercontent.com/KyleBing/english-vocabulary/master/json/7-SAT-顺序.json',
+        name: 'SAT词汇'
+    }
+};
+
+function showVocabImportModal() {
+    document.getElementById('vocab-import-modal').classList.remove('hidden');
+}
+
+function closeVocabImportModal() {
+    document.getElementById('vocab-import-modal').classList.add('hidden');
+}
+
+async function importVocabLibrary(libraryKey) {
+    const library = VOCAB_LIBRARIES[libraryKey];
+    if (!library) {
+        showToast('词库不存在');
+        return;
+    }
+
+    showToast(`正在导入${library.name}...`);
+
+    try {
+        const response = await fetch(library.url);
+        if (!response.ok) {
+            throw new Error('网络请求失败');
+        }
+
+        const data = await response.json();
+
+        // 转换格式并过滤已存在的单词
+        const existingWords = new Set(myVocab.map(w => w.word.toLowerCase()));
+        let importedCount = 0;
+
+        data.forEach(item => {
+            const wordLower = item.word.toLowerCase();
+            if (!existingWords.has(wordLower)) {
+                // 获取第一个释义
+                const translation = item.translations && item.translations.length > 0
+                    ? item.translations[0].translation
+                    : '';
+
+                // 获取词性
+                const wordType = item.translations && item.translations.length > 0
+                    ? item.translations[0].type
+                    : '';
+
+                // 组合释义和词性
+                const meaning = wordType ? `${translation} (${wordType})` : translation;
+
+                myVocab.push({
+                    word: item.word,
+                    phonetic: '',
+                    meaning: meaning
+                });
+
+                existingWords.add(wordLower);
+                importedCount++;
+            }
+        });
+
+        // 保存到本地存储
+        localStorage.setItem('myVocab', JSON.stringify(myVocab));
+
+        showToast(`成功导入 ${importedCount} 个新单词`);
+        closeVocabImportModal();
+        renderVocabList();
+
+    } catch (error) {
+        console.error('导入词库失败:', error);
+        showToast('导入失败，请检查网络连接');
+    }
+}
+
 // 6. 心情日记 (Mood Diary)
 let moodEntries = [];
 let currentMoodMonth = new Date();
