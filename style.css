@@ -2146,14 +2146,14 @@ input:checked + .mood-icon-wrapper {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
     gap: 16px;
-    padding: 20px 0;
+    padding: 10px 0;
 }
 
 .vocab-import-card {
     background: var(--bg-color);
     border-radius: 12px;
-    padding: 20px;
-    padding-top: 20px;
+    padding: 16px;
+    padding-top: 16px;
     text-align: center;
     cursor: pointer;
     box-shadow: 2px 2px 4px rgba(163, 177, 198, 0.1), -2px -2px 4px rgba(255, 255, 255, 0.5);
@@ -2229,7 +2229,7 @@ input:checked + .mood-icon-wrapper {
 .vocab-import-actions {
     display: flex;
     justify-content: center;
-    padding: 20px 0 10px 0;
+    padding: 15px 0 5px 0;
 }
 
 .vocab-import-actions button {
