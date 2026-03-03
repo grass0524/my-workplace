@@ -260,7 +260,7 @@ body {
 
 .icon-circle:hover,
 .health-item.active .icon-circle {
-    background: #ffffff;
+    background: var(--bg-color);
     box-shadow: var(--neu-shadow-out);
     transform: translateY(-2px);
 }
