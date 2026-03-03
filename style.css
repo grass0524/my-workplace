@@ -1373,7 +1373,7 @@ input:checked + .mood-icon-wrapper {
     overflow-y: auto;
     display: flex;
     flex-direction: column;
-    padding: 0 16px 80px 16px;
+    padding: 0 16px 20px 16px;
 }
 
 /* View Switch in Modal */
