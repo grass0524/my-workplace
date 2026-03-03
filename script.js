@@ -509,10 +509,23 @@ let currentWord = {};
 let myVocab = [];
 
 function initWord() {
+    // 从localStorage加载词库
+    const savedLibrary = localStorage.getItem('vocabLibrary');
+    if (savedLibrary) {
+        const parsedLibrary = JSON.parse(savedLibrary);
+        // 合并到当前词库，避免重复
+        const existingWords = new Set(vocabLibrary.map(w => w.word.toLowerCase()));
+        parsedLibrary.forEach(item => {
+            if (!existingWords.has(item.word.toLowerCase())) {
+                vocabLibrary.push(item);
+            }
+        });
+    }
+
     // 随机选一个 (实际应用按日期 Hash 选择)
     const index = Math.floor(Math.random() * vocabLibrary.length);
     currentWord = vocabLibrary[index];
-    
+
     document.getElementById('word-spelling').textContent = currentWord.word;
     document.getElementById('word-phonetic').textContent = currentWord.phonetic;
     document.getElementById('word-meaning').textContent = currentWord.meaning;
@@ -913,6 +926,10 @@ const VOCAB_LIBRARIES = {
 };
 
 function showVocabImportModal() {
+    // 清除所有选中状态
+    document.querySelectorAll('.vocab-import-card').forEach(card => {
+        card.classList.remove('selected');
+    });
     document.getElementById('vocab-import-modal').classList.remove('hidden');
 }
 
@@ -920,7 +937,86 @@ function closeVocabImportModal() {
     document.getElementById('vocab-import-modal').classList.add('hidden');
 }
 
+function toggleVocabLibrary(card) {
+    card.classList.toggle('selected');
+}
+
+async function importSelectedVocabLibraries() {
+    const selectedCards = document.querySelectorAll('.vocab-import-card.selected');
+
+    if (selectedCards.length === 0) {
+        showToast('请至少选择一个词库');
+        return;
+    }
+
+    let totalImported = 0;
+
+    for (const card of selectedCards) {
+        const libraryKey = card.dataset.library;
+        const library = VOCAB_LIBRARIES[libraryKey];
+
+        if (!library) continue;
+
+        showToast(`正在导入${library.name}...`);
+
+        try {
+            const response = await fetch(library.url);
+            if (!response.ok) {
+                throw new Error('网络请求失败');
+            }
+
+            const data = await response.json();
+
+            // 转换格式并过滤已存在的单词
+            const existingWords = new Set(vocabLibrary.map(w => w.word.toLowerCase()));
+            let importedCount = 0;
+
+            data.forEach(item => {
+                const wordLower = item.word.toLowerCase();
+                if (!existingWords.has(wordLower)) {
+                    // 获取第一个释义
+                    const translation = item.translations && item.translations.length > 0
+                        ? item.translations[0].translation
+                        : '';
+
+                    // 获取词性
+                    const wordType = item.translations && item.translations.length > 0
+                        ? item.translations[0].type
+                        : '';
+
+                    // 组合释义和词性
+                    const meaning = wordType ? `${translation} (${wordType})` : translation;
+
+                    vocabLibrary.push({
+                        word: item.word,
+                        phonetic: '',
+                        meaning: meaning
+                    });
+
+                    existingWords.add(wordLower);
+                    importedCount++;
+                }
+            });
+
+            totalImported += importedCount;
+        } catch (error) {
+            console.error(`导入${library.name}失败:`, error);
+            showToast(`导入${library.name}失败，请检查网络连接`);
+        }
+    }
+
+    // 保存到本地存储
+    localStorage.setItem('vocabLibrary', JSON.stringify(vocabLibrary));
+
+    showToast(`成功导入 ${totalImported} 个新单词`);
+    closeVocabImportModal();
+
+    // 刷新今日单词
+    refreshWord();
+}
+
 async function importVocabLibrary(libraryKey) {
+    // 这个函数保留用于向后兼容，但不再使用
     const library = VOCAB_LIBRARIES[libraryKey];
     if (!library) {
         showToast('词库不存在');
