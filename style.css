@@ -1804,7 +1804,7 @@ input:checked + .mood-icon-wrapper {
 /* 默写复习模式 */
 .quiz-float-btn {
     position: absolute;
-    bottom: -16px;
+    bottom: 50px;
     left: 50%;
     transform: translateX(-50%);
     z-index: 10;
