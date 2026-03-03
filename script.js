@@ -718,7 +718,6 @@ function renderCurrentWord() {
                 <button class="quiz-audio-btn" onclick="speakText('${currentWord.word}')" title="朗读">
                     <i class="fas fa-volume-high"></i>
                 </button>
-                ${isComplete ? '<div class="quiz-complete-icon">✅</div>' : ''}
                 <div class="quiz-input-area">
                     ${letterInputs}
                 </div>
