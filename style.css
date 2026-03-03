@@ -254,7 +254,7 @@ body {
     font-size: 30px;
     color: rgba(255, 255, 255, 0.7);
     margin-bottom: 12px;
-    box-shadow: none;
+    box-shadow: 2px 2px 4px rgba(163, 177, 198, 0.1), -2px -2px 4px rgba(255, 255, 255, 0.5);
     transition: all 0.3s ease;
 }
 
