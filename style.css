@@ -1969,7 +1969,7 @@ input:checked + .mood-icon-wrapper {
 }
 
 .btn-text-quiz:hover {
-    color: var(--text-color);
+    color: var(--primary-color);
     box-shadow: var(--neu-shadow-out);
     background: var(--bg-color);
 }
