@@ -658,12 +658,10 @@ function renderQuiz() {
     // 隐藏悬浮按钮
     floatBtn.style.display = 'none';
 
-    // 修改标题为退出默写模式
+    // 修改标题
     modalHeader.innerHTML = `
         <h3>默写复习</h3>
-        <button class="btn-text" onclick="exitQuiz()">
-            <i class="fas fa-sign-out-alt"></i> 退出默写模式
-        </button>
+        <button class="btn-close" onclick="exitQuiz()"><i class="fas fa-times"></i></button>
     `;
 
     renderCurrentWord();
@@ -797,6 +795,11 @@ function renderQuizActions() {
     if (!isLast) {
         actionsHtml += '<button class="btn-primary" onclick="nextWord()">下一个</button>';
     }
+    actionsHtml += '</div>';
+
+    // 添加退出按钮在最下面
+    actionsHtml += '<div class="quiz-exit-container">';
+    actionsHtml += '<button class="btn-text-quiz" onclick="exitQuiz()">退出默写模式</button>';
     actionsHtml += '</div>';
 
     return actionsHtml;
