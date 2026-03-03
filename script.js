@@ -302,6 +302,7 @@ function editTodo(id) {
     editEl.classList.remove('hidden');
     inputEl.focus();
     inputEl.select();
+    autoResizeTextarea(inputEl);
 }
 
 function saveTodoEdit(id) {
@@ -422,10 +423,12 @@ function renderTodos() {
                         </div>
                     </span>
                     <span class="todo-edit hidden" id="todo-edit-${todo.id}">
-                        <input type="text" class="neu-input-sm" id="todo-edit-input-${todo.id}" value="${todo.text}" onkeypress="handleTodoEditKeypress(event, ${todo.id})">
-                        <div class="todo-actions">
-                            <button class="btn-save" onclick="saveTodoEdit(${todo.id})" title="保存"><i class="fas fa-check"></i></button>
-                            <button class="btn-cancel" onclick="cancelTodoEdit(${todo.id})" title="取消"><i class="fas fa-times"></i></button>
+                        <div class="edit-container">
+                            <textarea class="edit-textarea" id="todo-edit-input-${todo.id}" rows="1" oninput="autoResizeTextarea(this)" onkeypress="handleTodoEditKeypress(event, ${todo.id})">${todo.text}</textarea>
+                            <div class="edit-actions-inline">
+                                <button class="btn-save" onclick="saveTodoEdit(${todo.id})" title="保存"><i class="fas fa-check"></i></button>
+                                <button class="btn-cancel" onclick="cancelTodoEdit(${todo.id})" title="取消"><i class="fas fa-times"></i></button>
+                            </div>
                         </div>
                     </span>
                 </div>
@@ -1061,17 +1064,19 @@ function renderMoodRecent() {
                     <div class="entry-date">${date.toLocaleString()}</div>
                 </div>
                 <div class="entry-edit hidden">
-                    <input type="text" class="neu-input-sm" id="home-edit-input-${entry.id}" value="${entry.note}">
+                    <div class="edit-container">
+                        <textarea class="edit-textarea" id="home-edit-input-${entry.id}" rows="1" oninput="autoResizeTextarea(this)">${entry.note}</textarea>
+                        <div class="edit-actions-inline">
+                            <button class="btn-save" onclick="saveMoodEdit(${entry.id}, 'home')" title="提交"><i class="fas fa-check"></i></button>
+                            <button class="btn-cancel" onclick="cancelMoodEdit(${entry.id}, 'home')" title="取消"><i class="fas fa-times"></i></button>
+                        </div>
+                    </div>
                 </div>
             </div>
             <div class="mood-actions">
                 <div class="action-view">
                     <button class="btn-action-mood btn-edit-mood" onclick="editMood(${entry.id}, 'home')" title="编辑"><i class="fas fa-pen"></i></button>
                     <button class="btn-action-mood btn-delete-mood" onclick="deleteMood(${entry.id})" title="删除"><i class="fas fa-trash"></i></button>
-                </div>
-                <div class="action-edit hidden">
-                    <button class="btn-action-mood btn-submit-mood" onclick="saveMoodEdit(${entry.id}, 'home')" title="提交"><i class="fas fa-check"></i></button>
-                    <button class="btn-action-mood btn-cancel-mood" onclick="cancelMoodEdit(${entry.id}, 'home')" title="取消"><i class="fas fa-times"></i></button>
                 </div>
             </div>
         `;
@@ -1120,9 +1125,10 @@ function editMood(id, location = 'home') {
     viewActions.classList.add('hidden');
     editActions.classList.remove('hidden');
 
-    // 聚焦输入框
+    // 聚焦输入框并调整高度
     inputEl.focus();
     inputEl.select();
+    autoResizeTextarea(inputEl);
 }
 
 function cancelMoodEdit(id, location = 'home') {
@@ -1175,6 +1181,13 @@ function saveMoodEdit(id, location = 'home') {
     }
 }
 
+// 自动调整textarea高度
+function autoResizeTextarea(textarea) {
+    textarea.style.height = 'auto';
+    const newHeight = Math.min(textarea.scrollHeight, 200);
+    textarea.style.height = newHeight + 'px';
+}
+
 // Modal Logic
 function showMoodStats() {
     document.getElementById('mood-modal').classList.remove('hidden');
@@ -1224,17 +1237,19 @@ function renderModalMoodTimeline() {
                     <div class="entry-date">${date.toLocaleString()}</div>
                 </div>
                 <div class="entry-edit hidden">
-                    <input type="text" class="neu-input-sm" id="modal-timeline-edit-input-${entry.id}" value="${entry.note}">
+                    <div class="edit-container">
+                        <textarea class="edit-textarea" id="modal-timeline-edit-input-${entry.id}" rows="1" oninput="autoResizeTextarea(this)">${entry.note}</textarea>
+                        <div class="edit-actions-inline">
+                            <button class="btn-save" onclick="saveMoodEdit(${entry.id}, 'modal-timeline')" title="提交"><i class="fas fa-check"></i></button>
+                            <button class="btn-cancel" onclick="cancelMoodEdit(${entry.id}, 'modal-timeline')" title="取消"><i class="fas fa-times"></i></button>
+                        </div>
+                    </div>
                 </div>
             </div>
             <div class="mood-actions">
                 <div class="action-view">
                     <button class="btn-action-mood btn-edit-mood" onclick="editMood(${entry.id}, 'modal-timeline')" title="编辑"><i class="fas fa-pen"></i></button>
                     <button class="btn-action-mood btn-delete-mood" onclick="deleteMood(${entry.id})" title="删除"><i class="fas fa-trash"></i></button>
-                </div>
-                <div class="action-edit hidden">
-                    <button class="btn-action-mood btn-submit-mood" onclick="saveMoodEdit(${entry.id}, 'modal-timeline')" title="提交"><i class="fas fa-check"></i></button>
-                    <button class="btn-action-mood btn-cancel-mood" onclick="cancelMoodEdit(${entry.id}, 'modal-timeline')" title="取消"><i class="fas fa-times"></i></button>
                 </div>
             </div>
         `;
@@ -1320,17 +1335,19 @@ function renderMoodDayDetail(year, month, day) {
                         <div class="entry-date">${date.toLocaleTimeString()}</div>
                     </div>
                     <div class="entry-edit hidden">
-                        <input type="text" class="neu-input-sm" id="modal-day-edit-input-${entry.id}" value="${entry.note}">
+                        <div class="edit-container">
+                            <textarea class="edit-textarea" id="modal-day-edit-input-${entry.id}" rows="1" oninput="autoResizeTextarea(this)">${entry.note}</textarea>
+                            <div class="edit-actions-inline">
+                                <button class="btn-save" onclick="saveMoodEdit(${entry.id}, 'modal-day')" title="提交"><i class="fas fa-check"></i></button>
+                                <button class="btn-cancel" onclick="cancelMoodEdit(${entry.id}, 'modal-day')" title="取消"><i class="fas fa-times"></i></button>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div class="mood-actions">
                     <div class="action-view">
                         <button class="btn-action-mood btn-edit-mood" onclick="editMood(${entry.id}, 'modal-day')" title="编辑"><i class="fas fa-pen"></i></button>
                         <button class="btn-action-mood btn-delete-mood" onclick="deleteMood(${entry.id})" title="删除"><i class="fas fa-trash"></i></button>
-                    </div>
-                    <div class="action-edit hidden">
-                        <button class="btn-action-mood btn-submit-mood" onclick="saveMoodEdit(${entry.id}, 'modal-day')" title="提交"><i class="fas fa-check"></i></button>
-                        <button class="btn-action-mood btn-cancel-mood" onclick="cancelMoodEdit(${entry.id}, 'modal-day')" title="取消"><i class="fas fa-times"></i></button>
                     </div>
                 </div>
             `;
