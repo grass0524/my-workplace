@@ -244,21 +244,22 @@ body {
 }
 
 .icon-circle {
-    width: 56px;
-    height: 56px;
+    width: 60px;
+    height: 60px;
     border-radius: 50%;
     background: #cbd5e0;
     display: flex;
     justify-content: center;
     align-items: center;
-    font-size: 26px;
+    font-size: 28px;
     color: white;
     margin-bottom: 8px;
     box-shadow: none;
     transition: all 0.3s ease;
 }
 
-.icon-circle:hover {
+.icon-circle:hover,
+.health-item.active .icon-circle {
     box-shadow: var(--neu-shadow-out);
     transform: translateY(-2px);
 }
@@ -271,25 +272,19 @@ body {
 /* Water - 喝水 */
 .icon-circle.water:hover,
 .health-item.water.active .icon-circle {
-    background: #e3f2fd;
     color: #5eb0ff;
-    box-shadow: var(--neu-shadow-out);
 }
 
 /* Toilet - 如厕 */
 .icon-circle.toilet:hover,
 .health-item.toilet.active .icon-circle {
-    background: #e0f2f1;
     color: #b8f0ed;
-    box-shadow: var(--neu-shadow-out);
 }
 
 /* Exercise - 运动 */
 .icon-circle.exercise:hover,
 .health-item.exercise.active .icon-circle {
-    background: #fce4ec;
     color: #ffa8aa;
-    box-shadow: var(--neu-shadow-out);
 }
 
 .count {
@@ -299,11 +294,13 @@ body {
 }
 
 .label {
-    font-size: 12px;
+    font-size: 14px;
     color: var(--text-light);
+    font-weight: 500;
 }
 
 .status-text {
+    display: none;
     font-size: 12px;
     color: var(--text-light);
     margin-bottom: 4px;
