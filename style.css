@@ -1418,7 +1418,7 @@ input:checked + .mood-icon-wrapper {
     justify-content: space-between;
     align-items: center;
     margin: 0 0 20px 0;
-    padding: 4px 0;
+    padding: 8px 0 4px 0;
     font-weight: 600;
     gap: 16px;
     position: relative;
