@@ -715,7 +715,7 @@ body {
 
 .btn-icon.active {
     color: var(--primary-color);
-    box-shadow: var(--neu-shadow-in);
+    box-shadow: var(--neu-shadow-out);
 }
 
 .btn-primary {
@@ -1388,11 +1388,29 @@ input:checked + .mood-icon-wrapper {
     width: auto;
     height: 32px;
     padding: 0 12px;
-    border-radius: 16px;
+    border-radius: 8px;
     font-size: 14px;
     display: flex;
     align-items: center;
     gap: 6px;
+    background: transparent;
+    border: none;
+    color: #a3b1c6;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: none;
+}
+
+.view-switch .btn-icon:hover {
+    color: var(--primary-color);
+    box-shadow: var(--neu-shadow-out);
+    background: var(--bg-color);
+}
+
+.view-switch .btn-icon.active {
+    color: var(--primary-color);
+    box-shadow: var(--neu-shadow-out);
+    background: var(--bg-color);
 }
 
 /* Calendar in Modal (Common) */
