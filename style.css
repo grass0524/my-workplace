@@ -2155,13 +2155,13 @@ input:checked + .mood-icon-wrapper {
     padding: 20px;
     text-align: center;
     cursor: pointer;
-    box-shadow: var(--neu-shadow-out);
+    box-shadow: var(--neu-shadow-in);
     transition: all 0.3s ease;
 }
 
 .vocab-import-card:hover {
-    transform: translateY(-4px);
-    box-shadow: var(--neu-shadow-out-hover);
+    transform: translateY(-2px);
+    box-shadow: var(--neu-shadow-out);
 }
 
 .vocab-import-card:active {
