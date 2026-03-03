@@ -823,8 +823,7 @@ body {
 
 .vocab-list {
     list-style: none;
-    max-height: 400px;
-    overflow-y: auto;
+    flex: 1;
 }
 
 .vocab-item {
