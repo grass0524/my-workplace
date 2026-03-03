@@ -2144,10 +2144,12 @@ input:checked + .mood-icon-wrapper {
 /* Vocab import modal - ensure shadows are visible */
 #vocab-import-modal .modal-content {
     overflow: visible;
+    padding-bottom: 20px;
 }
 
 #vocab-import-modal .modal-body {
     overflow-y: auto;
+    margin-bottom: 20px;
 }
 
 .vocab-import-grid {
@@ -2237,7 +2239,7 @@ input:checked + .mood-icon-wrapper {
 .vocab-import-actions {
     display: flex;
     justify-content: center;
-    padding: 20px 0 0 0;
+    padding: 50px 0 0 0;
 }
 
 .vocab-import-actions button {
