@@ -2192,7 +2192,6 @@ input:checked + .mood-icon-wrapper {
 .vocab-import-card.selected {
     box-shadow: var(--neu-shadow-in);
     transform: none;
-    border: 2px solid var(--primary-color);
 }
 
 .vocab-import-actions {
