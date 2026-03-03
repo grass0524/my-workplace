@@ -2141,6 +2141,15 @@ input:checked + .mood-icon-wrapper {
     gap: 16px;
 }
 
+/* Vocab import modal - ensure shadows are visible */
+#vocab-import-modal .modal-content {
+    overflow: visible;
+}
+
+#vocab-import-modal .modal-body {
+    overflow-y: auto;
+}
+
 .vocab-import-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
