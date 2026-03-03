@@ -97,21 +97,24 @@ function toggleHealth(type) {
 function updateHealthUI() {
     const today = getTodayStr();
     const todayData = healthRecords[today] || { water: false, toilet: false, exercise: false };
-    
+
     // Update Icons and Text
     const types = ['water', 'toilet', 'exercise'];
     types.forEach(type => {
         const isDone = todayData[type];
         const btn = document.getElementById(`btn-${type}`);
         const status = document.getElementById(`status-${type}`);
-        
+        const healthItem = btn.closest('.health-item');
+
         if (isDone) {
+            healthItem.classList.add('active');
             btn.style.opacity = '1';
-            btn.innerHTML = '<i class="fas fa-check"></i>'; // Change icon to check
+            btn.innerHTML = '<i class="fas fa-check"></i>';
             status.textContent = '已打卡';
             status.classList.add('done');
         } else {
-            btn.style.opacity = '0.5'; // Dim if not done
+            healthItem.classList.remove('active');
+            btn.style.opacity = '1';
             // Restore original icons
             if (type === 'water') btn.innerHTML = '<i class="fas fa-glass-water"></i>';
             if (type === 'toilet') btn.innerHTML = '<i class="fas fa-restroom"></i>';

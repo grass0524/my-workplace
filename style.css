@@ -244,20 +244,22 @@ body {
 }
 
 .icon-circle {
-    width: 64px;
-    height: 64px;
+    width: 48px;
+    height: 48px;
     border-radius: 50%;
+    background: var(--bg-color);
     display: flex;
     justify-content: center;
     align-items: center;
     font-size: 24px;
-    color: white;
+    color: #cbd5e0;
     margin-bottom: 8px;
-    box-shadow: var(--neu-shadow-out);
+    box-shadow: none;
     transition: all 0.3s ease;
 }
 
 .icon-circle:hover {
+    box-shadow: var(--neu-shadow-out);
     transform: translateY(-2px);
 }
 
@@ -266,17 +268,28 @@ body {
     transform: translateY(0);
 }
 
-.icon-circle.water {
-    background: linear-gradient(145deg, #5eb0ff, #00d4ee);
+/* Water - 喝水 */
+.icon-circle.water:hover {
+    color: #5eb0ff;
+}
+.health-item.water.active .icon-circle {
+    color: #5eb0ff;
 }
 
-.icon-circle.toilet {
-    background: linear-gradient(145deg, #b8f0ed, #f5e0ea);
-    color: #666;
+/* Toilet - 如厕 */
+.icon-circle.toilet:hover {
+    color: #b8f0ed;
+}
+.health-item.toilet.active .icon-circle {
+    color: #b8f0ed;
 }
 
-.icon-circle.exercise {
-    background: linear-gradient(145deg, #ffa8aa, #fde3f3);
+/* Exercise - 运动 */
+.icon-circle.exercise:hover {
+    color: #ffa8aa;
+}
+.health-item.exercise.active .icon-circle {
+    color: #ffa8aa;
 }
 
 .count {
