@@ -1206,20 +1206,6 @@ input:checked + .mood-icon-wrapper {
     justify-content: center;
     font-size: 12px;
     transition: all 0.3s ease;
-}
-
-.edit-actions-inline .btn-save {
-    background: var(--secondary-color);
-    color: white;
-    box-shadow: 4px 4px 8px rgba(80, 227, 194, 0.3), -4px -4px 8px var(--shadow-light);
-}
-
-.edit-actions-inline .btn-save:hover {
-    transform: translateY(-1px);
-    box-shadow: 6px 6px 12px rgba(80, 227, 194, 0.4), -6px -6px 12px var(--shadow-light);
-}
-
-.edit-actions-inline .btn-cancel {
     background: var(--bg-color);
     color: #718096;
     box-shadow: var(--neu-shadow-sm);
@@ -1228,6 +1214,17 @@ input:checked + .mood-icon-wrapper {
 .edit-actions-inline .btn-cancel:hover {
     box-shadow: var(--neu-shadow-out);
     color: var(--text-color);
+}
+
+.edit-actions-inline .btn-save {
+    background: var(--bg-color);
+    color: #48bb78;
+    box-shadow: var(--neu-shadow-sm);
+}
+
+.edit-actions-inline .btn-save:hover {
+    box-shadow: var(--neu-shadow-out);
+    color: #38a169;
 }
 
 /* Action 按钮组显示/隐藏 */
