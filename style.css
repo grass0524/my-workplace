@@ -2232,6 +2232,11 @@ input:checked + .mood-icon-wrapper {
     padding: 20px 0 10px 0;
 }
 
+.vocab-import-actions button {
+    padding: 12px 24px;
+    font-size: 15px;
+}
+
 /* 今日单词底部导入按钮 */
 .word-footer {
     display: flex;
