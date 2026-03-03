@@ -753,10 +753,23 @@ function handleLetterInput(input, index) {
         }
     }
 
-    // 检查是否完成
+    // 检查是否完成且正确
     const userAnswer = quizState.userAnswers[answerKey];
     if (checkWordComplete(currentWord, userAnswer)) {
-        renderCurrentWord();
+        // 检查是否全部正确
+        const allCorrect = currentWord.word.split('').every((letter, idx) => {
+            const userInput = userAnswer[idx] || '';
+            return userInput.toUpperCase() === letter.toUpperCase();
+        });
+
+        if (allCorrect) {
+            // 延迟500ms后自动进入下一个
+            setTimeout(() => {
+                nextWord();
+            }, 500);
+        } else {
+            renderCurrentWord();
+        }
     }
 }
 
