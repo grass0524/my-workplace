@@ -244,14 +244,14 @@ body {
 }
 
 .icon-circle {
-    width: 48px;
-    height: 48px;
+    width: 56px;
+    height: 56px;
     border-radius: 50%;
     background: #cbd5e0;
     display: flex;
     justify-content: center;
     align-items: center;
-    font-size: 24px;
+    font-size: 26px;
     color: white;
     margin-bottom: 8px;
     box-shadow: none;
@@ -273,6 +273,7 @@ body {
 .health-item.water.active .icon-circle {
     background: #e3f2fd;
     color: #5eb0ff;
+    box-shadow: var(--neu-shadow-out);
 }
 
 /* Toilet - 如厕 */
@@ -280,6 +281,7 @@ body {
 .health-item.toilet.active .icon-circle {
     background: #e0f2f1;
     color: #b8f0ed;
+    box-shadow: var(--neu-shadow-out);
 }
 
 /* Exercise - 运动 */
@@ -287,6 +289,7 @@ body {
 .health-item.exercise.active .icon-circle {
     background: #fce4ec;
     color: #ffa8aa;
+    box-shadow: var(--neu-shadow-out);
 }
 
 .count {
