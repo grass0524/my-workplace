@@ -642,9 +642,18 @@ function startQuiz() {
 }
 
 function renderQuiz() {
+    const modal = document.getElementById('vocab-modal');
     const modalHeader = document.getElementById('vocab-modal-header');
     const modalBody = document.getElementById('vocab-modal-body');
     const floatBtn = document.getElementById('quiz-start-btn');
+    const modalContent = modal.querySelector('.modal-content');
+
+    // 直接设置弹窗宽度和样式
+    if (modalContent) {
+        modalContent.style.width = '1000px';
+        modalContent.style.maxWidth = '1000px';
+        modalContent.classList.add('quiz-mode');
+    }
 
     // 隐藏悬浮按钮
     floatBtn.style.display = 'none';
@@ -681,7 +690,7 @@ function renderCurrentWord() {
             inputClass += isCorrect ? ' correct' : ' incorrect';
         }
 
-        const returnVal = `<input type="text" class="${inputClass}" maxlength="1" data-index="${index}" value="${userInput}" oninput="handleLetterInput(this, ${index})" onkeypress="handleLetterKeypress(event, this)" autocomplete="off">`;
+        const returnVal = `<input type="text" class="${inputClass}" maxlength="1" data-index="${index}" value="${userInput}" oninput="handleLetterInput(this, ${index})" onkeydown="handleLetterKeypress(event, this)" autocomplete="off">`;
         return returnVal;
     }).join('');
 
@@ -696,18 +705,10 @@ function renderCurrentWord() {
                 <div class="quiz-input-area">
                     ${letterInputs}
                 </div>
-                ${isComplete ? renderQuizActions() : ''}
             </div>
         </div>
+        ${renderQuizActions()}
     `;
-
-    // 聚焦到第一个空输入框
-    if (!isComplete) {
-        setTimeout(() => {
-            const firstEmpty = modalBody.querySelector('.quiz-letter-input:not(.correct):not(.incorrect)');
-            if (firstEmpty) firstEmpty.focus();
-        }, 100);
-    }
 }
 
 function handleLetterInput(input, index) {
@@ -728,30 +729,47 @@ function handleLetterInput(input, index) {
     input.classList.remove('correct', 'incorrect');
     if (value !== '') {
         input.classList.add(isCorrect ? 'correct' : 'incorrect');
+
+        // 自动跳到下一个输入框（无论对错）
+        const inputs = document.querySelectorAll('.quiz-letter-input');
+        if (index + 1 < inputs.length) {
+            inputs[index + 1].focus();
+        }
     }
 
     // 检查是否完成
     const userAnswer = quizState.userAnswers[answerKey];
     if (checkWordComplete(currentWord, userAnswer)) {
         renderCurrentWord();
-    } else {
-        // 自动跳到下一个输入框
-        if (value !== '' && isCorrect) {
-            const inputs = document.querySelectorAll('.quiz-letter-input');
-            if (index + 1 < inputs.length) {
-                inputs[index + 1].focus();
-            }
-        }
     }
 }
 
 function handleLetterKeypress(event, input) {
-    // 支持退格键
-    if (event.key === 'Backspace' && input.value === '') {
-        const inputs = document.querySelectorAll('.quiz-letter-input');
+    if (event.key === 'Backspace') {
+        event.preventDefault();
         const index = parseInt(input.dataset.index);
-        if (index > 0) {
-            inputs[index - 1].focus();
+        const answerKey = String(quizState.currentIndex);
+        const inputs = document.querySelectorAll('.quiz-letter-input');
+
+        // 如果当前输入框有内容，清空它
+        if (input.value !== '') {
+            input.value = '';
+            input.classList.remove('correct', 'incorrect');
+            if (quizState.userAnswers[answerKey]) {
+                delete quizState.userAnswers[answerKey][index];
+            }
+        }
+        // 跳到前一个输入框（如果不是第一个）
+        else if (index > 0) {
+            const prevInput = inputs[index - 1];
+            prevInput.focus();
+
+            // 清空前一个输入框
+            prevInput.value = '';
+            prevInput.classList.remove('correct', 'incorrect');
+            if (quizState.userAnswers[answerKey]) {
+                delete quizState.userAnswers[answerKey][index - 1];
+            }
         }
     }
 }
@@ -773,11 +791,11 @@ function renderQuizActions() {
 
     let actionsHtml = '<div class="quiz-actions">';
     if (!isFirst) {
-        actionsHtml += '<button class="btn-secondary" onclick="prevWord()"><i class="fas fa-arrow-left"></i> 上一个</button>';
+        actionsHtml += '<button class="btn-secondary" onclick="prevWord()">上一个</button>';
     }
-    actionsHtml += '<button class="btn-primary" onclick="removeCurrentWord()"><i class="fas fa-trash"></i> 移出生词本</button>';
+    actionsHtml += '<button class="btn-secondary" onclick="removeCurrentWord()">移出生词本</button>';
     if (!isLast) {
-        actionsHtml += '<button class="btn-primary" onclick="nextWord()">下一个 <i class="fas fa-arrow-right"></i></button>';
+        actionsHtml += '<button class="btn-primary" onclick="nextWord()">下一个</button>';
     }
     actionsHtml += '</div>';
 
@@ -829,14 +847,26 @@ function exitQuiz() {
     quizState.userAnswers = {};
 
     // 恢复弹窗为生词本列表
+    const modal = document.getElementById('vocab-modal');
     const modalHeader = document.getElementById('vocab-modal-header');
     const modalBody = document.getElementById('vocab-modal-body');
     const floatBtn = document.getElementById('quiz-start-btn');
+    const modalContent = modal.querySelector('.modal-content');
+
+    // 移除quiz-mode类并重置宽度
+    if (modalContent) {
+        modalContent.classList.remove('quiz-mode');
+        modalContent.style.width = '';
+        modalContent.style.maxWidth = '';
+    }
 
     modalHeader.innerHTML = `
         <h3>我的生词本</h3>
         <button class="btn-close" onclick="closeVocabModal()"><i class="fas fa-times"></i></button>
     `;
+
+    // 恢复生词本列表结构
+    modalBody.innerHTML = '<ul class="vocab-list" id="vocab-list"></ul>';
 
     renderVocabList();
 

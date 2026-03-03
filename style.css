@@ -1266,6 +1266,14 @@ input:checked + .mood-icon-wrapper {
     border: 1px solid rgba(163, 177, 198, 0.3);
 }
 
+/* Quiz mode - wider modal */
+.modal-content.quiz-mode {
+    width: 1000px !important;
+    max-width: 1000px !important;
+    height: auto !important;
+    max-height: 60vh !important;
+}
+
 .modal-header {
     display: flex;
     justify-content: space-between;
@@ -1825,7 +1833,7 @@ input:checked + .mood-icon-wrapper {
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 40px 20px;
+    padding: 30px 20px 20px 20px;
     height: 100%;
 }
 
@@ -1839,7 +1847,7 @@ input:checked + .mood-icon-wrapper {
     font-size: 24px;
     font-weight: 600;
     color: var(--text-color);
-    margin-bottom: 20px;
+    margin-bottom: 16px;
 }
 
 .quiz-audio-btn {
@@ -1854,7 +1862,7 @@ input:checked + .mood-icon-wrapper {
     display: flex;
     align-items: center;
     justify-content: center;
-    margin: 0 auto 30px;
+    margin: 0 auto 20px;
 }
 
 .quiz-audio-btn:hover {
@@ -1868,16 +1876,18 @@ input:checked + .mood-icon-wrapper {
 
 .quiz-input-area {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     align-items: center;
-    gap: 12px;
-    margin-bottom: 30px;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 20px;
+    flex-wrap: nowrap;
 }
 
 .quiz-letter-input {
-    width: 50px;
-    height: 60px;
-    font-size: 28px;
+    width: 60px;
+    height: 70px;
+    font-size: 32px;
     font-weight: 700;
     text-align: center;
     border: none;
@@ -1923,14 +1933,26 @@ input:checked + .mood-icon-wrapper {
 
 .quiz-actions {
     display: flex;
-    gap: 12px;
+    gap: 20px;
     justify-content: center;
     flex-wrap: wrap;
+    margin-top: -80px;
+    padding-top: 20px;
+    padding-bottom: 20px;
+    border-top: 1px solid rgba(163, 177, 198, 0.2);
 }
 
-.quiz-actions .btn-secondary,
-.quiz-actions .btn-primary {
-    min-width: 100px;
+.quiz-actions button {
+    width: 140px;
+    height: 55px;
+    font-size: 16px;
+}
+
+/* Modal body in quiz mode - flex layout for fixed bottom buttons */
+.modal-content.quiz-mode .modal-body {
+    display: flex;
+    flex-direction: column;
+    overflow: visible;
 }
 
 /* 数据管理区域 */
