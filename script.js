@@ -57,7 +57,7 @@ let confirmCallback = null;
 function showConfirm(message) {
     return new Promise((resolve) => {
         const dialog = document.getElementById('confirm-dialog');
-        const messageEl = document.getElementById('confirm-message');
+        const messageEl = document.getElementById('confirm-dialog-message');
         const okBtn = document.getElementById('confirm-ok-btn');
 
         messageEl.textContent = message;
