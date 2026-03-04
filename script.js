@@ -980,6 +980,8 @@ function removeLibraryWords(libraryKey) {
     const library = VOCAB_LIBRARIES[libraryKey];
     if (!library) return;
 
+    console.log('开始移除词库:', libraryKey, '当前词库大小:', vocabLibrary.length);
+
     // 过滤掉属于该词库的单词
     const originalLength = vocabLibrary.length;
     vocabLibrary = vocabLibrary.filter(word => {
@@ -992,6 +994,7 @@ function removeLibraryWords(libraryKey) {
     });
 
     const removedCount = originalLength - vocabLibrary.length;
+    console.log('移除了', removedCount, '个单词，剩余:', vocabLibrary.length);
 
     if (removedCount > 0) {
         // 保存到本地存储
@@ -1022,18 +1025,27 @@ function removeLibraryWords(libraryKey) {
 }
 
 function showVocabImportModal() {
-    // 获取已导入的词库列表
-    const importedLibraries = getImportedLibraries();
-
     // 清除所有选中状态
     document.querySelectorAll('.vocab-import-card').forEach(card => {
         card.classList.remove('selected');
-        // 如果该词库已导入，添加选中状态
+    });
+
+    // 基于实际存在的单词来判断哪些词库已导入
+    const importedLibraryKeys = new Set();
+    vocabLibrary.forEach(word => {
+        if (word.libraryKey) {
+            importedLibraryKeys.add(word.libraryKey);
+        }
+    });
+
+    // 为有单词的词库添加选中状态
+    document.querySelectorAll('.vocab-import-card').forEach(card => {
         const libraryKey = card.dataset.library;
-        if (importedLibraries.includes(libraryKey)) {
+        if (importedLibraryKeys.has(libraryKey)) {
             card.classList.add('selected');
         }
     });
+
     document.getElementById('vocab-import-modal').classList.remove('hidden');
 }
 
@@ -1045,11 +1057,28 @@ function closeVocabImportModal() {
 let pendingConfirmAction = null;
 
 function showConfirmModal(message, onConfirm) {
+    console.log('显示确认弹窗，消息:', message);
     const modal = document.getElementById('confirm-modal');
     const messageEl = document.getElementById('confirm-message');
-    messageEl.textContent = message;
+
+    console.log('Modal元素:', modal);
+    console.log('Message元素:', messageEl);
+
+    if (messageEl) {
+        messageEl.innerHTML = message;
+        console.log('消息已设置，当前内容:', messageEl.innerHTML);
+    } else {
+        console.error('找不到confirm-message元素');
+    }
+
     pendingConfirmAction = onConfirm;
-    modal.classList.remove('hidden');
+
+    if (modal) {
+        modal.classList.remove('hidden');
+        console.log('弹窗已显示');
+    } else {
+        console.error('找不到confirm-modal元素');
+    }
 }
 
 function closeConfirmModal(confirmed) {
