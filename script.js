@@ -1,10 +1,10 @@
 // 1. 初始化
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     initDate();
     initHealth();
     initTodos();
     initHoliday();
-    initWord();
+    await initWord();
     initMood();
     initQuote();
 });
@@ -511,7 +511,7 @@ const vocabLibrary = [
 let currentWord = {};
 let myVocab = [];
 
-function initWord() {
+async function initWord() {
     // 从localStorage加载词库
     const savedLibrary = localStorage.getItem('vocabLibrary');
     if (savedLibrary) {
@@ -528,6 +528,18 @@ function initWord() {
     // 随机选一个 (实际应用按日期 Hash 选择)
     const index = Math.floor(Math.random() * vocabLibrary.length);
     currentWord = vocabLibrary[index];
+
+    // 如果音标为空，从字典API获取
+    if (!currentWord.phonetic || currentWord.phonetic.trim() === '') {
+        const fetchedPhonetic = await fetchPhoneticFromDictionary(currentWord.word);
+        if (fetchedPhonetic) {
+            currentWord.phonetic = fetchedPhonetic;
+            // 更新vocabLibrary中的音标
+            vocabLibrary[index].phonetic = fetchedPhonetic;
+            // 保存到localStorage
+            localStorage.setItem('vocabLibrary', JSON.stringify(vocabLibrary));
+        }
+    }
 
     document.getElementById('word-spelling').textContent = currentWord.word;
     document.getElementById('word-phonetic').textContent = currentWord.phonetic;
@@ -556,7 +568,7 @@ function addToVocab() {
     }
 }
 
-function refreshWord() {
+async function refreshWord() {
     // Get a new random word, different from current
     let newIndex;
     do {
@@ -564,6 +576,18 @@ function refreshWord() {
     } while (vocabLibrary[newIndex].word === currentWord.word && vocabLibrary.length > 1);
 
     currentWord = vocabLibrary[newIndex];
+
+    // 如果音标为空，从字典API获取
+    if (!currentWord.phonetic || currentWord.phonetic.trim() === '') {
+        const fetchedPhonetic = await fetchPhoneticFromDictionary(currentWord.word);
+        if (fetchedPhonetic) {
+            currentWord.phonetic = fetchedPhonetic;
+            // 更新vocabLibrary中的音标
+            vocabLibrary[newIndex].phonetic = fetchedPhonetic;
+            // 保存到localStorage
+            localStorage.setItem('vocabLibrary', JSON.stringify(vocabLibrary));
+        }
+    }
 
     // Update UI with animation
     const spellingEl = document.getElementById('word-spelling');
@@ -950,6 +974,28 @@ function showVocabImportModal() {
 
 function closeVocabImportModal() {
     document.getElementById('vocab-import-modal').classList.add('hidden');
+}
+
+// 从字典API获取音标
+async function fetchPhoneticFromDictionary(word) {
+    try {
+        const response = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${word}`);
+        if (!response.ok) {
+            return '';
+        }
+        const data = await response.json();
+        if (data && data.length > 0 && data[0].phonetics) {
+            // 优先使用有文本的音标
+            const phoneticWithText = data[0].phonetics.find(p => p.text);
+            if (phoneticWithText) {
+                return phoneticWithText.text;
+            }
+        }
+        return '';
+    } catch (error) {
+        console.warn(`获取${word}音标失败:`, error);
+        return '';
+    }
 }
 
 function toggleVocabLibrary(card) {
