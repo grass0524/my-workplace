@@ -1294,8 +1294,11 @@ async function importSelectedVocabLibraries() {
     }
 
     let totalImported = 0;
+    let totalSkipped = 0;  // 总共跳过的单词数
     const importedLibraries = getImportedLibraries();
     console.log('已导入的词库列表:', importedLibraries);
+
+    const importResults = [];  // 记录每个词库的导入结果
 
     for (const card of selectedCards) {
         const libraryKey = card.dataset.library;
@@ -1318,6 +1321,7 @@ async function importSelectedVocabLibraries() {
             // 转换格式并过滤已存在的单词
             const existingWords = new Set(vocabLibrary.map(w => w.word.toLowerCase()));
             let importedCount = 0;
+            let skippedCount = 0;  // 新增：记录跳过的单词数
 
             data.forEach(item => {
                 const wordLower = item.word.toLowerCase();
@@ -1347,11 +1351,22 @@ async function importSelectedVocabLibraries() {
 
                     existingWords.add(wordLower);
                     importedCount++;
+                } else {
+                    skippedCount++;  // 单词已存在，跳过
                 }
             });
 
             totalImported += importedCount;
-            console.log(`${library.name}导入了${importedCount}个新单词`);
+            totalSkipped += skippedCount;
+            console.log(`${library.name}: 总共${data.length}个单词，已存在${skippedCount}个，新导入${importedCount}个`);
+
+            // 记录结果
+            importResults.push({
+                name: library.name,
+                total: data.length,
+                imported: importedCount,
+                skipped: skippedCount
+            });
 
             // 记录已导入的词库
             if (!importedLibraries.includes(libraryKey)) {
@@ -1364,7 +1379,7 @@ async function importSelectedVocabLibraries() {
         }
     }
 
-    console.log(`总共导入${totalImported}个新单词`);
+    console.log(`导入完成: 总共导入${totalImported}个新单词，跳过${totalSkipped}个已存在单词`);
 
     // 保存词库到本地存储
     localStorage.setItem('vocabLibrary', JSON.stringify(vocabLibrary));
@@ -1372,7 +1387,12 @@ async function importSelectedVocabLibraries() {
     // 保存已导入的词库列表
     saveImportedLibraries(importedLibraries);
 
-    showToast(`成功导入 ${totalImported} 个新单词`);
+    // 显示详细的导入结果
+    let resultMessage = `成功导入 ${totalImported} 个新单词`;
+    if (totalSkipped > 0) {
+        resultMessage += `（跳过 ${totalSkipped} 个已存在单词）`;
+    }
+    showToast(resultMessage);
     console.log('导入完成，显示成功提示');
 
     closeVocabImportModal();
