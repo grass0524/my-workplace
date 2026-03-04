@@ -978,9 +978,17 @@ function saveImportedLibraries(libraries) {
 // 从词库中删除指定词库的所有单词
 function removeLibraryWords(libraryKey) {
     const library = VOCAB_LIBRARIES[libraryKey];
-    if (!library) return;
+    if (!library) {
+        console.error('找不到词库:', libraryKey);
+        showToast('操作失败：找不到词库');
+        return;
+    }
 
-    console.log('开始移除词库:', libraryKey, '当前词库大小:', vocabLibrary.length);
+    console.log('开始移除词库:', libraryKey, '词库名称:', library.name, '当前词库大小:', vocabLibrary.length);
+
+    // 统计有多少单词属于这个词库
+    const wordsInLibrary = vocabLibrary.filter(word => word.libraryKey === libraryKey);
+    console.log(`找到${wordsInLibrary.length}个属于${library.name}的单词`);
 
     // 过滤掉属于该词库的单词
     const originalLength = vocabLibrary.length;
@@ -994,21 +1002,25 @@ function removeLibraryWords(libraryKey) {
     });
 
     const removedCount = originalLength - vocabLibrary.length;
-    console.log('移除了', removedCount, '个单词，剩余:', vocabLibrary.length);
+    console.log('实际移除了', removedCount, '个单词，剩余:', vocabLibrary.length);
 
+    // 保存到本地存储（无论是否有单词被移除都要保存）
+    localStorage.setItem('vocabLibrary', JSON.stringify(vocabLibrary));
+    console.log('已保存到localStorage');
+
+    // 从已导入列表中移除该词库
+    const importedLibs = getImportedLibraries();
+    const updatedLibs = importedLibs.filter(key => key !== libraryKey);
+    saveImportedLibraries(updatedLibs);
+    console.log('已更新已导入词库列表:', updatedLibs);
+
+    // 显示反馈
     if (removedCount > 0) {
-        // 保存到本地存储
-        localStorage.setItem('vocabLibrary', JSON.stringify(vocabLibrary));
-
-        // 从已导入列表中移除该词库
-        const importedLibs = getImportedLibraries();
-        const updatedLibs = importedLibs.filter(key => key !== libraryKey);
-        saveImportedLibraries(updatedLibs);
-
-        showToast(`已移除${library.name}的${removedCount}个单词`);
+        showToast(`已移除"${library.name}"的${removedCount}个单词`);
 
         // 如果当前单词被删除了，刷新显示
         if (currentWord && currentWord.word && currentWord.libraryKey === libraryKey) {
+            console.log('当前单词被移除，刷新显示');
             // 检查是否还有单词可用
             if (vocabLibrary.length > 0) {
                 refreshWord();
@@ -1020,7 +1032,8 @@ function removeLibraryWords(libraryKey) {
             }
         }
     } else {
-        showToast(`${library.name}没有可移除的单词`);
+        showToast(`"${library.name}"没有可移除的单词`);
+        console.log('没有单词被移除');
     }
 }
 
@@ -1061,13 +1074,22 @@ function closeVocabImportModal() {
 // 确认弹窗相关
 let pendingConfirmAction = null;
 
-function showConfirmModal(message, onConfirm) {
-    console.log('显示确认弹窗，消息:', message);
+function showConfirmModal(title, message, onConfirm) {
+    console.log('显示确认弹窗，标题:', title, '消息:', message);
     const modal = document.getElementById('confirm-modal');
+    const titleEl = document.getElementById('confirm-title');
     const messageEl = document.getElementById('confirm-message');
 
     console.log('Modal元素:', modal);
+    console.log('Title元素:', titleEl);
     console.log('Message元素:', messageEl);
+
+    if (titleEl) {
+        titleEl.textContent = title;
+        console.log('标题已设置:', titleEl.textContent);
+    } else {
+        console.error('找不到confirm-title元素');
+    }
 
     if (messageEl) {
         messageEl.innerHTML = message;
@@ -1120,16 +1142,18 @@ async function fetchPhoneticFromDictionary(word) {
 
 function toggleVocabLibrary(card) {
     const libraryKey = card.dataset.library;
+    const library = VOCAB_LIBRARIES[libraryKey];
     const wasSelected = card.classList.contains('selected');
 
     // 如果是从选中变为未选中，显示确认弹窗
     if (wasSelected) {
-        const library = VOCAB_LIBRARIES[libraryKey];
         if (library) {
             showConfirmModal(
-                '确认移除当前词库吗？',
+                '移除词库',
+                `确认移除"${library.name}"吗？`,
                 () => {
                     // 用户确认，执行移除
+                    console.log('用户确认移除:', libraryKey);
                     card.classList.remove('selected');
                     removeLibraryWords(libraryKey);
                 }
