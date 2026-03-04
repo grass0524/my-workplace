@@ -964,10 +964,76 @@ const VOCAB_LIBRARIES = {
     }
 };
 
+// 获取已导入的词库列表
+function getImportedLibraries() {
+    const imported = localStorage.getItem('importedVocabLibraries');
+    return imported ? JSON.parse(imported) : [];
+}
+
+// 保存已导入的词库列表
+function saveImportedLibraries(libraries) {
+    localStorage.setItem('importedVocabLibraries', JSON.stringify(libraries));
+}
+
+// 从词库中删除指定词库的所有单词
+function removeLibraryWords(libraryKey) {
+    const library = VOCAB_LIBRARIES[libraryKey];
+    if (!library) return;
+
+    // 获取该词库的所有单词（通过API获取来知道哪些单词属于这个词库）
+    fetch(library.url)
+        .then(response => response.json())
+        .then(data => {
+            const wordsToRemove = new Set(data.map(item => item.word.toLowerCase()));
+
+            // 过滤掉属于该词库的单词
+            const originalLength = vocabLibrary.length;
+            vocabLibrary = vocabLibrary.filter(word => {
+                // 如果单词有libraryKey属性，直接比较
+                if (word.libraryKey) {
+                    return word.libraryKey !== libraryKey;
+                }
+                // 如果没有libraryKey（旧数据），通过单词本身判断
+                return !wordsToRemove.has(word.word.toLowerCase());
+            });
+
+            const removedCount = originalLength - vocabLibrary.length;
+
+            if (removedCount > 0) {
+                // 保存到本地存储
+                localStorage.setItem('vocabLibrary', JSON.stringify(vocabLibrary));
+
+                // 从已导入列表中移除该词库
+                const importedLibs = getImportedLibraries();
+                const updatedLibs = importedLibs.filter(key => key !== libraryKey);
+                saveImportedLibraries(updatedLibs);
+
+                showToast(`已移除${library.name}的${removedCount}个单词`);
+
+                // 如果当前单词被删除了，刷新显示
+                if (wordsToRemove.has(currentWord.word.toLowerCase())) {
+                    refreshWord();
+                }
+            }
+        })
+        .catch(error => {
+            console.error('获取词库数据失败:', error);
+            showToast('操作失败，请重试');
+        });
+}
+
 function showVocabImportModal() {
+    // 获取已导入的词库列表
+    const importedLibraries = getImportedLibraries();
+
     // 清除所有选中状态
     document.querySelectorAll('.vocab-import-card').forEach(card => {
         card.classList.remove('selected');
+        // 如果该词库已导入，添加选中状态
+        const libraryKey = card.dataset.library;
+        if (importedLibraries.includes(libraryKey)) {
+            card.classList.add('selected');
+        }
     });
     document.getElementById('vocab-import-modal').classList.remove('hidden');
 }
@@ -999,7 +1065,24 @@ async function fetchPhoneticFromDictionary(word) {
 }
 
 function toggleVocabLibrary(card) {
+    const libraryKey = card.dataset.library;
+    const wasSelected = card.classList.contains('selected');
+
+    // 切换选中状态
     card.classList.toggle('selected');
+
+    // 如果是从选中变为未选中，删除该词库的单词
+    if (wasSelected) {
+        const library = VOCAB_LIBRARIES[libraryKey];
+        if (library) {
+            if (confirm(`确定要移除"${library.name}"的所有单词吗？`)) {
+                removeLibraryWords(libraryKey);
+            } else {
+                // 用户取消，恢复选中状态
+                card.classList.add('selected');
+            }
+        }
+    }
 }
 
 async function importSelectedVocabLibraries() {
@@ -1011,6 +1094,7 @@ async function importSelectedVocabLibraries() {
     }
 
     let totalImported = 0;
+    const importedLibraries = getImportedLibraries();
 
     for (const card of selectedCards) {
         const libraryKey = card.dataset.library;
@@ -1054,7 +1138,8 @@ async function importSelectedVocabLibraries() {
                     vocabLibrary.push({
                         word: item.word,
                         phonetic: phonetic,
-                        meaning: meaning
+                        meaning: meaning,
+                        libraryKey: libraryKey  // 记录单词来自哪个词库
                     });
 
                     existingWords.add(wordLower);
@@ -1063,14 +1148,23 @@ async function importSelectedVocabLibraries() {
             });
 
             totalImported += importedCount;
+
+            // 记录已导入的词库
+            if (!importedLibraries.includes(libraryKey)) {
+                importedLibraries.push(libraryKey);
+            }
+
         } catch (error) {
             console.error(`导入${library.name}失败:`, error);
             showToast(`导入${library.name}失败，请检查网络连接`);
         }
     }
 
-    // 保存到本地存储
+    // 保存词库到本地存储
     localStorage.setItem('vocabLibrary', JSON.stringify(vocabLibrary));
+
+    // 保存已导入的词库列表
+    saveImportedLibraries(importedLibraries);
 
     showToast(`成功导入 ${totalImported} 个新单词`);
     closeVocabImportModal();
