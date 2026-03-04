@@ -976,62 +976,48 @@ function saveImportedLibraries(libraries) {
 }
 
 // 从词库中删除指定词库的所有单词
-async function removeLibraryWords(libraryKey) {
+function removeLibraryWords(libraryKey) {
     const library = VOCAB_LIBRARIES[libraryKey];
     if (!library) return;
 
-    try {
-        // 获取该词库的所有单词（通过API获取来知道哪些单词属于这个词库）
-        const response = await fetch(library.url);
-        if (!response.ok) {
-            throw new Error('网络请求失败');
+    // 过滤掉属于该词库的单词
+    const originalLength = vocabLibrary.length;
+    vocabLibrary = vocabLibrary.filter(word => {
+        // 如果单词有libraryKey属性，直接比较
+        if (word.libraryKey) {
+            return word.libraryKey !== libraryKey;
         }
+        // 如果没有libraryKey（旧数据），保留该单词
+        return true;
+    });
 
-        const data = await response.json();
-        const wordsToRemove = new Set(data.map(item => item.word.toLowerCase()));
+    const removedCount = originalLength - vocabLibrary.length;
 
-        // 过滤掉属于该词库的单词
-        const originalLength = vocabLibrary.length;
-        vocabLibrary = vocabLibrary.filter(word => {
-            // 如果单词有libraryKey属性，直接比较
-            if (word.libraryKey) {
-                return word.libraryKey !== libraryKey;
+    if (removedCount > 0) {
+        // 保存到本地存储
+        localStorage.setItem('vocabLibrary', JSON.stringify(vocabLibrary));
+
+        // 从已导入列表中移除该词库
+        const importedLibs = getImportedLibraries();
+        const updatedLibs = importedLibs.filter(key => key !== libraryKey);
+        saveImportedLibraries(updatedLibs);
+
+        showToast(`已移除${library.name}的${removedCount}个单词`);
+
+        // 如果当前单词被删除了，刷新显示
+        if (currentWord && currentWord.word && currentWord.libraryKey === libraryKey) {
+            // 检查是否还有单词可用
+            if (vocabLibrary.length > 0) {
+                refreshWord();
+            } else {
+                // 没有单词了，清空显示
+                document.getElementById('word-spelling').textContent = '暂无单词';
+                document.getElementById('word-phonetic').textContent = '';
+                document.getElementById('word-meaning').textContent = '请先导入词库';
             }
-            // 如果没有libraryKey（旧数据），通过单词本身判断
-            return !wordsToRemove.has(word.word.toLowerCase());
-        });
-
-        const removedCount = originalLength - vocabLibrary.length;
-
-        if (removedCount > 0) {
-            // 保存到本地存储
-            localStorage.setItem('vocabLibrary', JSON.stringify(vocabLibrary));
-
-            // 从已导入列表中移除该词库
-            const importedLibs = getImportedLibraries();
-            const updatedLibs = importedLibs.filter(key => key !== libraryKey);
-            saveImportedLibraries(updatedLibs);
-
-            showToast(`已移除${library.name}的${removedCount}个单词`);
-
-            // 如果当前单词被删除了，刷新显示
-            if (currentWord && currentWord.word && wordsToRemove.has(currentWord.word.toLowerCase())) {
-                // 检查是否还有单词可用
-                if (vocabLibrary.length > 0) {
-                    await refreshWord();
-                } else {
-                    // 没有单词了，清空显示
-                    document.getElementById('word-spelling').textContent = '暂无单词';
-                    document.getElementById('word-phonetic').textContent = '';
-                    document.getElementById('word-meaning').textContent = '请先导入词库';
-                }
-            }
-        } else {
-            showToast(`${library.name}没有可移除的单词`);
         }
-    } catch (error) {
-        console.error('获取词库数据失败:', error);
-        showToast('操作失败，请重试');
+    } else {
+        showToast(`${library.name}没有可移除的单词`);
     }
 }
 
