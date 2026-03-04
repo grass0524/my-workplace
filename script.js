@@ -1075,7 +1075,10 @@ function removeLibraryWords(libraryKey) {
                     console.log('当前单词被移除，刷新显示');
                     // 检查是否还有单词可用
                     if (vocabLibrary.length > 0) {
-                        refreshWord();
+                        // refreshWord是async函数，需要处理
+                        refreshWord().catch(err => {
+                            console.error('刷新单词失败:', err);
+                        });
                     } else {
                         // 没有单词了，清空显示
                         document.getElementById('word-spelling').textContent = '暂无单词';
