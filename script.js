@@ -1107,34 +1107,54 @@ function removeLibraryWords(libraryKey) {
 }
 
 function showVocabImportModal() {
-    console.log('打开导入弹窗，当前vocabLibrary大小:', vocabLibrary.length);
+    console.log('=== 打开导入弹窗 ===');
+    console.log('当前vocabLibrary大小:', vocabLibrary.length);
 
-    // 清除所有选中状态
-    document.querySelectorAll('.vocab-import-card').forEach(card => {
-        card.classList.remove('selected');
-    });
-
-    // 基于实际存在的单词来判断哪些词库已导入
-    const importedLibraryKeys = new Set();
-    vocabLibrary.forEach(word => {
-        if (word.libraryKey) {
-            importedLibraryKeys.add(word.libraryKey);
-            console.log(`找到单词: ${word.word}, 来自词库: ${word.libraryKey}`);
-        }
-    });
-
-    console.log('检测到的已导入词库:', Array.from(importedLibraryKeys));
-
-    // 为有单词的词库添加选中状态
-    document.querySelectorAll('.vocab-import-card').forEach(card => {
-        const libraryKey = card.dataset.library;
-        if (importedLibraryKeys.has(libraryKey)) {
-            card.classList.add('selected');
-            console.log(`勾选词库: ${libraryKey}`);
-        }
-    });
-
+    // 先显示弹窗
     document.getElementById('vocab-import-modal').classList.remove('hidden');
+
+    // 使用setTimeout确保DOM已渲染
+    setTimeout(() => {
+        // 清除所有选中状态
+        const allCards = document.querySelectorAll('.vocab-import-card');
+        console.log('找到', allCards.length, '个词库卡片');
+
+        allCards.forEach(card => {
+            card.classList.remove('selected');
+        });
+
+        // 基于实际存在的单词来判断哪些词库已导入
+        const importedLibraryKeys = new Set();
+        vocabLibrary.forEach(word => {
+            if (word.libraryKey) {
+                importedLibraryKeys.add(word.libraryKey);
+            }
+        });
+
+        console.log('检测到的已导入词库:', Array.from(importedLibraryKeys));
+
+        // 为有单词的词库添加选中状态
+        let selectedCount = 0;
+        allCards.forEach(card => {
+            const libraryKey = card.dataset.library;
+            if (importedLibraryKeys.has(libraryKey)) {
+                card.classList.add('selected');
+                selectedCount++;
+                console.log(`✓ 勾选词库: ${libraryKey}`);
+            }
+        });
+
+        console.log(`总共勾选了 ${selectedCount} 个词库`);
+
+        // 验证：重新检查哪些卡片有selected类
+        const selectedCards = document.querySelectorAll('.vocab-import-card.selected');
+        console.log('验证：实际有selected类的卡片数量:', selectedCards.length);
+        selectedCards.forEach(card => {
+            console.log('  -', card.dataset.library);
+        });
+
+        console.log('=== 导入弹窗打开完成 ===');
+    }, 50);
 }
 
 function closeVocabImportModal() {
