@@ -1,7 +1,8 @@
 [build]
   publish = "."
-  base = ""
-  image = "ubuntu-jammy:latest"
+
+[build.image]
+  name = "ubuntu-jammy"
 
 [[redirects]]
   from = "/*"
