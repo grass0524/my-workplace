@@ -1119,6 +1119,11 @@ function showVocabImportModal() {
         const allCards = document.querySelectorAll('.vocab-import-card');
         console.log('找到', allCards.length, '个词库卡片');
 
+        // 打印所有卡片的data-library属性
+        allCards.forEach(card => {
+            console.log(`卡片: ${card.dataset.library}, 元素:`, card);
+        });
+
         allCards.forEach(card => {
             card.classList.remove('selected');
         });
@@ -1137,6 +1142,7 @@ function showVocabImportModal() {
         let selectedCount = 0;
         allCards.forEach(card => {
             const libraryKey = card.dataset.library;
+            console.log(`检查卡片 ${libraryKey}, 是否在已导入列表中:`, importedLibraryKeys.has(libraryKey));
             if (importedLibraryKeys.has(libraryKey)) {
                 card.classList.add('selected');
                 selectedCount++;
