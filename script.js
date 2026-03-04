@@ -1002,9 +1002,12 @@ async function importSelectedVocabLibraries() {
                     // 组合释义和词性
                     const meaning = wordType ? `${translation} (${wordType})` : translation;
 
+                    // 获取音标（优先使用美式音标，其次是英式，最后使用phonetic字段）
+                    const phonetic = item.phonetic || item.ph_am || item.ph_en || '';
+
                     vocabLibrary.push({
                         word: item.word,
-                        phonetic: '',
+                        phonetic: phonetic,
                         meaning: meaning
                     });
 
@@ -1068,9 +1071,12 @@ async function importVocabLibrary(libraryKey) {
                 // 组合释义和词性
                 const meaning = wordType ? `${translation} (${wordType})` : translation;
 
+                // 获取音标
+                const phonetic = item.phonetic || item.ph_am || item.ph_en || '';
+
                 myVocab.push({
                     word: item.word,
-                    phonetic: '',
+                    phonetic: phonetic,
                     meaning: meaning
                 });
 
