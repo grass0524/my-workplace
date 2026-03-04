@@ -1,9 +1,3 @@
-[build]
-  publish = "."
-
-[build.image]
-  name = "ubuntu-jammy"
-
 [[redirects]]
   from = "/*"
   to = "/index.html"
