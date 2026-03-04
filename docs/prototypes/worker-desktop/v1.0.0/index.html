@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Workplace</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- 引入 Font Awesome 图标库 (CDN) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <!-- 头部 -->
+        <header class="header">
+            <h1>My Workplace</h1>
+            <div class="date-info" id="current-date"></div>
+        </header>
+
+        <!-- 每日一言 -->
+        <div class="daily-quote-banner">
+            <div class="quote-banner-content">
+                <span class="quote-banner-text" id="quote-text">正在加载...</span>
+                <span class="quote-banner-author" id="quote-author"></span>
+            </div>
+            <button class="quote-refresh-btn" onclick="refreshQuote()" title="换一言">
+                <i class="fas fa-rotate"></i>
+            </button>
+        </div>
+
+        <!-- 主内容区：Grid 布局 -->
+        <main class="dashboard-grid">
+            
+            <!-- 模块一：健康打卡 -->
+            <section class="card health-card">
+                <div class="card-header">
+                    <h2>健康打卡</h2>
+                    <button class="btn-icon-neu" onclick="showHealthHistory()" title="统计"><i class="fas fa-chart-bar"></i></button>
+                </div>
+                <div class="card-body health-stats">
+                    <div class="health-item water" onclick="toggleHealth('water')">
+                        <div class="icon-circle water" id="btn-water"><i class="fas fa-glass-water"></i></div>
+                        <div class="status-text" id="status-water">未打卡</div>
+                        <div class="label">喝水</div>
+                    </div>
+                    <div class="health-item toilet" onclick="toggleHealth('toilet')">
+                        <div class="icon-circle toilet" id="btn-toilet"><i class="fas fa-restroom"></i></div>
+                        <div class="status-text" id="status-toilet">未打卡</div>
+                        <div class="label">如厕</div>
+                    </div>
+                    <div class="health-item exercise" onclick="toggleHealth('exercise')">
+                        <div class="icon-circle exercise" id="btn-exercise"><i class="fas fa-person-running"></i></div>
+                        <div class="status-text" id="status-exercise">未打卡</div>
+                        <div class="label">运动</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 健康统计与补卡弹窗 -->
+            <div id="health-modal" class="modal hidden">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3>健康打卡统计</h3>
+                        <button class="btn-close" onclick="closeHealthModal()"><i class="fas fa-times"></i></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="calendar-header-controls">
+                            <button onclick="changeHealthMonth(-1)"><i class="fas fa-chevron-left"></i></button>
+                            <span id="health-calendar-month">2026年2月</span>
+                            <button onclick="changeHealthMonth(1)"><i class="fas fa-chevron-right"></i></button>
+                        </div>
+                        <div class="health-calendar-grid" id="health-calendar">
+                            <!-- 动态生成日历，支持点击补卡 -->
+                        </div>
+                        <div class="health-month-stats" id="health-month-stats">
+                            <!-- 动态生成月度统计 -->
+                        </div>
+                        <div class="legend">
+                            <span class="dot done"></span> 全部完成
+                            <span class="dot partial"></span> 部分完成
+                            <span class="dot none"></span> 未打卡
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 健康补卡编辑弹窗 -->
+            <div id="health-edit-modal" class="modal hidden">
+                <div class="modal-content modal-sm">
+                    <div class="modal-header">
+                        <h3 id="health-edit-title">补打卡</h3>
+                        <button class="btn-close" onclick="closeHealthEditModal()"><i class="fas fa-times"></i></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="health-edit-content">
+                            <p id="health-edit-date" style="margin-bottom: 16px; color: #666;"></p>
+                            <div class="health-edit-toggles">
+                                <div class="health-edit-item">
+                                    <label class="health-toggle-label">
+                                        <input type="checkbox" id="edit-water" class="health-toggle-checkbox">
+                                        <span class="health-toggle-custom">
+                                            <i class="fas fa-glass-water"></i>
+                                            <span>喝水</span>
+                                        </span>
+                                    </label>
+                                </div>
+                                <div class="health-edit-item">
+                                    <label class="health-toggle-label">
+                                        <input type="checkbox" id="edit-toilet" class="health-toggle-checkbox">
+                                        <span class="health-toggle-custom">
+                                            <i class="fas fa-restroom"></i>
+                                            <span>如厕</span>
+                                        </span>
+                                    </label>
+                                </div>
+                                <div class="health-edit-item">
+                                    <label class="health-toggle-label">
+                                        <input type="checkbox" id="edit-exercise" class="health-toggle-checkbox">
+                                        <span class="health-toggle-custom">
+                                            <i class="fas fa-person-running"></i>
+                                            <span>运动</span>
+                                        </span>
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="health-edit-actions">
+                                <button class="btn-secondary" onclick="closeHealthEditModal()">取消</button>
+                                <button class="btn-primary" onclick="saveHealthEdit()">保存</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 模块三：放假倒计时 (放在上面比较显眼) -->
+            <section class="card holiday-card">
+                <div class="card-header">
+                    <h2>放假倒计时</h2>
+                </div>
+                <div class="card-body holiday-content">
+                    <div class="countdown-text">
+                        距离 <span id="holiday-name" class="highlight">劳动节</span> 假还有
+                    </div>
+                    <div class="countdown-number" id="holiday-days">--</div>
+                    <div class="countdown-unit">天</div>
+                    <div class="holiday-date" id="holiday-date-str">2026-05-01</div>
+                </div>
+            </section>
+
+            <!-- 模块四：今日单词 -->
+            <section class="card word-card">
+                <div class="card-header">
+                    <h2>今日单词</h2>
+                    <button class="btn-icon-neu" onclick="showVocabBook()" title="生词本"><i class="fas fa-book"></i></button>
+                </div>
+                <div class="card-body word-content" id="daily-word-view">
+                    <div class="word-spelling" id="word-spelling">Loading...</div>
+                    <div class="word-phonetic" id="word-phonetic">/ ... /</div>
+                    <div class="word-meaning" id="word-meaning">正在加载单词...</div>
+                    <div class="word-actions">
+                        <button class="btn-icon" onclick="playWordAudio()"><i class="fas fa-volume-high"></i></button>
+                        <button class="btn-icon" onclick="refreshWord()" title="换一个"><i class="fas fa-rotate"></i></button>
+                        <button class="btn-primary btn-sm" onclick="addToVocab()"><i class="fas fa-plus"></i> 加入生词本</button>
+                    </div>
+                </div>
+                <div class="word-footer">
+                    <button class="btn-text-word" onclick="showVocabImportModal()">导入词库</button>
+                </div>
+            </section>
+
+            <!-- 生词本弹窗 -->
+            <div id="vocab-modal" class="modal hidden">
+                <div class="modal-content">
+                    <div class="modal-header" id="vocab-modal-header">
+                        <h3>我的生词本</h3>
+                        <button class="btn-close" onclick="closeVocabModal()"><i class="fas fa-times"></i></button>
+                    </div>
+                    <div class="modal-body" id="vocab-modal-body">
+                        <ul class="vocab-list" id="vocab-list">
+                            <!-- 动态生成 -->
+                        </ul>
+                    </div>
+                    <!-- 默写复习悬浮按钮 -->
+                    <div class="quiz-float-btn" id="quiz-start-btn">
+                        <button class="btn-primary btn-quiz" onclick="startQuiz()">
+                            <i class="fas fa-pen"></i> 默写复习
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 词库导入弹窗 -->
+            <div id="vocab-import-modal" class="modal hidden">
+                <div class="modal-content" style="max-width: 700px; height: 450px;">
+                    <div class="modal-header">
+                        <h3>导入词库</h3>
+                        <button class="btn-close" onclick="closeVocabImportModal()"><i class="fas fa-times"></i></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="vocab-import-grid">
+                            <div class="vocab-import-card" data-library="middle-school" onclick="toggleVocabLibrary(this)">
+                                <div class="vocab-import-name">初中词汇</div>
+                                <div class="vocab-import-count">3,223 词</div>
+                            </div>
+                            <div class="vocab-import-card" data-library="high-school" onclick="toggleVocabLibrary(this)">
+                                <div class="vocab-import-name">高中词汇</div>
+                                <div class="vocab-import-count">6,008 词</div>
+                            </div>
+                            <div class="vocab-import-card" data-library="cet4" onclick="toggleVocabLibrary(this)">
+                                <div class="vocab-import-name">四级词汇</div>
+                                <div class="vocab-import-count">7,508 词</div>
+                            </div>
+                            <div class="vocab-import-card" data-library="cet6" onclick="toggleVocabLibrary(this)">
+                                <div class="vocab-import-name">六级词汇</div>
+                                <div class="vocab-import-count">5,651 词</div>
+                            </div>
+                            <div class="vocab-import-card" data-library="graduate" onclick="toggleVocabLibrary(this)">
+                                <div class="vocab-import-name">考研词汇</div>
+                                <div class="vocab-import-count">9,602 词</div>
+                            </div>
+                            <div class="vocab-import-card" data-library="toefl" onclick="toggleVocabLibrary(this)">
+                                <div class="vocab-import-name">托福词汇</div>
+                                <div class="vocab-import-count">13,477 词</div>
+                            </div>
+                            <div class="vocab-import-card" data-library="sat" onclick="toggleVocabLibrary(this)">
+                                <div class="vocab-import-name">SAT词汇</div>
+                                <div class="vocab-import-count">8,887 词</div>
+                            </div>
+                        </div>
+                        <div class="vocab-import-actions">
+                            <button class="btn-primary" onclick="importSelectedVocabLibraries()">导入选中的词库</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 模块二：待办清单 -->
+            <section class="card todo-card">
+                <div class="card-header">
+                    <h2>待办清单</h2>
+                    <div class="todo-stats">
+                        <span class="stat-item">待办 <b id="todo-pending">0</b></span>
+                        <span class="stat-item">完成 <b id="todo-completed">0</b></span>
+                    </div>
+                </div>
+                <div class="card-body todo-body">
+                    <div class="todo-input-group">
+                        <input type="text" id="new-todo-input" placeholder="添加新任务 (Enter)" onkeypress="handleTodoInput(event)">
+                        <input type="date" id="new-todo-date" class="date-picker-sm">
+                        <button class="btn-add" onclick="addTodo()"><i class="fas fa-plus"></i></button>
+                    </div>
+                    <div class="todo-list-container" id="todo-list-container">
+                        <!-- 动态生成按日期分组的列表 -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- 模块五：心情日记 -->
+            <section class="card mood-card">
+                <div class="card-header">
+                    <h2>心情日记</h2>
+                    <button class="btn-icon-neu" onclick="showMoodStats()" title="统计"><i class="fas fa-chart-pie"></i></button>
+                </div>
+                <div class="card-body mood-body">
+                    <div class="mood-input-area">
+                        <div class="mood-selector">
+                            <label><input type="radio" name="mood" value="happy" checked> <span class="mood-icon-wrapper happy"><i class="fas fa-face-laugh-beam mood-icon"></i></span></label>
+                            <label><input type="radio" name="mood" value="normal"> <span class="mood-icon-wrapper normal"><i class="fas fa-face-meh mood-icon"></i></span></label>
+                            <label><input type="radio" name="mood" value="sad"> <span class="mood-icon-wrapper sad"><i class="fas fa-face-frown mood-icon"></i></span></label>
+                            <label><input type="radio" name="mood" value="angry"> <span class="mood-icon-wrapper angry"><i class="fas fa-face-angry mood-icon"></i></span></label>
+                            <label><input type="radio" name="mood" value="tired"> <span class="mood-icon-wrapper tired"><i class="fas fa-face-tired mood-icon"></i></span></label>
+                        </div>
+                        <div class="mood-text-group">
+                            <input type="text" id="mood-note" placeholder="今天心情怎么样？">
+                            <button class="btn-add" onclick="saveMood()"><i class="fas fa-plus"></i></button>
+                        </div>
+                    </div>
+                    
+                    <!-- 仅展示今日心情或最近心情 -->
+                    <div class="mood-list-container" id="mood-recent-list">
+                        <!-- 动态生成 -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- 心情统计弹窗 -->
+            <div id="mood-modal" class="modal hidden">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3>心情日记统计</h3>
+                        <div class="view-switch">
+                            <button class="btn-icon active" id="modal-view-timeline" onclick="switchMoodModalView('timeline')"><i class="fas fa-list"></i> <span>列表</span></button>
+                            <button class="btn-icon" id="modal-view-calendar" onclick="switchMoodModalView('calendar')"><i class="fas fa-calendar-days"></i> <span>日历</span></button>
+                        </div>
+                        <button class="btn-close" onclick="closeMoodModal()"><i class="fas fa-times"></i></button>
+                    </div>
+                    <div class="modal-body">
+                        <!-- 时间轴视图 -->
+                        <div class="mood-list-container full-height" id="modal-mood-timeline">
+                            <ul class="mood-list" id="modal-mood-list">
+                                <!-- 动态生成 -->
+                            </ul>
+                        </div>
+
+                        <!-- 日历视图 -->
+                        <div class="mood-calendar-container hidden full-height" id="modal-mood-calendar">
+                            <div class="calendar-header-controls">
+                                <button onclick="changeMoodMonth(-1)"><i class="fas fa-chevron-left"></i></button>
+                                <span id="mood-calendar-month">2026年2月</span>
+                                <button onclick="changeMoodMonth(1)"><i class="fas fa-chevron-right"></i></button>
+                            </div>
+                            <div class="calendar-grid" id="modal-calendar-grid">
+                                <!-- 动态生成 -->
+                            </div>
+                            <div class="mood-day-detail" id="mood-day-detail">
+                                <div class="detail-placeholder">点击日期查看当日心情</div>
+                                <ul class="mood-list" id="mood-day-list"></ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+
+        <!-- 数据管理与页尾 -->
+        <footer class="footer-with-actions">
+            <div class="data-actions">
+                <button class="btn-data" onclick="exportData()" title="导出所有数据到JSON文件">
+                    <i class="fas fa-download"></i> 导出数据
+                </button>
+                <button class="btn-data" onclick="document.getElementById('import-file-input').click()" title="从JSON文件导入数据">
+                    <i class="fas fa-upload"></i> 导入数据
+                </button>
+                <input type="file" id="import-file-input" accept=".json" style="display: none;" onchange="importData(event)">
+            </div>
+            <div class="footer-text">
+                <p>© 2026 My Workplace - Stay Healthy, Stay Productive.</p>
+            </div>
+        </footer>
+    </div>
+
+    <!-- 自定义提示组件 -->
+    <div id="toast" class="toast hidden">
+        <div class="toast-content">
+            <i class="fas fa-info-circle toast-icon"></i>
+            <span class="toast-message" id="toast-message"></span>
+        </div>
+    </div>
+
+    <!-- 自定义确认对话框 -->
+    <div id="confirm-dialog" class="modal hidden">
+        <div class="modal-content modal-sm">
+            <div class="modal-header">
+                <h3>确认</h3>
+                <button class="btn-close" onclick="closeConfirmDialog(false)"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body">
+                <p class="confirm-message" id="confirm-message"></p>
+                <div class="confirm-actions">
+                    <button class="btn-secondary" onclick="closeConfirmDialog(false)">取消</button>
+                    <button class="btn-primary" id="confirm-ok-btn">确定</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,16 @@
+{
+  "version": "v1.0.0",
+  "project": "worker-desktop",
+  "module": "worker-desktop",
+  "pages": [
+    {
+      "id": "dashboard",
+      "path": "index.html",
+      "name": "工作桌面主页",
+      "type": "dashboard",
+      "description": "包含所有5个功能模块的聚合展示页"
+    }
+  ],
+  "lastModified": "2026-02-28T10:00:00Z",
+  "generatedBy": "TraeAI"
+}
