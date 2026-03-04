@@ -976,50 +976,63 @@ function saveImportedLibraries(libraries) {
 }
 
 // 从词库中删除指定词库的所有单词
-function removeLibraryWords(libraryKey) {
+async function removeLibraryWords(libraryKey) {
     const library = VOCAB_LIBRARIES[libraryKey];
     if (!library) return;
 
-    // 获取该词库的所有单词（通过API获取来知道哪些单词属于这个词库）
-    fetch(library.url)
-        .then(response => response.json())
-        .then(data => {
-            const wordsToRemove = new Set(data.map(item => item.word.toLowerCase()));
+    try {
+        // 获取该词库的所有单词（通过API获取来知道哪些单词属于这个词库）
+        const response = await fetch(library.url);
+        if (!response.ok) {
+            throw new Error('网络请求失败');
+        }
 
-            // 过滤掉属于该词库的单词
-            const originalLength = vocabLibrary.length;
-            vocabLibrary = vocabLibrary.filter(word => {
-                // 如果单词有libraryKey属性，直接比较
-                if (word.libraryKey) {
-                    return word.libraryKey !== libraryKey;
-                }
-                // 如果没有libraryKey（旧数据），通过单词本身判断
-                return !wordsToRemove.has(word.word.toLowerCase());
-            });
+        const data = await response.json();
+        const wordsToRemove = new Set(data.map(item => item.word.toLowerCase()));
 
-            const removedCount = originalLength - vocabLibrary.length;
+        // 过滤掉属于该词库的单词
+        const originalLength = vocabLibrary.length;
+        vocabLibrary = vocabLibrary.filter(word => {
+            // 如果单词有libraryKey属性，直接比较
+            if (word.libraryKey) {
+                return word.libraryKey !== libraryKey;
+            }
+            // 如果没有libraryKey（旧数据），通过单词本身判断
+            return !wordsToRemove.has(word.word.toLowerCase());
+        });
 
-            if (removedCount > 0) {
-                // 保存到本地存储
-                localStorage.setItem('vocabLibrary', JSON.stringify(vocabLibrary));
+        const removedCount = originalLength - vocabLibrary.length;
 
-                // 从已导入列表中移除该词库
-                const importedLibs = getImportedLibraries();
-                const updatedLibs = importedLibs.filter(key => key !== libraryKey);
-                saveImportedLibraries(updatedLibs);
+        if (removedCount > 0) {
+            // 保存到本地存储
+            localStorage.setItem('vocabLibrary', JSON.stringify(vocabLibrary));
 
-                showToast(`已移除${library.name}的${removedCount}个单词`);
+            // 从已导入列表中移除该词库
+            const importedLibs = getImportedLibraries();
+            const updatedLibs = importedLibs.filter(key => key !== libraryKey);
+            saveImportedLibraries(updatedLibs);
 
-                // 如果当前单词被删除了，刷新显示
-                if (wordsToRemove.has(currentWord.word.toLowerCase())) {
-                    refreshWord();
+            showToast(`已移除${library.name}的${removedCount}个单词`);
+
+            // 如果当前单词被删除了，刷新显示
+            if (currentWord && currentWord.word && wordsToRemove.has(currentWord.word.toLowerCase())) {
+                // 检查是否还有单词可用
+                if (vocabLibrary.length > 0) {
+                    await refreshWord();
+                } else {
+                    // 没有单词了，清空显示
+                    document.getElementById('word-spelling').textContent = '暂无单词';
+                    document.getElementById('word-phonetic').textContent = '';
+                    document.getElementById('word-meaning').textContent = '请先导入词库';
                 }
             }
-        })
-        .catch(error => {
-            console.error('获取词库数据失败:', error);
-            showToast('操作失败，请重试');
-        });
+        } else {
+            showToast(`${library.name}没有可移除的单词`);
+        }
+    } catch (error) {
+        console.error('获取词库数据失败:', error);
+        showToast('操作失败，请重试');
+    }
 }
 
 function showVocabImportModal() {
@@ -1040,6 +1053,27 @@ function showVocabImportModal() {
 
 function closeVocabImportModal() {
     document.getElementById('vocab-import-modal').classList.add('hidden');
+}
+
+// 确认弹窗相关
+let pendingConfirmAction = null;
+
+function showConfirmModal(message, onConfirm) {
+    const modal = document.getElementById('confirm-modal');
+    const messageEl = document.getElementById('confirm-message');
+    messageEl.textContent = message;
+    pendingConfirmAction = onConfirm;
+    modal.classList.remove('hidden');
+}
+
+function closeConfirmModal(confirmed) {
+    const modal = document.getElementById('confirm-modal');
+    modal.classList.add('hidden');
+
+    if (confirmed && pendingConfirmAction) {
+        pendingConfirmAction();
+    }
+    pendingConfirmAction = null;
 }
 
 // 从字典API获取音标
@@ -1068,20 +1102,22 @@ function toggleVocabLibrary(card) {
     const libraryKey = card.dataset.library;
     const wasSelected = card.classList.contains('selected');
 
-    // 切换选中状态
-    card.classList.toggle('selected');
-
-    // 如果是从选中变为未选中，删除该词库的单词
+    // 如果是从选中变为未选中，显示确认弹窗
     if (wasSelected) {
         const library = VOCAB_LIBRARIES[libraryKey];
         if (library) {
-            if (confirm(`确定要移除"${library.name}"的所有单词吗？`)) {
-                removeLibraryWords(libraryKey);
-            } else {
-                // 用户取消，恢复选中状态
-                card.classList.add('selected');
-            }
+            showConfirmModal(
+                `确定要移除"${library.name}"的所有单词吗？`,
+                () => {
+                    // 用户确认，执行移除
+                    card.classList.remove('selected');
+                    removeLibraryWords(libraryKey);
+                }
+            );
         }
+    } else {
+        // 从未选中变为选中，直接添加选中状态
+        card.classList.add('selected');
     }
 }
 

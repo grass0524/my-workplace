@@ -1387,6 +1387,14 @@ input:checked + .mood-icon-wrapper {
     padding: 0 16px 30px 16px;
 }
 
+.modal-footer {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    padding: 20px;
+    border-top: 1px solid var(--border-color);
+}
+
 /* View Switch in Modal */
 .view-switch {
     display: flex;
