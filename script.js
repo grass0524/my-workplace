@@ -1070,6 +1070,13 @@ function removeLibraryWords(libraryKey) {
             if (removedCount > 0) {
                 showToast(`已移除"${library.name}"的${removedCount}个单词`);
 
+                // 取消卡片的勾选状态
+                const card = document.querySelector(`.vocab-import-card[data-library="${libraryKey}"]`);
+                if (card) {
+                    card.classList.remove('selected');
+                    console.log(`已取消词库${libraryKey}的勾选状态`);
+                }
+
                 // 如果当前单词被删除了，刷新显示
                 if (currentWord && currentWord.word && currentWord.libraryKey === libraryKey) {
                     console.log('当前单词被移除，刷新显示');
