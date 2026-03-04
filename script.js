@@ -513,7 +513,7 @@ function initHoliday() {
 }
 
 // 5. 今日单词 (Daily Word)
-const vocabLibrary = [
+let vocabLibrary = [
     { word: 'Resilience', phonetic: '/rɪˈzɪliəns/', meaning: 'n. 恢复力；弹力；顺应力' },
     { word: 'Procrastinate', phonetic: '/prəˈkræstɪneɪt/', meaning: 'v. 拖延，耽搁' },
     { word: 'Synergy', phonetic: '/ˈsɪnərdʒi/', meaning: 'n. 协同效应；增效作用' },

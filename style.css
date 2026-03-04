@@ -1419,6 +1419,8 @@ input:checked + .mood-icon-wrapper {
     display: block !important;
     visibility: visible !important;
     opacity: 1 !important;
+    min-height: 30px;
+    word-break: break-word;
 }
 
 #confirm-message:empty:before {
@@ -1429,7 +1431,8 @@ input:checked + .mood-icon-wrapper {
 #confirm-message {
     color: #a3b1c6 !important;
     font-size: 15px !important;
-    min-height: 24px;
+    min-height: 30px;
+    display: block !important;
 }
 
 .modal-confirm .modal-footer {
