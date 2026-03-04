@@ -1290,7 +1290,7 @@ function toggleVocabLibrary(card) {
 }
 
 async function importSelectedVocabLibraries() {
-    console.log('开始导入词库...');
+    console.log('=== importSelectedVocabLibraries 开始 ===');
     const selectedCards = document.querySelectorAll('.vocab-import-card.selected');
     console.log('选中的卡片数量:', selectedCards.length);
 
@@ -1300,8 +1300,14 @@ async function importSelectedVocabLibraries() {
         return;
     }
 
+    console.log('准备调用showLoading...');
     // 显示loading
-    showLoading('正在导入词库...');
+    try {
+        showLoading('正在导入词库...');
+        console.log('showLoading调用成功');
+    } catch (e) {
+        console.error('showLoading调用失败:', e);
+    }
 
     let totalImported = 0;
     let totalSkipped = 0;  // 总共跳过的单词数
