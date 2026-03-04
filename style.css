@@ -1395,6 +1395,33 @@ input:checked + .mood-icon-wrapper {
     border-top: 1px solid var(--border-color);
 }
 
+/* 确认弹窗样式 */
+.modal-confirm {
+    max-width: 400px !important;
+    height: auto !important;
+    max-height: none !important;
+}
+
+.modal-confirm .modal-body {
+    padding: 20px 24px !important;
+    text-align: center;
+}
+
+.modal-confirm .modal-body p {
+    color: var(--text-color);
+    font-size: 15px;
+    line-height: 1.6;
+    margin: 0;
+}
+
+.modal-confirm .modal-footer {
+    padding: 16px 24px;
+}
+
+.modal-confirm .modal-footer button {
+    min-width: 80px;
+}
+
 /* View Switch in Modal */
 .view-switch {
     display: flex;

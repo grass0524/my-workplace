@@ -366,16 +366,16 @@
 
     <!-- 自定义确认弹窗 -->
     <div id="confirm-modal" class="modal hidden">
-        <div class="modal-content" style="max-width: 400px;">
+        <div class="modal-content modal-confirm">
             <div class="modal-header">
                 <h3>确认操作</h3>
             </div>
-            <div class="modal-body" style="text-align: center; padding: 30px 20px;">
-                <p id="confirm-message" style="color: #a3b1c6; font-size: 15px; line-height: 1.6;"></p>
+            <div class="modal-body">
+                <p id="confirm-message"></p>
             </div>
-            <div class="modal-footer" style="display: flex; gap: 12px; justify-content: center; padding: 20px; border-top: 1px solid rgba(163, 177, 198, 0.1);">
-                <button class="btn-secondary" onclick="closeConfirmModal(false)" style="padding: 10px 24px;">取消</button>
-                <button class="btn-primary" onclick="closeConfirmModal(true)" style="padding: 10px 24px;">确认</button>
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="closeConfirmModal(false)">取消</button>
+                <button class="btn-primary" onclick="closeConfirmModal(true)">确认</button>
             </div>
         </div>
     </div>
