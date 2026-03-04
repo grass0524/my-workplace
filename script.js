@@ -1300,6 +1300,9 @@ async function importSelectedVocabLibraries() {
         return;
     }
 
+    // 显示loading
+    showLoading('正在导入词库...');
+
     let totalImported = 0;
     let totalSkipped = 0;  // 总共跳过的单词数
     const importedLibraries = getImportedLibraries();
@@ -1307,105 +1310,130 @@ async function importSelectedVocabLibraries() {
 
     const importResults = [];  // 记录每个词库的导入结果
 
-    for (const card of selectedCards) {
-        const libraryKey = card.dataset.library;
-        const library = VOCAB_LIBRARIES[libraryKey];
+    try {
+        for (const card of selectedCards) {
+            const libraryKey = card.dataset.library;
+            const library = VOCAB_LIBRARIES[libraryKey];
 
-        if (!library) continue;
+            if (!library) continue;
 
-        console.log(`开始导入${library.name}...`);
-        showToast(`正在导入${library.name}...`);
+            console.log(`开始导入${library.name}...`);
+            showToast(`正在导入${library.name}...`);
 
-        try {
-            const response = await fetch(library.url);
-            if (!response.ok) {
-                throw new Error('网络请求失败');
-            }
+            try {
+                // 添加超时控制
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 30000); // 30秒超时
 
-            const data = await response.json();
-            console.log(`${library.name}获取到${data.length}个单词`);
+                const response = await fetch(library.url, {
+                    signal: controller.signal
+                });
+                clearTimeout(timeoutId);
 
-            // 转换格式并过滤已存在的单词
-            const existingWords = new Set(vocabLibrary.map(w => w.word.toLowerCase()));
-            let importedCount = 0;
-            let skippedCount = 0;  // 新增：记录跳过的单词数
-
-            data.forEach(item => {
-                const wordLower = item.word.toLowerCase();
-                if (!existingWords.has(wordLower)) {
-                    // 获取第一个释义
-                    const translation = item.translations && item.translations.length > 0
-                        ? item.translations[0].translation
-                        : '';
-
-                    // 获取词性
-                    const wordType = item.translations && item.translations.length > 0
-                        ? item.translations[0].type
-                        : '';
-
-                    // 组合释义和词性
-                    const meaning = wordType ? `${translation} (${wordType})` : translation;
-
-                    // 获取音标（优先使用美式音标，其次是英式，最后使用phonetic字段）
-                    const phonetic = item.phonetic || item.ph_am || item.ph_en || '';
-
-                    vocabLibrary.push({
-                        word: item.word,
-                        phonetic: phonetic,
-                        meaning: meaning,
-                        libraryKey: libraryKey  // 记录单词来自哪个词库
-                    });
-
-                    existingWords.add(wordLower);
-                    importedCount++;
-                } else {
-                    skippedCount++;  // 单词已存在，跳过
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
                 }
-            });
 
-            totalImported += importedCount;
-            totalSkipped += skippedCount;
-            console.log(`${library.name}: 总共${data.length}个单词，已存在${skippedCount}个，新导入${importedCount}个`);
+                const data = await response.json();
+                console.log(`${library.name}获取到${data.length}个单词`);
 
-            // 记录结果
-            importResults.push({
-                name: library.name,
-                total: data.length,
-                imported: importedCount,
-                skipped: skippedCount
-            });
+                // 转换格式并过滤已存在的单词
+                const existingWords = new Set(vocabLibrary.map(w => w.word.toLowerCase()));
+                let importedCount = 0;
+                let skippedCount = 0;  // 新增：记录跳过的单词数
 
-            // 记录已导入的词库
-            if (!importedLibraries.includes(libraryKey)) {
-                importedLibraries.push(libraryKey);
+                data.forEach(item => {
+                    const wordLower = item.word.toLowerCase();
+                    if (!existingWords.has(wordLower)) {
+                        // 获取第一个释义
+                        const translation = item.translations && item.translations.length > 0
+                            ? item.translations[0].translation
+                            : '';
+
+                        // 获取词性
+                        const wordType = item.translations && item.translations.length > 0
+                            ? item.translations[0].type
+                            : '';
+
+                        // 组合释义和词性
+                        const meaning = wordType ? `${translation} (${wordType})` : translation;
+
+                        // 获取音标（优先使用美式音标，其次是英式，最后使用phonetic字段）
+                        const phonetic = item.phonetic || item.ph_am || item.ph_en || '';
+
+                        vocabLibrary.push({
+                            word: item.word,
+                            phonetic: phonetic,
+                            meaning: meaning,
+                            libraryKey: libraryKey  // 记录单词来自哪个词库
+                        });
+
+                        existingWords.add(wordLower);
+                        importedCount++;
+                    } else {
+                        skippedCount++;  // 单词已存在，跳过
+                    }
+                });
+
+                totalImported += importedCount;
+                totalSkipped += skippedCount;
+                console.log(`${library.name}: 总共${data.length}个单词，已存在${skippedCount}个，新导入${importedCount}个`);
+
+                // 记录结果
+                importResults.push({
+                    name: library.name,
+                    total: data.length,
+                    imported: importedCount,
+                    skipped: skippedCount
+                });
+
+                // 记录已导入的词库
+                if (!importedLibraries.includes(libraryKey)) {
+                    importedLibraries.push(libraryKey);
+                }
+
+            } catch (error) {
+                if (error.name === 'AbortError') {
+                    console.error(`导入${library.name}超时`);
+                    showToast(`导入${library.name}超时，请稍后重试`);
+                } else {
+                    console.error(`导入${library.name}失败:`, error);
+                    showToast(`导入${library.name}失败: ${error.message}`);
+                }
             }
-
-        } catch (error) {
-            console.error(`导入${library.name}失败:`, error);
-            showToast(`导入${library.name}失败，请检查网络连接`);
         }
+
+        console.log(`导入完成: 总共导入${totalImported}个新单词，跳过${totalSkipped}个已存在单词`);
+
+        // 保存词库到本地存储
+        localStorage.setItem('vocabLibrary', JSON.stringify(vocabLibrary));
+
+        // 保存已导入的词库列表
+        saveImportedLibraries(importedLibraries);
+
+        // 隐藏loading
+        hideLoading();
+
+        // 显示详细的导入结果
+        let resultMessage = `成功导入 ${totalImported} 个新单词`;
+        if (totalSkipped > 0) {
+            resultMessage += `（跳过 ${totalSkipped} 个已存在单词）`;
+        }
+        showToast(resultMessage);
+        console.log('导入完成，显示成功提示');
+
+        closeVocabImportModal();
+
+        // 刷新今日单词
+        refreshWord().catch(err => {
+            console.error('刷新单词失败:', err);
+        });
+
+    } catch (error) {
+        console.error('导入过程发生错误:', error);
+        hideLoading();
+        showToast('导入失败，请重试');
     }
-
-    console.log(`导入完成: 总共导入${totalImported}个新单词，跳过${totalSkipped}个已存在单词`);
-
-    // 保存词库到本地存储
-    localStorage.setItem('vocabLibrary', JSON.stringify(vocabLibrary));
-
-    // 保存已导入的词库列表
-    saveImportedLibraries(importedLibraries);
-
-    // 显示详细的导入结果
-    let resultMessage = `成功导入 ${totalImported} 个新单词`;
-    if (totalSkipped > 0) {
-        resultMessage += `（跳过 ${totalSkipped} 个已存在单词）`;
-    }
-    showToast(resultMessage);
-    console.log('导入完成，显示成功提示');
-
-    closeVocabImportModal();
-
-    // 刷新今日单词
-    refreshWord();
 }
 
 async function importVocabLibrary(libraryKey) {
