@@ -1317,19 +1317,27 @@ async function importSelectedVocabLibraries() {
     const importResults = [];  // 记录每个词库的导入结果
 
     try {
+        let libraryIndex = 0;
         for (const card of selectedCards) {
             const libraryKey = card.dataset.library;
             const library = VOCAB_LIBRARIES[libraryKey];
 
             if (!library) continue;
 
+            libraryIndex++;
             console.log(`开始导入${library.name}...`);
-            showToast(`正在导入${library.name}...`);
+
+            // 显示当前进度
+            showLoading(
+                `正在导入"${library.name}"...\n` +
+                `词库进度: ${libraryIndex}/${selectedCards.length}`
+            );
+            showToast(`正在导入${library.name} (${libraryIndex}/${selectedCards.length})...`);
 
             try {
-                // 添加超时控制
+                // 添加超时控制（60秒超时，处理大词库需要更长时间）
                 const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 30000); // 30秒超时
+                const timeoutId = setTimeout(() => controller.abort(), 60000);
 
                 const response = await fetch(library.url, {
                     signal: controller.signal
@@ -1343,12 +1351,19 @@ async function importSelectedVocabLibraries() {
                 const data = await response.json();
                 console.log(`${library.name}获取到${data.length}个单词`);
 
+                // 更新loading提示
+                showLoading(`正在导入"${library.name}"...\n获取到 ${data.length} 个单词`);
+
                 // 转换格式并过滤已存在的单词
                 const existingWords = new Set(vocabLibrary.map(w => w.word.toLowerCase()));
                 let importedCount = 0;
                 let skippedCount = 0;  // 新增：记录跳过的单词数
 
-                data.forEach(item => {
+                // 每处理500个单词更新一次进度
+                const updateInterval = 500;
+                let lastUpdate = 0;
+
+                data.forEach((item, index) => {
                     const wordLower = item.word.toLowerCase();
                     if (!existingWords.has(wordLower)) {
                         // 获取第一个释义
@@ -1378,6 +1393,18 @@ async function importSelectedVocabLibraries() {
                         importedCount++;
                     } else {
                         skippedCount++;  // 单词已存在，跳过
+                    }
+
+                    // 定期更新进度
+                    if (index - lastUpdate >= updateInterval || index === data.length - 1) {
+                        const processed = index + 1;
+                        const progress = Math.round((processed / data.length) * 100);
+                        showLoading(
+                            `正在导入"${library.name}"...\n` +
+                            `处理进度: ${processed}/${data.length} (${progress}%)\n` +
+                            `新导入: ${importedCount} | 跳过: ${skippedCount}`
+                        );
+                        lastUpdate = index;
                     }
                 });
 

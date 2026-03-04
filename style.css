@@ -1969,6 +1969,9 @@ input:checked + .mood-icon-wrapper {
     font-size: 15px;
     color: var(--text-color);
     font-weight: 500;
+    white-space: pre-line;  /* 支持\n换行 */
+    text-align: center;
+    line-height: 1.6;
 }
 
 @keyframes fadeIn {
