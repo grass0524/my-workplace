@@ -1405,13 +1405,22 @@ input:checked + .mood-icon-wrapper {
 .modal-confirm .modal-body {
     padding: 20px 24px !important;
     text-align: center;
+    min-height: auto !important;
 }
 
 .modal-confirm .modal-body p {
-    color: var(--text-color);
-    font-size: 15px;
-    line-height: 1.6;
-    margin: 0;
+    color: #a3b1c6 !important;
+    font-size: 15px !important;
+    line-height: 1.6 !important;
+    margin: 0 !important;
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+#confirm-message {
+    color: #a3b1c6 !important;
+    font-size: 15px !important;
 }
 
 .modal-confirm .modal-footer {
