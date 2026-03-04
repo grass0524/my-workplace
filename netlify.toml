@@ -1,5 +1,5 @@
 [build]
-  image = "ubuntu-jammy:2024-05-30"
+  publish = "."
 
 [[redirects]]
   from = "/*"
