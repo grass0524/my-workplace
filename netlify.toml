@@ -1,3 +1,6 @@
+[build]
+  image = "ubuntu-jammy:2024-05-30"
+
 [[redirects]]
   from = "/*"
   to = "/index.html"
