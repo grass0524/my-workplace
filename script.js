@@ -1119,6 +1119,7 @@ function showVocabImportModal() {
     vocabLibrary.forEach(word => {
         if (word.libraryKey) {
             importedLibraryKeys.add(word.libraryKey);
+            console.log(`找到单词: ${word.word}, 来自词库: ${word.libraryKey}`);
         }
     });
 
@@ -1144,37 +1145,45 @@ function closeVocabImportModal() {
 let pendingConfirmAction = null;
 
 function showConfirmModal(title, message, onConfirm) {
-    console.log('显示确认弹窗，标题:', title, '消息:', message);
+    console.log('=== 显示确认弹窗 ===');
+    console.log('标题参数:', title);
+    console.log('消息参数:', message);
+
     const modal = document.getElementById('confirm-modal');
     const titleEl = document.getElementById('confirm-title');
     const messageEl = document.getElementById('confirm-message');
 
     console.log('Modal元素:', modal);
-    console.log('Title元素:', titleEl);
+    console.log('Title元素:', titleEl, '初始内容:', titleEl ? titleEl.textContent : 'N/A');
     console.log('Message元素:', messageEl);
 
+    // 设置标题
     if (titleEl) {
         titleEl.textContent = title;
-        console.log('标题已设置:', titleEl.textContent);
+        console.log('✓ 标题已设置为:', titleEl.textContent);
     } else {
-        console.error('找不到confirm-title元素');
+        console.error('✗ 找不到confirm-title元素');
     }
 
+    // 设置消息
     if (messageEl) {
         messageEl.innerHTML = message;
-        console.log('消息已设置，当前内容:', messageEl.innerHTML);
+        console.log('✓ 消息已设置为:', messageEl.innerHTML);
     } else {
-        console.error('找不到confirm-message元素');
+        console.error('✗ 找不到confirm-message元素');
     }
 
     pendingConfirmAction = onConfirm;
 
+    // 显示弹窗
     if (modal) {
         modal.classList.remove('hidden');
-        console.log('弹窗已显示');
+        console.log('✓ 弹窗已显示');
     } else {
-        console.error('找不到confirm-modal元素');
+        console.error('✗ 找不到confirm-modal元素');
     }
+
+    console.log('=== 确认弹窗设置完成 ===');
 }
 
 function closeConfirmModal(confirmed) {
@@ -1214,19 +1223,29 @@ function toggleVocabLibrary(card) {
     const library = VOCAB_LIBRARIES[libraryKey];
     const wasSelected = card.classList.contains('selected');
 
-    // 如果是从选中变为未选中，显示确认弹窗
+    // 检查该词库是否真的已经导入（vocabLibrary中有该词库的单词）
+    const isImported = vocabLibrary.some(word => word.libraryKey === libraryKey);
+    console.log(`词库${libraryKey}: wasSelected=${wasSelected}, isImported=${isImported}`);
+
+    // 如果是从选中变为未选中
     if (wasSelected) {
         if (library) {
-            showConfirmModal(
-                '移除词库',
-                `确认移除"${library.name}"吗？`,
-                () => {
-                    // 用户确认，执行移除
-                    console.log('用户确认移除:', libraryKey);
-                    card.classList.remove('selected');
-                    removeLibraryWords(libraryKey);
-                }
-            );
+            // 如果词库已经导入，需要确认移除
+            if (isImported) {
+                showConfirmModal(
+                    '移除词库',
+                    `确认移除"${library.name}"吗？`,
+                    () => {
+                        // 用户确认，执行移除
+                        console.log('用户确认移除已导入的词库:', libraryKey);
+                        removeLibraryWords(libraryKey);
+                    }
+                );
+            } else {
+                // 词库还没导入，只是取消选择，不需要移除
+                console.log('词库尚未导入，仅取消选择');
+                card.classList.remove('selected');
+            }
         }
     } else {
         // 从未选中变为选中，直接添加选中状态
