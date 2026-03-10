@@ -3,7 +3,7 @@
 const JUHE_API_KEY = '03d1da64823d24414d7b6bab4b8390a2'; // 聚合数据API密钥
 const JUHE_BASE_URL = 'http://v.juhe.cn/toutiao';
 
-const CORS_PROXY = 'https://corsproxy.io/?';
+const CORS_PROXY = 'https://api.codetabs.com/v1/proxy?quest=';
 
 // 新闻类型映射（前端分类 → 聚合数据API type参数）
 const NEWS_TYPE_MAP = {
