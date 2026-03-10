@@ -1,14 +1,26 @@
 // 1. 初始化
+// TianAPI配置（需要注册获取：https://www.tianapi.com/）
+const TIANAPI_KEY = 'e2a78b6891a96a3fdfeffe9f5274a6bd'; // 请在 https://www.tianapi.com/ 注册后获取API Key
+const TIANAPI_BASE_URL = 'https://apis.tianapi.com';
+
+
+// 自动清除旧版本新闻缓存
+if (localStorage.getItem('newsData') && !JSON.parse(localStorage.getItem('newsData')).version) {
+    localStorage.removeItem('newsData');
+    console.log('已清除旧版本新闻缓存');
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
     initDate();
     initHealth();
     initTodos();
     initHoliday();
-    await initWord();
     initMood();
     initQuote();
+    initAccounting();
+    await initNews();
+    await initWord();
 });
-
 function initDate() {
     const options = { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' };
     document.getElementById('current-date').textContent = new Date().toLocaleDateString('zh-CN', options);
@@ -2154,3 +2166,1601 @@ function importData(event) {
     // Reset input
     event.target.value = '';
 }
+
+// ==================== 记账功能 ====================
+
+// 记账数据存储
+let accountingData = {
+    records: []
+};
+
+// 分类关键词映射（智能归类）
+const categoryKeywords = {
+    '餐饮': ['午餐', '晚餐', '早餐', '奶茶', '咖啡', '外卖', '聚餐', '吃饭', '餐厅', '食堂', '小吃', '零食', '饮料'],
+    '交通': ['打车', '滴滴', '地铁', '公交', '油费', '停车', '高速', '出租车', '单车', '共享'],
+    '购物': ['买菜', '衣服', '淘宝', '京东', '拼多多', '日用品', '超市', '商场', '网购', '快递'],
+    '娱乐': ['电影', '游戏', 'KTV', '健身', '运动', '旅游', '票', '演出', '音乐', '视频'],
+    '居住': ['房租', '水电', '物业', '燃气', '宽带', '话费', '网费', '维修', '装修'],
+    '医疗': ['药', '医院', '看病', '体检', '疫苗', '药店'],
+    '教育': ['书', '课程', '培训', '学费', '学习'],
+    '工资': ['工资', '薪水', '奖金', '提成', '兼职'],
+    '理财': ['理财', '基金', '股票', '收益', '利息']
+};
+
+// 收入分类
+const incomeCategories = ['工资', '理财', '其他收入'];
+
+// 支出分类
+const expenseCategories = ['餐饮', '交通', '购物', '娱乐', '居住', '医疗', '教育', '其他'];
+
+// 当前选中的记账类型和分类
+let currentAccountingType = 'expense';
+
+// 分类图标映射
+const categoryIcons = {
+    '餐饮': 'utensils', '交通': 'car', '购物': 'shopping-bag', '娱乐': 'gamepad-2',
+    '居住': 'home', '医疗': 'heart-pulse', '教育': 'book-open', '其他': 'more-horizontal',
+    '工资': 'briefcase', '理财': 'trending-up', '其他收入': 'plus-circle'
+};
+
+let currentAccountingCategory = null;
+
+// 初始化记账功能
+function initAccounting() {
+    loadAccountingData();
+    updateAccountingSummary();
+    renderRecentRecords();
+    // 初始化分类按钮
+    renderAccountingCategories('expense');
+}
+
+// 加载记账数据
+function loadAccountingData() {
+    const saved = localStorage.getItem('accountingData');
+    if (saved) {
+        accountingData = JSON.parse(saved);
+    }
+}
+
+// 保存记账数据
+function saveAccountingData() {
+    localStorage.setItem('accountingData', JSON.stringify(accountingData));
+}
+
+// 智能解析用户输入
+function parseAccountingInput(input) {
+    const trimmed = input.trim();
+    
+    // 提取金额（支持多种格式：35元、¥35、35）
+    const amountMatch = trimmed.match(/(\d+(?:\.\d+)?)/);
+    if (!amountMatch) {
+        return null;
+    }
+    const amount = parseFloat(amountMatch[1]);
+    
+    // 判断是收入还是支出
+    let type = 'expense'; // 默认为支出
+    if (trimmed.includes('收入') || trimmed.includes('工资') || trimmed.includes('奖金') || 
+        trimmed.includes('理财') || trimmed.includes('兼职') || trimmed.includes('收益')) {
+        type = 'income';
+    }
+    
+    // 智能识别分类
+    let category = '其他';
+    if (type === 'income') {
+        for (const cat of incomeCategories) {
+            if (trimmed.includes(cat)) {
+                category = cat;
+                break;
+            }
+        }
+    } else {
+        for (const [cat, keywords] of Object.entries(categoryKeywords)) {
+            if (keywords.some(kw => trimmed.includes(kw))) {
+                category = cat;
+                break;
+            }
+        }
+    }
+    
+    // 提取备注（去掉金额和分类关键词）
+    let note = trimmed
+        .replace(amountMatch[0], '')
+        .replace(/[元¥收入支出工资奖金理财兼职]/g, '')
+        .trim();
+    
+    return {
+        type,
+        category,
+        amount,
+        note: note || category,
+        date: new Date().toISOString(),
+        id: Date.now()
+    };
+}
+
+// 处理快速智能输入
+function handleAccountingInput(event) {
+    if (event.key === 'Enter') {
+        addAccounting();
+    }
+}
+
+// 添加记账（带确认弹窗）
+let pendingAccounting = null;
+
+function addAccounting() {
+    const input = document.getElementById('accounting-input');
+    const value = input.value.trim();
+    
+    if (!value) {
+        showToast('请输入记账内容');
+        return;
+    }
+    
+    const parsed = parseAccountingInput(value);
+    if (!parsed) {
+        showToast('无法识别金额，请重新输入');
+        return;
+    }
+    
+    pendingAccounting = parsed;
+    showAccountingConfirmModal(parsed);
+    input.value = '';
+}
+
+// 显示记账确认弹窗
+function showAccountingConfirmModal(data) {
+    const modal = document.getElementById('accounting-confirm-modal');
+    const typeSelect = document.getElementById('confirm-type');
+    const categorySelect = document.getElementById('confirm-category');
+    const amountInput = document.getElementById('confirm-amount');
+    const noteInput = document.getElementById('confirm-note');
+    
+    // 填充数据
+    typeSelect.value = data.type;
+    amountInput.value = data.amount;
+    noteInput.value = data.note;
+    
+    // 根据类型填充分类选项
+    updateCategoryOptions(data.type, data.category);
+    
+    // 监听类型变化
+    typeSelect.onchange = () => {
+        updateCategoryOptions(typeSelect.value, categorySelect.value);
+    };
+    
+    modal.classList.remove('hidden');
+}
+
+// 更新分类选项
+function updateCategoryOptions(type, selectedCategory) {
+    const categorySelect = document.getElementById('confirm-category');
+    const categories = type === 'income' ? incomeCategories : expenseCategories;
+    
+    categorySelect.innerHTML = categories.map(cat => 
+        '<option value="' + cat + '" ' + (cat === selectedCategory ? 'selected' : '') + '>' + cat + '</option>'
+    ).join('');
+}
+
+// 关闭确认弹窗
+function closeAccountingConfirmModal() {
+    document.getElementById('accounting-confirm-modal').classList.add('hidden');
+    pendingAccounting = null;
+}
+
+// 确认保存记账
+function saveAccountingConfirm() {
+    if (!pendingAccounting) return;
+    
+    const type = document.getElementById('confirm-type').value;
+    const category = document.getElementById('confirm-category').value;
+    const amount = parseFloat(document.getElementById('confirm-amount').value);
+    const note = document.getElementById('confirm-note').value;
+    
+    if (amount <= 0) {
+        showToast('金额必须大于0');
+        return;
+    }
+    
+    const record = {
+        ...pendingAccounting,
+        type,
+        category,
+        amount,
+        note,
+        id: Date.now()
+    };
+    
+    accountingData.records.unshift(record);
+    saveAccountingData();
+    updateAccountingSummary();
+    renderRecentRecords();
+    
+    closeAccountingConfirmModal();
+    showToast('记账成功！');
+}
+
+// 选择记账类型
+function selectAccountingType(type) {
+    currentAccountingType = type;
+    currentAccountingCategory = null;
+    
+    // 更新按钮状态
+    document.querySelectorAll('.type-toggle-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.type === type);
+    });
+
+    // 切换收入模式类到容器
+    const accountingContainer = document.querySelector('.accounting-top-container');
+    if (accountingContainer) {
+        if (type === 'income') {
+            accountingContainer.classList.add('income-mode');
+        } else {
+            accountingContainer.classList.remove('income-mode');
+        }
+    }    
+    // 渲染分类按钮
+    renderAccountingCategories(type);
+    
+    // 重置输入框
+    const detailInput = document.getElementById('accounting-amount-input');
+    detailInput.placeholder = '选择分类后输入金额';
+    detailInput.value = '';
+    document.getElementById('accounting-note-input').value = '';
+}
+
+// 渲染分类按钮
+function renderAccountingCategories(type) {
+    const container = document.getElementById('accounting-categories');
+    const categories = type === 'income' ? incomeCategories : expenseCategories;
+    
+    container.innerHTML = categories.map(cat => 
+        '<button class="category-item' + (currentAccountingCategory === cat ? ' active' : '') + '" ' +
+        'onclick="selectAccountingCategory(\'' + cat + '\')">' +
+        '<i data-lucide="' + (categoryIcons[cat] || 'circle') + '"></i>' +
+        '<span>' + cat + '</span>' +
+        '</button>'
+    ).join('');
+    
+    if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
+    }
+}
+function selectAccountingCategory(category) {
+    currentAccountingCategory = category;
+    
+    // 更新按钮状态
+    document.querySelectorAll('.category-item').forEach(btn => {
+        btn.classList.toggle('active', btn.textContent === category);
+    });
+    
+    // 更新输入框提示
+    const placeholder = currentAccountingType === 'income' ? '输入收入金额' : '输入' + category + '金额';
+    const detailInput = document.getElementById('accounting-amount-input');
+    detailInput.placeholder = placeholder;
+    detailInput.focus();
+}
+
+// 处理明细输入回车
+function handleAccountingDetailInput(event) {
+    if (event.key === 'Enter') {
+        addAccountingRecord();
+    }
+}
+
+// 添加记账记录
+function addAccountingRecord() {
+    if (!currentAccountingCategory) {
+        showToast('请先选择分类');
+        return;
+    }
+    
+    const amountInput = document.getElementById('accounting-amount-input');
+    const noteInput = document.getElementById('accounting-note-input');
+    
+    const amountStr = amountInput.value.trim();
+    if (!amountStr) {
+        showToast('请输入金额');
+        return;
+    }
+    
+    const amount = parseFloat(amountStr);
+    if (isNaN(amount) || amount <= 0) {
+        showToast('请输入有效的金额');
+        return;
+    }
+    
+    const note = noteInput.value.trim() || currentAccountingCategory;
+    
+    const record = {
+        type: currentAccountingType,
+        category: currentAccountingCategory,
+        amount: amount,
+        note: note,
+        date: new Date().toISOString(),
+        id: Date.now()
+    };
+    
+    accountingData.records.unshift(record);
+    saveAccountingData();
+    updateAccountingSummary();
+    renderRecentRecords();
+    
+    // 重置输入
+    amountInput.value = '';
+    noteInput.value = '';
+    currentAccountingCategory = null;
+    renderAccountingCategories(currentAccountingType);
+    amountInput.placeholder = '选择分类后输入金额';
+    
+    showToast('记账成功！');
+}
+
+// 更新今日收支概览
+function updateAccountingSummary() {
+    const today = new Date().toDateString();
+    const todayRecords = accountingData.records.filter(r => 
+        new Date(r.date).toDateString() === today
+    );
+    
+    const todayExpense = todayRecords
+        .filter(r => r.type === 'expense')
+        .reduce((sum, r) => sum + r.amount, 0);
+    
+    const todayExpenseEl = document.getElementById('today-expense-inline');
+    if (todayExpenseEl) {
+        todayExpenseEl.textContent = '¥' + todayExpense.toFixed(2);
+    }
+}
+function renderRecentRecords() {
+    const container = document.getElementById('accounting-records-list');
+    const recentRecords = accountingData.records.slice(0, 5);
+    
+    if (recentRecords.length === 0) {
+        container.innerHTML = '<p style="text-align: center; color: var(--text-light); padding: 20px;">暂无记账记录</p>';
+        return;
+    }
+    
+    container.innerHTML = recentRecords.map(record => {
+        const recordDate = new Date(record.date);
+        const timeStr = recordDate.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
+        const dateStr = recordDate.toLocaleDateString('zh-CN', { month: 'short', day: 'numeric' });
+        const categoryIcon = categoryIcons[record.category] || 'circle';
+        
+        return '<div class="accounting-record ' + record.type + '">' +
+            '<div class="accounting-record-left">' +
+            '<div class="accounting-record-icon-wrapper">' +
+            '<i data-lucide="' + categoryIcon + '"></i>' +
+            '</div>' +
+            '<div class="accounting-record-content">' +
+            '<div class="accounting-record-category">' + record.category + '</div>' +
+            '<div class="accounting-record-note">' + record.note + '</div>' +
+            '</div>' +
+            '</div>' +
+            '<div class="accounting-record-right">' +
+            '<div class="accounting-record-amount-time">' +
+            '<span class="accounting-record-amount ' + record.type + '">' +
+            (record.type === 'income' ? '+' : '-') + '¥' + record.amount.toFixed(2) +
+            '</span>' +
+            '<div class="accounting-record-time">' + dateStr + ' ' + timeStr + '</div>' +
+            '</div>' +
+            '<button class="accounting-record-edit" onclick="editAccountingRecord(' + record.id + ')">' +
+            '<i class="fas fa-edit"></i>' +
+            '</button>' +
+            '<button class="accounting-record-delete" onclick="deleteAccountingRecord(' + record.id + ')">' +
+            '<i class="fas fa-trash"></i>' +
+            '</button>' +
+            '</div>' +
+            '</div>';
+    }).join('');
+    
+    if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
+    }
+}
+function deleteAccountingRecord(id) {
+    if (!confirm('确定要删除这条记录吗？')) {
+        return;
+    }
+    
+    // 从数据中删除
+    const index = accountingData.records.findIndex(r => r.id === id);
+    if (index !== -1) {
+        accountingData.records.splice(index, 1);
+        saveAccountingData();
+        
+        // 更新UI
+        updateAccountingSummary();
+        renderRecentRecords();
+        
+        showToast('删除成功！');
+    }
+}
+
+function editAccountingRecord(id) {
+    const record = accountingData.records.find(r => r.id === id);
+    if (!record) return;
+    
+    // 使用快速记账确认弹窗的结构
+    const modal = document.getElementById('quick-accounting-modal');
+    const timeInput = document.getElementById('qa-confirm-time');
+    const categorySelect = document.getElementById('qa-confirm-category');
+    const detailInput = document.getElementById('qa-confirm-detail');
+    const amountInput = document.getElementById('qa-confirm-amount');
+    
+    // 设置为编辑模式
+    window.editingAccountId = id;
+    
+    // 填充数据
+    const recordDate = new Date(record.date);
+    const year = recordDate.getFullYear();
+    const month = String(recordDate.getMonth() + 1).padStart(2, '0');
+    const day = String(recordDate.getDate()).padStart(2, '0');
+    const hours = String(recordDate.getHours()).padStart(2, '0');
+    const minutes = String(recordDate.getMinutes()).padStart(2, '0');
+    timeInput.value = `${year}-${month}-${day}T${hours}:${minutes}`;
+    
+    // 监听时间变化
+    timeInput.onchange = function() {
+        pendingQuickAccounting.customTime = this.value;
+    };
+    
+    // 设置分类选项
+    const categories = record.type === 'income' ? incomeCategories : expenseCategories;
+    categorySelect.innerHTML = categories.map(cat => 
+        `<option value="${cat}" ${cat === record.category ? 'selected' : ''}>${cat}</option>`
+    ).join('');
+    
+    // 监听分类变化
+    categorySelect.onchange = function() {
+        pendingQuickAccounting.category = this.value;
+    };
+    
+    // 设置类型按钮状态
+    const typeExpenseBtn = document.getElementById('qa-confirm-type-expense');
+    const typeIncomeBtn = document.getElementById('qa-confirm-type-income');
+    
+    if (record.type === 'expense') {
+        typeExpenseBtn.classList.add('active');
+        typeIncomeBtn.classList.remove('active');
+    } else {
+        typeIncomeBtn.classList.add('active');
+        typeExpenseBtn.classList.remove('active');
+    }
+    
+    // 设置明细和金额
+    detailInput.value = record.note;
+    amountInput.value = record.amount.toFixed(2);
+    
+    // 存储当前编辑状态
+    pendingQuickAccounting = {
+        type: record.type,
+        category: record.category,
+        detail: record.note,
+        amount: record.amount,
+        customTime: record.date
+    };
+    
+    // 修改标题为"编辑记账"
+    const titleElement = modal.querySelector('.modal-header h3');
+    if (titleElement) {
+        titleElement.textContent = '编辑记账';
+    }
+    
+    // 修改确认按钮文本
+    const confirmBtn = modal.querySelector('.btn-confirm');
+    if (confirmBtn) {
+        const btnSpan = confirmBtn.querySelector('span');
+        if (btnSpan) {
+            btnSpan.textContent = '保存修改';
+        }
+    }
+    
+    // 显示弹窗
+    modal.classList.remove('hidden');
+    modal.setAttribute('tabindex', '0');
+    modal.focus();
+    
+    // 添加键盘事件监听
+    modal.removeEventListener('keydown', handleEnterKeyForQuickAccounting);
+    modal.addEventListener('keydown', handleEnterKeyForQuickAccounting);
+    
+    // 初始化图标
+    if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
+    }
+}
+
+
+// 显示记账统计弹窗
+let currentStatsPeriod = 'day';
+
+function showAccountingStats() {
+    const modal = document.getElementById('accounting-modal');
+    modal.classList.remove('hidden');
+    switchAccountingPeriod('day');
+}
+
+// 关闭记账统计弹窗
+function closeAccountingModal() {
+    document.getElementById('accounting-modal').classList.add('hidden');
+}
+
+// 切换统计周期
+function switchAccountingPeriod(period) {
+    currentStatsPeriod = period;
+    
+    // 更新按钮状态
+    document.querySelectorAll('.stats-period-switch .btn-icon').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.period === period);
+    });
+    
+    // 渲染统计数据
+    renderAccountingStats(period);
+}
+
+// 渲染统计数据
+function renderAccountingStats(period) {
+    const now = new Date();
+    let startDate, endDate, title;
+    
+    switch (period) {
+        case 'day':
+            startDate = new Date(now.setHours(0, 0, 0, 0));
+            endDate = new Date(now.setHours(23, 59, 59, 999));
+            title = '今日';
+            break;
+        case 'month':
+            startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+            endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+            title = '本月';
+            break;
+        case 'year':
+            startDate = new Date(now.getFullYear(), 0, 1);
+            endDate = new Date(now.getFullYear(), 11, 31);
+            title = '本年';
+            break;
+    }
+    
+    const periodRecords = accountingData.records.filter(r => {
+        const recordDate = new Date(r.date);
+        return recordDate >= startDate && recordDate <= endDate;
+    });
+    
+    const totalIncome = periodRecords
+        .filter(r => r.type === 'income')
+        .reduce((sum, r) => sum + r.amount, 0);
+    
+    const totalExpense = periodRecords
+        .filter(r => r.type === 'expense')
+        .reduce((sum, r) => sum + r.amount, 0);
+    
+    const balance = totalIncome - totalExpense;
+    
+    // 渲染概览
+    document.getElementById('accounting-stats-overview').innerHTML = 
+        '<div class="accounting-stat-card total">' +
+        '<span class="label">收支结余</span>' +
+        '<span class="value">¥' + balance.toFixed(2) + '</span>' +
+        '</div>' +
+        '<div class="accounting-stat-card income">' +
+        '<span class="label">总收入</span>' +
+        '<span class="value">¥' + totalIncome.toFixed(2) + '</span>' +
+        '</div>' +
+        '<div class="accounting-stat-card expense">' +
+        '<span class="label">总支出</span>' +
+        '<span class="value">¥' + totalExpense.toFixed(2) + '</span>' +
+        '</div>';
+    
+    // 按分类统计
+    const categoryStats = {};
+    periodRecords.forEach(r => {
+        if (!categoryStats[r.category]) {
+            categoryStats[r.category] = { type: r.type, amount: 0, records: [] };
+        }
+        categoryStats[r.category].amount += r.amount;
+        categoryStats[r.category].records.push(r);
+    });
+    
+    // 渲染分类详情
+    const sortedCategories = Object.entries(categoryStats)
+        .sort((a, b) => b[1].amount - a[1].amount);
+    
+    if (sortedCategories.length === 0) {
+        document.getElementById('accounting-stats-detail').innerHTML = 
+            '<p style="text-align: center; color: var(--text-light); padding: 40px;">暂无记录</p>';
+    } else {
+        document.getElementById('accounting-stats-detail').innerHTML = sortedCategories.map(([cat, data]) => 
+            '<div class="accounting-stats-category">' +
+            '<div class="accounting-stats-category-header">' +
+            '<span class="accounting-stats-category-name">' + cat + '</span>' +
+            '<span class="accounting-stats-category-amount ' + data.type + '">' +
+            (data.type === 'income' ? '+' : '-') + '¥' + data.amount.toFixed(2) +
+            '</span>' +
+            '</div>' +
+            '<div class="accounting-stats-category-records">' +
+            data.records.slice(0, 3).map(r => 
+                '<div style="display: flex; justify-content: space-between; font-size: 13px; color: var(--text-light); padding: 8px 0;">' +
+                '<span>' + r.note + '</span>' +
+                '<span>' + new Date(r.date).toLocaleDateString('zh-CN') + '</span>' +
+                '</div>'
+            ).join('') +
+            '</div>' +
+            '</div>'
+        ).join('');
+    }
+}
+
+
+// ==================== 热点新闻功能 ====================
+
+// 新闻数据存储
+let newsData = {
+    tech: [],
+    finance: [],
+    general: [],
+    lastFetch: null
+};
+
+// 新闻缓存过期时间（1小时）
+const NEWS_CACHE_DURATION = 60 * 60 * 1000;
+
+// 当前选中的新闻分类
+let currentNewsCategory = 'tech';
+
+// 初始化新闻功能
+async function initNews() {
+    await loadNewsData();
+    await fetchAndRenderNews();
+}
+
+// 加载新闻数据（从缓存）
+async function loadNewsData() {
+    const saved = localStorage.getItem('newsData');
+    if (saved) {
+        try {
+            const parsed = JSON.parse(saved);
+            // 检查缓存版本，清除旧版本缓存
+            if (!parsed.version || parsed.version < 2) {
+                console.log('检测到旧版本新闻缓存，已清除');
+                localStorage.removeItem('newsData');
+                return false;
+            }
+            newsData = parsed;
+            // 检查缓存是否过期
+            if (newsData.lastFetch) {
+                const age = Date.now() - new Date(newsData.lastFetch).getTime();
+                if (age < NEWS_CACHE_DURATION) {
+                    // 缓存未过期，直接使用
+                    return true;
+                }
+            }
+        } catch (error) {
+            console.error('加载新闻缓存失败:', error);
+        }
+    }
+    return false;
+}
+
+// 保存新闻数据到缓存
+function saveNewsData() {
+    newsData.lastFetch = new Date().toISOString();
+    newsData.version = 2; // 设置缓存版本
+    localStorage.setItem('newsData', JSON.stringify(newsData));
+}
+
+// 获取并渲染新闻
+async function fetchAndRenderNews() {
+    const loadingEl = document.getElementById('news-loading');
+    const contentEl = document.getElementById('news-content');
+    
+    try {
+        // 显示加载状态
+        loadingEl.classList.remove('hidden');
+        contentEl.classList.add('hidden');
+        
+        // 尝试从缓存加载
+        const hasCache = await loadNewsData();
+        if (hasCache && newsData.tech.length > 0) {
+            renderCurrentNewsList();
+            loadingEl.classList.add('hidden');
+            contentEl.classList.remove('hidden');
+            return;
+        }
+        
+        // 获取最新新闻
+        await fetchAllNews();
+        renderCurrentNewsList();
+        saveNewsData();
+        
+        loadingEl.classList.add('hidden');
+        contentEl.classList.remove('hidden');
+        
+    } catch (error) {
+        console.error('获取新闻失败:', error);
+        loadingEl.innerHTML = '<i class="fas fa-exclamation-circle"></i> 加载失败，点击刷新重试';
+        loadingEl.onclick = refreshNews;
+        loadingEl.style.cursor = 'pointer';
+    }
+}
+
+// 获取所有新闻
+async function fetchAllNews() {
+    // 如果没有配置API Key，使用模拟数据
+    if (!TIANAPI_KEY) {
+        console.warn('未配置TianAPI Key，使用模拟数据。请在 https://www.tianapi.com/ 注册获取');
+        newsData.tech = generateMockNews('tech', 8);
+        newsData.finance = generateMockNews('finance', 8);
+        newsData.general = generateMockNews('general', 8);
+        return;
+    }
+
+    try {
+        // 并行请求三个分类的新闻
+        const [techRes, financeRes, generalRes] = await Promise.all([
+            fetch(`${TIANAPI_BASE_URL}/technews/index?key=${TIANAPI_KEY}&num=8`),
+            fetch(`${TIANAPI_BASE_URL}/caijing/index?key=${TIANAPI_KEY}&num=8`),
+            fetch(`${TIANAPI_BASE_URL}/generalnews/index?key=${TIANAPI_KEY}&num=8`)
+        ]);
+
+        const [techData, financeData, generalData] = await Promise.all([
+            techRes.json(),
+            financeRes.json(),
+            generalRes.json()
+        ]);
+
+        // 检查响应状态
+        if (techData.code === 200 && techData.result) {
+            newsData.tech = techData.result.newslist.map(item => ({
+                title: item.title,
+                source: item.source,
+                time: formatNewsTime(item.ctime),
+                date: item.ctime
+            }));
+        }
+
+        if (financeData.code === 200 && financeData.result) {
+            newsData.finance = financeData.result.newslist.map(item => ({
+                title: item.title,
+                source: item.source,
+                time: formatNewsTime(item.ctime),
+                date: item.ctime
+            }));
+        }
+
+        if (generalData.code === 200 && generalData.result) {
+            newsData.general = generalData.result.newslist.map(item => ({
+                title: item.title,
+                source: item.source,
+                time: formatNewsTime(item.ctime),
+                date: item.ctime
+            }));
+        }
+
+        console.log('新闻数据获取成功');
+    } catch (error) {
+        console.error('获取新闻失败，使用模拟数据:', error);
+        // 失败时使用模拟数据
+        newsData.tech = generateMockNews('tech', 8);
+        newsData.finance = generateMockNews('finance', 8);
+        newsData.general = generateMockNews('general', 8);
+    }
+}
+
+// 格式化新闻时间
+function formatNewsTime(timestamp) {
+    const now = new Date();
+    const newsTime = new Date(timestamp);
+    const diff = Math.floor((now - newsTime) / 1000 / 60); // 分钟
+    
+    if (diff < 60) return `${diff}分钟前`;
+    if (diff < 1440) return `${Math.floor(diff / 60)}小时前`;
+    return `${Math.floor(diff / 1440)}天前`;
+}
+
+// 生成模拟新闻数据
+function generateMockNews(category, count) {
+    const newsTemplates = {
+        tech: [
+            { title: 'AI技术新突破：大模型应用场景持续扩展', source: '科技日报' },
+            { title: '国产芯片获得重大进展，性能提升50%', source: '36氪' },
+            { title: '新能源汽车销量创新高，智能驾驶成新焦点', source: '第一财经' },
+            { title: '5G网络覆盖率突破90%，6G研发启动', source: '通信世界' },
+            { title: '云计算市场规模持续扩大，企业数字化转型加速', source: 'TechWeb' },
+            { title: '量子计算实验取得重大突破，计算速度提升千倍', source: '量子科技' },
+            { title: '元宇宙概念持续升温，虚拟现实应用加速落地', source: 'VR产业网' },
+            { title: '区块链技术在金融领域应用加速，数字货币监管完善', source: '区块链日报' }
+        ],
+        finance: [
+            { title: '央行降准释放流动性，市场反应积极', source: '财联社' },
+            { title: 'A股三大指数集体上涨，成交额破万亿', source: '东方财富' },
+            { title: '人民币汇率保持稳定，外汇储备充足', source: '新浪财经' },
+            { title: '房地产市场迎来政策利好，多地出台新措施', source: '证券时报' },
+            { title: '数字人民币试点扩容，应用场景不断丰富', source: '金融界' },
+            { title: '债券市场持续活跃，绿色债券发行量创新高', source: '中国证券报' },
+            { title: '保险行业数字化转型加快，智能投保成趋势', source: '保观' },
+            { title: '私募基金规模持续增长，量化投资策略受追捧', source: '私募排排网' }
+        ],
+        general: [
+            { title: '全国两会召开，多项民生政策引关注', source: '人民日报' },
+            { title: '教育改革深化，职业教育迎来新发展', source: '新华网' },
+            { title: '医疗卫生体系建设提速，基层医疗服务改善', source: '健康报' },
+            { title: '生态文明建设取得新成效，绿色发展理念深入人心', source: '光明日报' },
+            { title: '文化事业繁荣发展，优秀作品不断涌现', source: '中国文化报' },
+            { title: '体育事业发展迅速，全民健身活动广泛开展', source: '体育总局' },
+            { title: '科技创新推动产业升级，新兴业态不断涌现', source: '经济日报' },
+            { title: '国际合作不断深化，共建一带一路倡议取得新进展', source: '新华社' }
+        ]
+    };
+    
+    const templates = newsTemplates[category] || newsTemplates.general;
+    const now = new Date();
+    
+    return templates.slice(0, count).map((item, index) => ({
+        title: item.title,
+        source: item.source,
+        time: Math.floor(index / 2) + '小时前',
+        date: new Date(now.getTime() - index * 30 * 60 * 1000).toISOString()
+    }));
+}
+
+// 切换新闻分类
+function switchNewsCategory(category) {
+    currentNewsCategory = category;
+    
+    // 更新标签状态
+    document.querySelectorAll('.news-tab').forEach(tab => {
+        tab.classList.toggle('active', tab.dataset.category === category);
+    });
+    
+    // 重新渲染新闻列表
+    renderCurrentNewsList();
+}
+
+// 渲染当前选中分类的新闻列表
+function renderCurrentNewsList() {
+    const container = document.getElementById('news-list');
+    const newsList = newsData[currentNewsCategory] || [];
+    
+    if (!newsList || newsList.length === 0) {
+        container.innerHTML = '<li style="text-align: center; color: var(--text-light); padding: 20px;">暂无新闻</li>';
+        return;
+    }
+    
+    container.innerHTML = newsList.slice(0, 8).map(item => 
+        '<li class="news-item" onclick="openNewsLink(\'' + item.title + '\')">' +
+        '<div class="news-item-title">' + item.title + '</div>' +
+        '<div class="news-item-meta">' +
+        '<span class="news-item-source">' + item.source + '</span>' +
+        '<span class="news-item-time">' + item.time + '</span>' +
+        '</div>' +
+        '</li>'
+    ).join('');
+}
+
+// 打开新闻链接（在新标签页）
+function openNewsLink(title) {
+    // 由于是模拟数据，这里跳转到搜索页面
+    const searchUrl = 'https://www.baidu.com/s?wd=' + encodeURIComponent(title);
+    window.open(searchUrl, '_blank');
+}
+
+// 刷新新闻
+async function refreshNews() {
+    const loadingEl = document.getElementById('news-loading');
+    loadingEl.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 加载中...';
+    loadingEl.style.cursor = 'default';
+    loadingEl.onclick = null;
+    
+    // 清除缓存
+    newsData = {
+        tech: [],
+        finance: [],
+        general: [],
+        lastFetch: null
+    };
+    localStorage.removeItem('newsData');
+    
+    await fetchAndRenderNews();
+}
+
+
+// ==================== 记账统计图表功能 ====================
+
+// 图表实例
+let expensePieChart = null;
+let incomeExpenseBarChart = null;
+
+// 打开记账统计弹窗
+function showAccountingStats() {
+    const modal = document.getElementById('accounting-stats-modal');
+    modal.classList.remove('hidden');
+    currentStatsPeriod = 'day';
+    updateStatsButtons();
+    renderAccountingStats();
+}
+
+// 关闭记账统计弹窗
+function closeAccountingStats() {
+    document.getElementById('accounting-stats-modal').classList.add('hidden');
+    // 销毁图表实例
+    if (expensePieChart) {
+        expensePieChart.destroy();
+        expensePieChart = null;
+    }
+    if (incomeExpenseBarChart) {
+        incomeExpenseBarChart.destroy();
+        incomeExpenseBarChart = null;
+    }
+}
+
+// 切换统计周期
+function switchStatsPeriod(period) {
+    currentStatsPeriod = period;
+    updateStatsButtons();
+    renderAccountingStats();
+}
+
+// 更新统计周期按钮状态
+function updateStatsButtons() {
+    document.querySelectorAll('.stats-period-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.period === currentStatsPeriod);
+    });
+}
+
+// 渲染统计数据
+function renderAccountingStats() {
+    const now = new Date();
+    let startDate, endDate;
+    
+    switch (currentStatsPeriod) {
+        case 'day':
+            startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            endDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59);
+            break;
+        case 'month':
+            startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+            endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59);
+            break;
+        case 'year':
+            startDate = new Date(now.getFullYear(), 0, 1);
+            endDate = new Date(now.getFullYear(), 11, 31, 23, 59, 59);
+            break;
+    }
+    
+    // 筛选当前周期的记录
+    const periodRecords = accountingData.records.filter(r => {
+        const recordDate = new Date(r.date);
+        return recordDate >= startDate && recordDate <= endDate;
+    });
+    
+    // 计算总收入和总支出
+    const totalIncome = periodRecords
+        .filter(r => r.type === 'income')
+        .reduce((sum, r) => sum + r.amount, 0);
+    
+    const totalExpense = periodRecords
+        .filter(r => r.type === 'expense')
+        .reduce((sum, r) => sum + r.amount, 0);
+    
+    const balance = totalIncome - totalExpense;
+    
+    // 更新概览卡片
+    document.getElementById('stats-balance').textContent = '¥' + balance.toFixed(2);
+    document.getElementById('stats-total-income').textContent = '¥' + totalIncome.toFixed(2);
+    document.getElementById('stats-total-expense').textContent = '¥' + totalExpense.toFixed(2);
+    
+    // 渲染图表
+    renderCharts(periodRecords);
+    
+    // 渲染分类统计列表
+    renderCategoryList(periodRecords);
+    
+    // 渲染详细记录列表
+    renderRecordsList(periodRecords);
+}
+
+// 渲染图表
+function renderCharts(records) {
+    const expenseRecords = records.filter(r => r.type === 'expense');
+    const incomeRecords = records.filter(r => r.type === 'income');
+    
+    // 按分类统计支出
+    const categoryStats = {};
+    expenseRecords.forEach(r => {
+        if (!categoryStats[r.category]) {
+            categoryStats[r.category] = 0;
+        }
+        categoryStats[r.category] += r.amount;
+    });
+    
+    // 渲染支出饼图
+    renderPieChart(categoryStats);
+    
+    // 渲染收支柱状图
+    const totalIncome = incomeRecords.reduce((sum, r) => sum + r.amount, 0);
+    const totalExpense = expenseRecords.reduce((sum, r) => sum + r.amount, 0);
+    renderBarChart(totalIncome, totalExpense);
+}
+
+// 渲染支出饼图
+function renderPieChart(categoryStats) {
+    const ctx = document.getElementById('expense-pie-chart').getContext('2d');
+    
+    // 销毁旧图表
+    if (expensePieChart) {
+        expensePieChart.destroy();
+    }
+    
+    const categories = Object.keys(categoryStats);
+    const amounts = Object.values(categoryStats);
+    
+    if (categories.length === 0) {
+        // 如果没有数据，显示空状态
+        document.getElementById('pie-chart-legend').innerHTML = 
+            '<p style="color: var(--text-light); text-align: center; width: 100%;">暂无支出数据</p>';
+        expensePieChart = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['无数据'],
+                datasets: [{
+                    data: [1],
+                    backgroundColor: ['rgba(163, 177, 198, 0.3)'],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        enabled: false
+                    }
+                }
+            }
+        });
+        return;
+    }
+    
+    // 定义颜色方案
+    const colors = [
+        '#e74c3c', '#e67e22', '#f39c12', '#27ae60', '#3498db',
+        '#9b59b6', '#1abc9c', '#34495e', '#16a085', '#d35400'
+    ];
+    
+    expensePieChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: categories,
+            datasets: [{
+                data: amounts,
+                backgroundColor: colors.slice(0, categories.length),
+                borderWidth: 2,
+                borderColor: '#e0e5ec'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const label = context.label || '';
+                            const value = context.parsed || 0;
+                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                            const percentage = ((value / total) * 100).toFixed(1);
+                            return label + ': ¥' + value.toFixed(2) + ' (' + percentage + '%)';
+                        }
+                    }
+                }
+            }
+        }
+    });
+    
+    // 渲染自定义图例
+    const legendContainer = document.getElementById('pie-chart-legend');
+    legendContainer.innerHTML = categories.map((cat, index) => {
+        const amount = categoryStats[cat];
+        const total = amounts.reduce((a, b) => a + b, 0);
+        const percentage = ((amount / total) * 100).toFixed(1);
+        return `
+            <div class="chart-legend-item">
+                <div class="chart-legend-color" style="background-color: ${colors[index]}"></div>
+                <span>${cat}: ¥${amount.toFixed(2)} (${percentage}%)</span>
+            </div>
+        `;
+    }).join('');
+}
+
+// 渲染收支柱状图
+function renderBarChart(income, expense) {
+    const ctx = document.getElementById('income-expense-bar-chart').getContext('2d');
+    
+    // 销毁旧图表
+    if (incomeExpenseBarChart) {
+        incomeExpenseBarChart.destroy();
+    }
+    
+    incomeExpenseBarChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: ['收入', '支出'],
+            datasets: [{
+                data: [income, expense],
+                backgroundColor: [
+                    'rgba(39, 174, 96, 0.8)',
+                    'rgba(231, 76, 60, 0.8)'
+                ],
+                borderColor: [
+                    '#27ae60',
+                    '#e74c3c'
+                ],
+                borderWidth: 2,
+                borderRadius: 8
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const label = context.label || '';
+                            const value = context.parsed.y || 0;
+                            return label + ': ¥' + value.toFixed(2);
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function(value) {
+                            return '¥' + value;
+                        }
+                    },
+                    grid: {
+                        color: 'rgba(163, 177, 198, 0.1)'
+                    }
+                },
+                x: {
+                    grid: {
+                        display: false
+                    }
+                }
+            }
+        }
+    });
+}
+
+// 渲染分类统计列表
+function renderCategoryList(records) {
+    const categoryList = document.getElementById('stats-category-list');
+    
+    if (records.length === 0) {
+        categoryList.innerHTML = '<p style="text-align: center; color: var(--text-light); padding: 20px;">暂无记录</p>';
+        return;
+    }
+    
+    // 按分类统计
+    const categoryStats = {};
+    records.forEach(r => {
+        if (!categoryStats[r.category]) {
+            categoryStats[r.category] = {
+                type: r.type,
+                amount: 0,
+                count: 0
+            };
+        }
+        categoryStats[r.category].amount += r.amount;
+        categoryStats[r.category].count += 1;
+    });
+    
+    // 排序
+    const sortedCategories = Object.entries(categoryStats)
+        .sort((a, b) => b[1].amount - a[1].amount);
+    
+    categoryList.innerHTML = sortedCategories.map(([category, data]) => `
+        <div class="stats-category-item">
+            <div style="flex: 1;">
+                <div class="stats-category-name">${category}</div>
+                <div class="stats-category-count">${data.count} 笔</div>
+            </div>
+            <div class="stats-category-amount ${data.type}">
+                ${data.type === 'income' ? '+' : '-'}¥${data.amount.toFixed(2)}
+            </div>
+        </div>
+    `).join('');
+}
+
+// 渲染详细记录列表
+function renderRecordsList(records) {
+    const recordsList = document.getElementById('stats-records-list');
+    
+    if (records.length === 0) {
+        recordsList.innerHTML = '<p style="text-align: center; color: var(--text-light); padding: 20px;">暂无记录</p>';
+        return;
+    }
+    
+    // 按日期倒序排序
+    const sortedRecords = [...records].sort((a, b) => 
+        new Date(b.date) - new Date(a.date)
+    );
+    
+    recordsList.innerHTML = sortedRecords.map(r => `
+        <div class="stats-record-item">
+            <div class="record-date">${new Date(r.date).toLocaleDateString('zh-CN')}</div>
+            <div class="record-category">${r.category}</div>
+            <div class="record-note">${r.note}</div>
+            <div class="record-amount ${r.type}">
+                ${r.type === 'income' ? '+' : '-'}¥${r.amount.toFixed(2)}
+            </div>
+        </div>
+    `).join('');
+}
+
+// ==================== 快速记账相关变量 ====================
+let pendingQuickAccounting = null;
+
+// 解析快速记账输入
+function parseQuickAccountingInput(text) {
+    text = text.trim();
+    if (!text) return null;
+    
+    const amountMatch = text.match(/(\d+\.?\d*)/);
+    if (!amountMatch) return null;
+    
+    const amount = parseFloat(amountMatch[1]);
+    if (isNaN(amount) || amount <= 0) return null;
+    
+    let detail = text.replace(amountMatch[1], '').trim();
+    if (!detail) detail = '其他';
+    
+    let type = 'expense';
+    const incomeKeywords = ['工资', '奖金', '理财', '收益', '退款', '报销'];
+    for (const keyword of incomeKeywords) {
+        if (text.includes(keyword)) {
+            type = 'income';
+            break;
+        }
+    }
+    
+    let category = null;
+    const categories = type === 'income' ? incomeCategories : expenseCategories;
+    
+    for (const [cat, keywords] of Object.entries(categoryKeywords)) {
+        if (categories.includes(cat)) {
+            for (const keyword of keywords) {
+                if (detail.includes(keyword)) {
+                    category = cat;
+                    break;
+                }
+            }
+            if (category) break;
+        }
+    }
+    
+    if (!category) {
+        category = categories[0];
+    }
+    
+    return {
+        type,
+        category,
+        detail,
+        amount,
+        customTime: null
+    };
+}
+
+// 处理快速记账输入回车
+function handleAccountingQuickInput(event) {
+    if (event.key === 'Enter') {
+        event.preventDefault();
+        addQuickAccounting();
+    }
+}
+
+// 添加快速记账
+function addQuickAccounting() {
+    const input = document.getElementById('accounting-quick-input');
+    const text = input.value.trim();
+    
+    if (!text) return;
+    
+    const parsed = parseQuickAccountingInput(text);
+    if (!parsed) {
+        alert('请输入有效的记账内容，例如：午餐35');
+        return;
+    }
+    
+    showQuickAccountingModal(parsed);
+    input.value = '';
+}
+
+// 显示快速记账确认弹窗
+function showQuickAccountingModal(data) {
+    const modal = document.getElementById('quick-accounting-modal');
+    const timeInput = document.getElementById('qa-confirm-time');
+    const categorySelect = document.getElementById('qa-confirm-category');
+    const detailInput = document.getElementById('qa-confirm-detail');
+    const amountInput = document.getElementById('qa-confirm-amount');
+    
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    timeInput.value = `${year}-${month}-${day}T${hours}:${minutes}`;
+    
+    timeInput.onchange = function() {
+        if (pendingQuickAccounting) {
+            pendingQuickAccounting.customTime = this.value;
+        }
+    };
+    
+    const categories = data.type === 'income' ? incomeCategories : expenseCategories;
+    categorySelect.innerHTML = categories.map(cat => 
+        `<option value="${cat}" ${cat === data.category ? 'selected' : ''}>${cat}</option>`
+    ).join('');
+    
+    categorySelect.onchange = function() {
+        if (pendingQuickAccounting) {
+            pendingQuickAccounting.category = this.value;
+        }
+    };
+    
+    const typeExpenseBtn = document.getElementById('qa-confirm-type-expense');
+    const typeIncomeBtn = document.getElementById('qa-confirm-type-income');
+    
+    if (data.type === 'expense') {
+        typeExpenseBtn.classList.add('active');
+        typeIncomeBtn.classList.remove('active');
+    } else {
+        typeIncomeBtn.classList.add('active');
+        typeExpenseBtn.classList.remove('active');
+    }
+    
+    detailInput.value = data.detail;
+    amountInput.value = data.amount.toFixed(2);
+    
+    pendingQuickAccounting = {
+        ...data
+    };
+    
+    const titleElement = modal.querySelector('.modal-header h3');
+    if (titleElement) {
+        titleElement.textContent = '确认记账';
+    }
+    
+    const confirmBtn = modal.querySelector('.btn-confirm');
+    if (confirmBtn) {
+        const btnSpan = confirmBtn.querySelector('span');
+        if (btnSpan) {
+            btnSpan.textContent = '确认添加';
+        }
+    }
+    
+    modal.classList.remove('hidden');
+    modal.setAttribute('tabindex', '0');
+    modal.focus();
+    
+    if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
+    }
+}
+
+// 关闭快速记账确认弹窗
+function closeQuickAccountingModal() {
+    const modal = document.getElementById('quick-accounting-modal');
+    modal.classList.add('hidden');
+    pendingQuickAccounting = null;
+    window.editingAccountId = null;
+}
+
+// 处理快速记账弹窗中的回车键
+function handleEnterKeyForQuickAccounting(event) {
+    if (event.key === 'Enter') {
+        event.preventDefault();
+        confirmQuickAccounting();
+    }
+}
+
+// 选择快速记账弹窗中的类型
+function selectQuickConfirmType(type) {
+    const typeExpenseBtn = document.getElementById('qa-confirm-type-expense');
+    const typeIncomeBtn = document.getElementById('qa-confirm-type-income');
+    
+    if (type === 'expense') {
+        typeExpenseBtn.classList.add('active');
+        typeIncomeBtn.classList.remove('active');
+    } else {
+        typeIncomeBtn.classList.add('active');
+        typeExpenseBtn.classList.remove('active');
+    }
+    
+    const categorySelect = document.getElementById('qa-confirm-category');
+    const categories = type === 'income' ? incomeCategories : expenseCategories;
+    const currentCategory = categorySelect.value;
+    
+    categorySelect.innerHTML = categories.map(cat => 
+        `<option value="${cat}">${cat}</option>`
+    ).join('');
+    
+    if (categories.includes(currentCategory)) {
+        categorySelect.value = currentCategory;
+    }
+    
+    if (pendingQuickAccounting) {
+        pendingQuickAccounting.type = type;
+        pendingQuickAccounting.category = categorySelect.value;
+    }
+}
+
+// 确认快速记账
+function confirmQuickAccounting() {
+    const timeInput = document.getElementById('qa-confirm-time');
+    const categorySelect = document.getElementById('qa-confirm-category');
+    const detailInput = document.getElementById('qa-confirm-detail');
+    const amountInput = document.getElementById('qa-confirm-amount');
+    
+    const amount = parseFloat(amountInput.value);
+    if (isNaN(amount) || amount <= 0) {
+        alert('请输入有效的金额');
+        return;
+    }
+    
+    if (window.editingAccountId) {
+        // 编辑模式
+        const record = accountingData.records.find(r => r.id === window.editingAccountId);
+        if (record) {
+            const typeExpenseBtn = document.getElementById('qa-confirm-type-expense');
+            const isExpense = typeExpenseBtn.classList.contains('active');
+            
+            record.type = isExpense ? 'expense' : 'income';
+            record.category = categorySelect.value;
+            record.note = detailInput.value.trim() || '无备注';
+            record.amount = amount;
+            record.date = timeInput.value ? new Date(timeInput.value).toISOString() : new Date().toISOString();
+            
+            saveAccountingData();
+            updateAccountingSummary();
+            renderRecentRecords();
+            
+            closeQuickAccountingModal();
+            showToast('修改成功！');
+        }
+    } else {
+        // 添加模式
+        if (!pendingQuickAccounting) return;
+        
+        const record = {
+            id: Date.now(),
+            type: pendingQuickAccounting.type,
+            category: categorySelect.value,
+            note: detailInput.value.trim() || '无备注',
+            amount: amount,
+            date: timeInput.value ? new Date(timeInput.value).toISOString() : new Date().toISOString()
+        };
+        
+        accountingData.records.unshift(record);
+        saveAccountingData();
+        
+        updateAccountingSummary();
+        renderRecentRecords();
+        
+        closeQuickAccountingModal();
+        showToast('记账成功！');
+    }
+}
+
+// 显示通知提示
+function showNotification(message) {
+    const notification = document.createElement('div');
+    notification.className = 'notification';
+    notification.textContent = message;
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: #27ae60;
+        color: white;
+        padding: 12px 24px;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        z-index: 10000;
+        animation: slideIn 0.3s ease;
+    `;
+    
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        notification.remove();
+    }, 2000);
+}
+
+// 确保收入分类选中时显示绿色背景
+function ensureIncomeCategoryGreenBackground() {
+    const container = document.getElementById('accounting-categories');
+    if (!container) return;
+    
+    const activeBtns = container.querySelectorAll('.category-item.active');
+    activeBtns.forEach(btn => {
+        const btnText = btn.textContent || btn.innerText;
+        if (container.classList.contains('income-mode')) {
+            btn.style.setProperty('background', '#27ae60', 'important');
+            btn.style.setProperty('background-color', '#27ae60', 'important');
+            btn.style.setProperty('color', 'white', 'important');
+        }
+    });
+}
+
+// 使用MutationObserver监听DOM变化
+const observer = new MutationObserver(() => {
+    ensureIncomeCategoryGreenBackground();
+});
+
+// 开始观察整个document
+observer.observe(document.body, {
+    childList: true,
+    subtree: true
+});
+
+// 页面加载完成后立即执行一次
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', ensureIncomeCategoryGreenBackground);
+} else {
+    ensureIncomeCategoryGreenBackground();
+}
+
+// 定时检查（每100ms）
+setInterval(ensureIncomeCategoryGreenBackground, 100);
+
+// 强制修复收入分类背景色 - 调试版本
+function forceFixIncomeCategoryBackground() {
+    const container = document.getElementById('accounting-categories');
+    if (!container) {
+        console.log('Container not found!');
+        return;
+    }
+    
+    console.log('Container classes:', container.classList.toString());
+    console.log('Has income-mode:', container.classList.contains('income-mode'));
+    
+    const activeBtns = container.querySelectorAll('.category-item.active');
+    console.log('Active buttons found:', activeBtns.length);
+    
+    activeBtns.forEach((btn, index) => {
+        console.log(`Button ${index} classes:`, btn.classList.toString());
+        console.log(`Button ${index} current background:`, window.getComputedStyle(btn).backgroundColor);
+        
+        if (container.classList.contains('income-mode')) {
+            console.log(`Setting button ${index} to green...`);
+            btn.style.setProperty('background', '#27ae60', 'important');
+            btn.style.setProperty('background-color', '#27ae60', 'important');
+            btn.style.background = '#27ae60';
+            btn.style.backgroundColor = '#27ae60';
+            console.log(`Button ${index} new background:`, window.getComputedStyle(btn).backgroundColor);
+        }
+    });
+}
+
+// 暴露到全局作用域以便在控制台调用
+window.debugIncomeCategory = forceFixIncomeCategoryBackground;
+window.fixIncomeCategory = forceFixIncomeCategoryBackground;
+
+console.log('Debug function loaded! Call window.fixIncomeCategory() in console to test');

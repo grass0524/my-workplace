@@ -141,14 +141,33 @@ body {
 .dashboard-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    grid-template-rows: auto auto;
+    grid-template-rows: 320px 400px auto;
     gap: 24px;
+}
+
+/* 记账和热点新闻卡片容器 - 占满整行，在第3行 */
+.accounting-news-wrapper {
+    grid-column: 1 / 4;
+    grid-row: 3;
+    display: flex;
+    gap: 24px;
+}
+
+.accounting-card,
+.news-card {
+    flex: 1;
+    min-width: 0;
 }
 
 /* Responsive Grid */
 @media (max-width: 900px) {
     .dashboard-grid {
         grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .accounting-news-wrapper {
+        grid-column: 1 / 3;
+        flex-direction: column;
     }
 }
 
@@ -1403,7 +1422,7 @@ input:checked + .mood-icon-wrapper {
 }
 
 .modal-confirm .modal-body {
-    padding: 20px 24px !important;
+    padding: 0 24px 20px 24px !important;
     text-align: center;
     min-height: auto !important;
     display: block !important;
@@ -2394,3 +2413,3392 @@ input:checked + .mood-icon-wrapper {
     background: var(--bg-color);
 }
 
+
+/* ==================== 记账模块样式 ==================== */
+.accounting-body {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+/* 输入区域 */
+.accounting-input-area {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+/* +/- 切换按钮 */
+.accounting-type-toggle {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    justify-content: center;
+    padding: 12px;
+    background: var(--bg-color);
+    border-radius: 12px;
+    box-shadow: var(--neu-shadow-in);
+}
+
+.type-toggle-btn {
+    width: 50px;
+    height: 50px;
+    border: none;
+    border-radius: 50%;
+    background: var(--bg-color);
+    color: var(--text-color);
+    font-size: 20px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: var(--neu-shadow-out);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.type-toggle-btn:hover {
+    box-shadow: var(--neu-shadow-in);
+    transform: scale(1.05);
+}
+
+.type-toggle-btn.active {
+    box-shadow: var(--neu-shadow-in);
+    color: #e74c3c;
+}
+
+.type-toggle-btn.income {
+    color: #27ae60;
+}
+
+.current-type-label {
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--text-color);
+}
+
+/* 分类快速选择 */
+.accounting-category-quick {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+}
+
+.category-chip {
+    padding: 8px 14px;
+    border: none;
+    border-radius: 20px;
+    background: var(--bg-color);
+    color: var(--text-color);
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: var(--neu-shadow-sm);
+}
+
+.category-chip:hover {
+    box-shadow: var(--neu-shadow-out);
+    transform: translateY(-1px);
+}
+
+.category-chip.active {
+    box-shadow: var(--neu-shadow-in);
+    background: var(--primary-color);
+    color: white;
+}
+
+/* 输入框 */
+.accounting-input-wrapper {
+    display: flex;
+    gap: 10px;
+}
+
+.accounting-input-wrapper input {
+    flex: 1;
+    padding: 14px 18px;
+    border: none;
+    border-radius: 12px;
+    background: var(--bg-color);
+    color: var(--text-color);
+    font-size: 14px;
+    box-shadow: var(--neu-shadow-in);
+    transition: all 0.3s ease;
+}
+
+.accounting-input-wrapper input:focus {
+    outline: none;
+    box-shadow: var(--neu-shadow-out);
+}
+
+.accounting-input-wrapper .btn-add {
+    padding: 14px 20px;
+    border: none;
+    border-radius: 12px;
+    background: var(--primary-color);
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: var(--neu-shadow-out);
+}
+
+.accounting-input-wrapper .btn-add:hover {
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+    transform: translateY(-1px);
+}
+
+/* 当日支出统计 */
+.accounting-day-summary {
+    padding: 16px;
+    background: var(--bg-color);
+    border-radius: 12px;
+    box-shadow: var(--neu-shadow-in);
+}
+
+.summary-item {
+    text-align: center;
+    padding: 16px;
+    background: var(--bg-color);
+    border-radius: 10px;
+    box-shadow: var(--neu-shadow-sm);
+    border-left: 4px solid #e74c3c;
+}
+
+.summary-label {
+    display: block;
+    font-size: 12px;
+    color: var(--text-light);
+    margin-bottom: 6px;
+}
+
+.summary-value {
+    display: block;
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--text-color);
+}
+
+/* 明细列表 */
+.accounting-records {
+    flex: 1;
+    display: flex;
+    overflow-y: auto;
+    overflow-x: visible;
+}
+
+.records-header {
+    padding: 12px 0;
+    border-bottom: 1px solid rgba(163, 177, 198, 0.2);
+    color: var(--text-color);
+    font-weight: 500;
+}
+
+.records-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 8px 0;
+}
+
+.records-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.records-list::-webkit-scrollbar-track {
+    background: var(--bg-color);
+    border-radius: 3px;
+}
+
+.records-list::-webkit-scrollbar-thumb {
+    background: rgba(163, 177, 198, 0.3);
+    border-radius: 3px;
+}
+
+.records-list::-webkit-scrollbar-thumb:hover {
+    background: rgba(163, 177, 198, 0.5);
+}
+
+.empty-hint {
+    text-align: center;
+    color: var(--text-light);
+    padding: 40px 20px;
+    font-size: 14px;
+}
+
+/* 记录项 */
+.record-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px;
+    margin-bottom: 8px;
+    background: var(--bg-color);
+    border-radius: 10px;
+    box-shadow: var(--neu-shadow-sm);
+    transition: all 0.3s ease;
+}
+
+.record-item:hover {
+    box-shadow: var(--neu-shadow-out);
+    transform: translateY(-1px);
+}
+
+.record-left {
+    flex: 1;
+    min-width: 0;
+}
+
+.record-category {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-color);
+    margin-bottom: 4px;
+}
+
+.record-note {
+    font-size: 12px;
+    color: var(--text-light);
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.record-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.record-amount {
+    font-size: 16px;
+    font-weight: 600;
+    flex-shrink: 0;
+}
+
+.record-amount.income {
+    color: #27ae60;
+}
+
+.record-amount.expense {
+    color: #e74c3c;
+}
+
+.record-meta {
+    font-size: 11px;
+    color: var(--text-light);
+    flex-shrink: 0;
+}
+
+.record-delete {
+    width: 24px;
+    height: 24px;
+    padding: 0;
+    border: none;
+    background: transparent;
+    color: var(--text-light);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.record-delete:hover {
+    color: #e74c3c;
+    transform: scale(1.1);
+}
+
+/* ==================== 记账弹窗样式 ==================== */
+/* 确认弹窗 */
+.confirm-info {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding: 20px;
+}
+
+.info-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px;
+    background: var(--bg-color);
+    border-radius: 8px;
+    box-shadow: var(--neu-shadow-in);
+}
+
+.info-label {
+    font-size: 14px;
+    color: var(--text-light);
+}
+
+.info-value {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-color);
+}
+
+.info-value.highlight {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--primary-color);
+}
+
+.confirm-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 20px;
+}
+
+.confirm-actions button {
+    flex: 1;
+    padding: 12px;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.confirm-actions .btn-secondary {
+    background: var(--bg-color);
+    color: var(--text-color);
+    box-shadow: var(--neu-shadow-sm);
+}
+
+.confirm-actions .btn-secondary:hover {
+    box-shadow: var(--neu-shadow-out);
+}
+
+.confirm-actions .btn-primary {
+    background: var(--primary-color);
+    color: white;
+    box-shadow: var(--neu-shadow-out);
+}
+
+.confirm-actions .btn-primary:hover {
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+}
+
+/* 统计弹窗 */
+.stats-tabs {
+    display: flex;
+    gap: 8px;
+}
+
+.stats-period-btn {
+    padding: 8px 20px;
+    border: none;
+    border-radius: 8px;
+    background: var(--bg-color);
+    color: var(--text-color);
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: var(--neu-shadow-sm);
+}
+
+.stats-period-btn:hover {
+    box-shadow: var(--neu-shadow-out);
+}
+
+.stats-period-btn.active {
+    box-shadow: var(--neu-shadow-in);
+    background: var(--primary-color);
+    color: white;
+}
+
+.stats-overview {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 24px;
+}
+
+.stat-card {
+    flex: 1;
+    padding: 20px;
+    background: var(--bg-color);
+    border-radius: 12px;
+    text-align: center;
+    box-shadow: var(--neu-shadow-in);
+}
+
+.stat-card.balance {
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(99, 102, 241, 0.05));
+}
+
+.stat-card.income {
+    border-top: 3px solid #27ae60;
+}
+
+.stat-card.expense {
+    border-top: 3px solid #e74c3c;
+}
+
+.stat-label {
+    display: block;
+    font-size: 12px;
+    color: var(--text-light);
+    margin-bottom: 8px;
+}
+
+.stat-value {
+    display: block;
+    font-size: 24px;
+    font-weight: 600;
+    color: var(--text-color);
+}
+
+.stats-content {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.stats-section h4 {
+    font-size: 14px;
+    color: var(--text-light);
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid rgba(163, 177, 198, 0.2);
+}
+
+.stats-category-list {
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.stats-category-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px;
+    margin-bottom: 8px;
+    background: var(--bg-color);
+    border-radius: 8px;
+    box-shadow: var(--neu-shadow-sm);
+}
+
+.category-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.category-name {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-color);
+}
+
+.category-count {
+    font-size: 11px;
+    color: var(--text-light);
+}
+
+.category-amount {
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.category-amount.income {
+    color: #27ae60;
+}
+
+.category-amount.expense {
+    color: #e74c3c;
+}
+
+.stats-records-list {
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.stats-record-item {
+    display: grid;
+    grid-template-columns: 120px 80px 1fr 100px;
+    gap: 12px;
+    align-items: center;
+    padding: 10px;
+    margin-bottom: 6px;
+    background: var(--bg-color);
+    border-radius: 6px;
+    font-size: 12px;
+}
+
+.stats-record-item .record-date {
+    color: var(--text-light);
+}
+
+.stats-record-item .record-category {
+    color: var(--primary-color);
+    font-weight: 500;
+}
+
+.stats-record-item .record-note {
+    color: var(--text-color);
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.stats-record-item .record-amount {
+    text-align: right;
+    font-weight: 600;
+}
+
+.stats-record-item .record-amount.income {
+    color: #27ae60;
+}
+
+.stats-record-item .record-amount.expense {
+    color: #e74c3c;
+}
+
+/* Modal sizes */
+.modal-sm {
+    max-width: 400px;
+}
+
+.modal-lg {
+    max-width: 800px;
+}
+
+@media (max-width: 600px) {
+    .stats-content {
+        grid-template-columns: 1fr;
+    }
+    
+    .stats-record-item {
+        grid-template-columns: 1fr;
+        gap: 4px;
+    }
+}
+
+
+
+/* ==================== 记账模块样式 ==================== */
+.accounting-body {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+/* 输入区域 */
+.accounting-input-area {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+/* +/- 切换按钮 */
+.accounting-type-toggle {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    justify-content: center;
+    padding: 12px;
+    background: var(--bg-color);
+    border-radius: 12px;
+    box-shadow: var(--neu-shadow-in);
+}
+
+.type-toggle-btn {
+    width: 50px;
+    height: 50px;
+    border: none;
+    border-radius: 50%;
+    background: var(--bg-color);
+    color: var(--text-color);
+    font-size: 20px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: var(--neu-shadow-out);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.type-toggle-btn:hover {
+    box-shadow: var(--neu-shadow-in);
+    transform: scale(1.05);
+}
+
+.type-toggle-btn.active {
+    box-shadow: var(--neu-shadow-in);
+    color: #e74c3c;
+}
+
+.type-toggle-btn.income {
+    color: #27ae60;
+}
+
+.current-type-label {
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--text-color);
+}
+
+/* 分类快速选择 */
+.accounting-category-quick {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+}
+
+.category-chip {
+    padding: 8px 14px;
+    border: none;
+    border-radius: 20px;
+    background: var(--bg-color);
+    color: var(--text-color);
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: var(--neu-shadow-sm);
+}
+
+.category-chip:hover {
+    box-shadow: var(--neu-shadow-out);
+    transform: translateY(-1px);
+}
+
+.category-chip.active {
+    box-shadow: var(--neu-shadow-in);
+    background: var(--primary-color);
+    color: white;
+}
+
+/* 输入框 */
+.accounting-input-wrapper {
+    display: flex;
+    gap: 10px;
+}
+
+.accounting-input-wrapper input {
+    flex: 1;
+    padding: 14px 18px;
+    border: none;
+    border-radius: 12px;
+    background: var(--bg-color);
+    color: var(--text-color);
+    font-size: 14px;
+    box-shadow: var(--neu-shadow-in);
+    transition: all 0.3s ease;
+}
+
+.accounting-input-wrapper input:focus {
+    outline: none;
+    box-shadow: var(--neu-shadow-out);
+}
+
+.accounting-input-wrapper .btn-add {
+    padding: 14px 20px;
+    border: none;
+    border-radius: 12px;
+    background: var(--primary-color);
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: var(--neu-shadow-out);
+}
+
+.accounting-input-wrapper .btn-add:hover {
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+    transform: translateY(-1px);
+}
+
+/* 当日支出统计 */
+.accounting-day-summary {
+    padding: 16px;
+    background: var(--bg-color);
+    border-radius: 12px;
+    box-shadow: var(--neu-shadow-in);
+}
+
+.summary-item {
+    text-align: center;
+    padding: 16px;
+    background: var(--bg-color);
+    border-radius: 10px;
+    box-shadow: var(--neu-shadow-sm);
+    border-left: 4px solid #e74c3c;
+}
+
+.summary-label {
+    display: block;
+    font-size: 12px;
+    color: var(--text-light);
+    margin-bottom: 6px;
+}
+
+.summary-value {
+    display: block;
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--text-color);
+}
+
+/* 明细列表 */
+.accounting-records {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.records-header {
+    padding: 12px 0;
+    border-bottom: 1px solid rgba(163, 177, 198, 0.2);
+    color: var(--text-color);
+    font-weight: 500;
+}
+
+.records-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 8px 0;
+}
+
+.empty-hint {
+    text-align: center;
+    color: var(--text-light);
+    padding: 40px 20px;
+    font-size: 14px;
+}
+
+/* 记录项 */
+.record-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px;
+    margin-bottom: 8px;
+    background: var(--bg-color);
+    border-radius: 10px;
+    box-shadow: var(--neu-shadow-sm);
+    transition: all 0.3s ease;
+}
+
+.record-item:hover {
+    box-shadow: var(--neu-shadow-out);
+    transform: translateY(-1px);
+}
+
+.record-left {
+    flex: 1;
+    min-width: 0;
+}
+
+.record-category {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-color);
+    margin-bottom: 4px;
+}
+
+.record-note {
+    font-size: 12px;
+    color: var(--text-light);
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.record-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.record-amount {
+    font-size: 16px;
+    font-weight: 600;
+    flex-shrink: 0;
+}
+
+.record-amount.income {
+    color: #27ae60;
+}
+
+.record-amount.expense {
+    color: #e74c3c;
+}
+
+.record-meta {
+    font-size: 11px;
+    color: var(--text-light);
+    flex-shrink: 0;
+}
+
+.record-delete {
+    width: 24px;
+    height: 24px;
+    padding: 0;
+    border: none;
+    background: transparent;
+    color: var(--text-light);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.record-delete:hover {
+    color: #e74c3c;
+    transform: scale(1.1);
+}
+
+/* ==================== 记账弹窗样式 ==================== */
+.confirm-info {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding: 20px;
+}
+
+.info-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px;
+    background: var(--bg-color);
+    border-radius: 8px;
+    box-shadow: var(--neu-shadow-in);
+}
+
+.info-label {
+    font-size: 14px;
+    color: var(--text-light);
+}
+
+.info-value {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-color);
+}
+
+.info-value.highlight {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--primary-color);
+}
+
+.confirm-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 20px;
+}
+
+.confirm-actions button {
+    flex: 1;
+    padding: 12px;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.confirm-actions .btn-secondary {
+    background: var(--bg-color);
+    color: var(--text-color);
+    box-shadow: var(--neu-shadow-sm);
+}
+
+.confirm-actions .btn-secondary:hover {
+    box-shadow: var(--neu-shadow-out);
+}
+
+.confirm-actions .btn-primary {
+    background: var(--primary-color);
+    color: white;
+    box-shadow: var(--neu-shadow-out);
+}
+
+.confirm-actions .btn-primary:hover {
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+}
+
+/* 统计弹窗 */
+.stats-tabs {
+    display: flex;
+    gap: 8px;
+}
+
+.stats-period-btn {
+    padding: 8px 20px;
+    border: none;
+    border-radius: 8px;
+    background: var(--bg-color);
+    color: var(--text-color);
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: var(--neu-shadow-sm);
+}
+
+.stats-period-btn:hover {
+    box-shadow: var(--neu-shadow-out);
+}
+
+.stats-period-btn.active {
+    box-shadow: var(--neu-shadow-in);
+    background: var(--primary-color);
+    color: white;
+}
+
+.stats-overview {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 24px;
+}
+
+.stat-card {
+    flex: 1;
+    padding: 20px;
+    background: var(--bg-color);
+    border-radius: 12px;
+    text-align: center;
+    box-shadow: var(--neu-shadow-in);
+}
+
+.stat-card.balance {
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(99, 102, 241, 0.05));
+}
+
+.stat-card.income {
+    border-top: 3px solid #27ae60;
+}
+
+.stat-card.expense {
+    border-top: 3px solid #e74c3c;
+}
+
+.stat-label {
+    display: block;
+    font-size: 12px;
+    color: var(--text-light);
+    margin-bottom: 8px;
+}
+
+.stat-value {
+    display: block;
+    font-size: 24px;
+    font-weight: 600;
+    color: var(--text-color);
+}
+
+.stats-content {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.stats-section h4 {
+    font-size: 14px;
+    color: var(--text-light);
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid rgba(163, 177, 198, 0.2);
+}
+
+.stats-category-list,
+.stats-records-list {
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.stats-category-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px;
+    margin-bottom: 8px;
+    background: var(--bg-color);
+    border-radius: 8px;
+    box-shadow: var(--neu-shadow-sm);
+}
+
+.category-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.category-name {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-color);
+}
+
+.category-count {
+    font-size: 11px;
+    color: var(--text-light);
+}
+
+.category-amount {
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.category-amount.income {
+    color: #27ae60;
+}
+
+.category-amount.expense {
+    color: #e74c3c;
+}
+
+.stats-record-item {
+    display: grid;
+    grid-template-columns: 120px 80px 1fr 100px;
+    gap: 12px;
+    align-items: center;
+    padding: 10px;
+    margin-bottom: 6px;
+    background: var(--bg-color);
+    border-radius: 6px;
+    font-size: 12px;
+}
+
+.stats-record-item .record-date {
+    color: var(--text-light);
+}
+
+.stats-record-item .record-category {
+    color: var(--primary-color);
+    font-weight: 500;
+}
+
+.stats-record-item .record-amount {
+    text-align: right;
+    font-weight: 600;
+}
+
+.stats-record-item .record-amount.income {
+    color: #27ae60;
+}
+
+.stats-record-item .record-amount.expense {
+    color: #e74c3c;
+}
+
+/* Modal sizes */
+.modal-sm {
+    max-width: 400px;
+}
+
+.modal-lg {
+    max-width: 800px;
+}
+
+@media (max-width: 600px) {
+    .stats-content {
+        grid-template-columns: 1fr;
+    }
+    
+    .stats-record-item {
+        grid-template-columns: 1fr;
+        gap: 4px;
+    }
+}
+
+/* ==================== 热点新闻模块优化样式 ==================== */
+.news-body {
+    display: flex;
+    flex-direction: column;
+/* ==================== 严格按Pencil设计图调整 ==================== */
+/* 记账和热点新闻容器 - 固定尺寸匹配设计图 */
+.accounting-news-wrapper {
+    grid-column: 1 / 4;
+    grid-row: 3;
+    display: flex;
+    gap: 24px;
+    justify-content: center;
+}
+
+.accounting-card,
+.news-card {
+    flex: 0 0 590px;
+    min-width: 590px;
+    max-width: 590px;
+    /* height: 836px; removed to allow auto height for news-card */
+    height: 950px;
+}
+
+/* 卡片标题区域 - 41px高度匹配设计 */
+.accounting-card .card-header,
+.news-card .card-header {
+    min-height: 41px;
+    padding: 12px 28px;
+    margin-bottom: 0;
+}
+
+.accounting-card .card-header h2,
+.news-card .card-header h2 {
+    font-size: 18px;
+    font-weight: 600;
+}
+
+/* ==================== 记账模块 - 按设计图重构 ==================== */
+.accounting-body {
+    display: flex;
+    flex-direction: column;
+    height: calc(100% - 41px);
+    padding: 0 28px 28px 28px;
+    gap: 20px;
+}
+
+/* 收支切换区域 - 90px高度 */
+.accounting-type-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    height: 90px;
+    background: linear-gradient(135deg, rgba(107, 124, 255, 0.05), rgba(80, 227, 194, 0.05));
+    border-radius: 16px;
+    box-shadow: var(--neu-shadow-in);
+}
+
+.type-toggle-btn {
+    width: 60px;
+    height: 60px;
+    border: none;
+    border-radius: 50%;
+    background: var(--bg-color);
+    color: var(--text-color);
+    font-size: 24px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: var(--neu-shadow-out);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.type-toggle-btn:hover {
+    box-shadow: var(--neu-shadow-in);
+    transform: scale(1.08);
+}
+
+.type-toggle-btn.active {
+    box-shadow: var(--neu-shadow-in);
+    background: #6b7bff;
+    color: white;
+}
+
+.type-toggle-btn.active.income {
+    background: #27ae60 !important;
+}
+
+.type-toggle-btn.active.expense {
+    background: #6b7bff !important;
+}
+.current-type-label {
+    font-size: 20px;
+    font-weight: 600;
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* 分类选择区域 */
+.accounting-category-quick {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+    min-height: 22px;
+}
+
+.category-chip {
+    padding: 10px 18px;
+    border: none;
+    border-radius: 20px;
+    background: var(--bg-color);
+    color: var(--text-color);
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: var(--neu-shadow-sm);
+}
+
+.category-chip:hover {
+    box-shadow: var(--neu-shadow-out);
+    transform: translateY(-2px);
+}
+
+.category-chip.active {
+    background: linear-gradient(135deg, var(--primary-color), #8b5cf6);
+    color: white;
+    box-shadow: 0 4px 12px rgba(107, 124, 255, 0.4);
+}
+
+/* 输入区域 */
+.accounting-input-wrapper {
+    display: flex;
+    gap: 12px;
+}
+
+.accounting-input-wrapper input {
+    flex: 1;
+    padding: 16px 20px;
+    border: none;
+    border-radius: 12px;
+    background: var(--bg-color);
+    color: var(--text-color);
+    font-size: 15px;
+    box-shadow: var(--neu-shadow-in);
+    transition: all 0.3s ease;
+}
+
+.accounting-input-wrapper input:focus {
+    outline: none;
+    box-shadow: var(--neu-shadow-out);
+}
+
+.accounting-input-wrapper .btn-add {
+    padding: 16px 28px;
+    border: none;
+    border-radius: 12px;
+    background: linear-gradient(135deg, var(--primary-color), #8b5cf6);
+    color: white;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(107, 124, 255, 0.3);
+}
+
+.accounting-input-wrapper .btn-add:hover {
+    box-shadow: 0 6px 16px rgba(107, 124, 255, 0.5);
+    transform: translateY(-2px);
+}
+
+/* 统计区域 */
+.accounting-day-summary {
+    padding: 20px;
+    background: linear-gradient(135deg, rgba(107, 124, 255, 0.08), rgba(80, 227, 194, 0.05));
+    border-radius: 16px;
+    box-shadow: var(--neu-shadow-in);
+}
+
+.summary-item {
+    text-align: center;
+    padding: 18px;
+    background: var(--bg-color);
+    border-radius: 12px;
+    box-shadow: var(--neu-shadow-sm);
+}
+
+.summary-item.expense {
+    border-left: 4px solid #e74c3c;
+}
+
+.summary-item.income {
+    border-left: 4px solid #27ae60;
+}
+
+.summary-label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-light);
+    margin-bottom: 8px;
+}
+
+.summary-value {
+    display: block;
+    font-size: 28px;
+    font-weight: 700;
+    background: linear-gradient(135deg, var(--text-color), var(--primary-color));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* 记录列表 - 339px高度 */
+.accounting-records {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+}
+
+.records-header {
+    padding: 12px 0;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-color);
+    border-bottom: 1px solid rgba(163, 177, 198, 0.2);
+}
+
+.records-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 8px 0;
+}
+
+.records-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.records-list::-webkit-scrollbar-track {
+    background: var(--bg-color);
+    border-radius: 3px;
+}
+
+.records-list::-webkit-scrollbar-thumb {
+    background: rgba(163, 177, 198, 0.3);
+    border-radius: 3px;
+}
+
+.records-list::-webkit-scrollbar-thumb:hover {
+    background: rgba(163, 177, 198, 0.5);
+}
+
+.record-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+    background: var(--bg-color);
+    border-radius: 12px;
+    box-shadow: var(--neu-shadow-sm);
+    transition: all 0.3s ease;
+}
+
+.record-item:hover {
+    box-shadow: var(--neu-shadow-out);
+    transform: translateY(-2px) translateX(2px);
+}
+
+.record-left {
+    flex: 1;
+    min-width: 0;
+}
+
+.record-category {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-color);
+    margin-bottom: 4px;
+}
+
+.record-note {
+    font-size: 13px;
+    color: var(--text-light);
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.record-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.record-amount {
+    font-size: 18px;
+    font-weight: 700;
+    flex-shrink: 0;
+}
+
+.record-amount.income {
+    color: #27ae60;
+}
+
+.record-amount.expense {
+    color: #e74c3c;
+}
+
+.record-meta {
+    font-size: 11px;
+    color: var(--text-light);
+    flex-shrink: 0;
+}
+
+.record-delete {
+    width: 26px;
+    height: 26px;
+    padding: 0;
+    border: none;
+    background: transparent;
+    color: var(--text-light);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.record-delete:hover {
+    color: #e74c3c;
+    transform: scale(1.15);
+}
+
+/* ==================== 热点新闻模块 - 按设计图重构 ==================== */
+.news-body {
+    display: flex;
+    flex-direction: column;
+    height: calc(100% - 41px);
+    padding: 0 0 0 0;
+    gap: 20px;
+}
+.news-tabs {
+    display: flex;
+    gap: 10px;
+    height: 40px;
+    padding: 4px;
+    background: var(--bg-color);
+    border-radius: 12px;
+    /*凹陷效果已移除*/
+}
+
+.news-tab {
+    flex: 1;
+    padding: 0 16px;
+    border: none;
+    border-radius: 10px;
+    background: transparent;
+    color: var(--text-color);
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+ align-items: center;
+    justify-content: center;
+    gap: 6px;
+    box-shadow: 2px 2px 4px var(--shadow-dark), -2px -2px 4px var(--shadow-light);
+}
+
+.news-tab:hover {
+    background: var(--bg-color);
+    box-shadow: inset 2px 2px 4px var(--shadow-dark), inset -2px -2px 4px var(--shadow-light);
+}
+
+.news-tab.active {
+    background: var(--primary-color);
+    color: white;
+    box-shadow: var(--neu-shadow-out);
+}
+.news-tab i {
+    font-size: 14px;
+}
+
+/* 新闻加载状态 */
+.news-loading {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-light);
+    font-size: 14px;
+    gap: 8px;
+    min-height: 200px;
+}
+
+.news-loading i {
+    font-size: 18px;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* 新闻列表 - 659px高度 */
+.news-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.news-list {
+    list-style: none;
+    overflow-y: auto;
+    overflow-x: visible;
+    padding: 16px 4px 4px 4px;
+    transform: translateY(-15px);
+}
+.news-list::-webkit-scrollbar {
+    width: 4px;
+}
+
+.news-list::-webkit-scrollbar-track {
+    background: var(--bg-color);
+    border-radius: 2px;
+}
+
+.news-list::-webkit-scrollbar-thumb {
+    background: rgba(163, 177, 198, 0.3);
+    border-radius: 2px;
+}
+
+.news-item {
+    padding: 16px;
+    margin-bottom: 12px;
+    background: var(--bg-color);
+    border-radius: 12px;
+    box-shadow: var(--neu-shadow-sm);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border-left: 3px solid transparent;
+}
+.news-item:hover {
+    box-shadow: var(--neu-shadow-out);
+    transform: translateX(4px);
+    border-left-color: var(--primary-color);
+}
+
+.news-item-title {
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--text-color);
+    line-height: 1.5;
+    margin-bottom: 10px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+}
+
+.news-item-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+}
+
+.news-item-source {
+    font-size: 13px;
+    color: var(--primary-color);
+    font-weight: 500;
+}
+
+.news-item-time {
+    font-size: 12px;
+    color: var(--text-light);
+}
+
+/* ==================== 动画效果 ==================== */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.news-item,
+.record-item {
+    animation: fadeInUp 0.3s ease;
+}
+
+/* ==================== 响应式优化 ==================== */
+@media (max-width: 1400px) {
+    .accounting-news-wrapper {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .accounting-card,
+    .news-card {
+        width: 100%;
+        max-width: 590px;
+        min-width: auto;
+    }
+}
+
+@media (max-width: 768px) {
+    .accounting-card,
+    .news-card {
+        height: auto;
+        min-height: 600px;
+    }
+    
+    .accounting-type-toggle {
+        height: auto;
+        padding: 12px;
+    }
+    
+    .type-toggle-btn {
+        width: 50px;
+        height: 50px;
+        font-size: 20px;
+    }
+    
+    .current-type-label {
+        font-size: 18px;
+    }
+    
+    .category-chip {
+        padding: 8px 14px;
+        font-size: 13px;
+    }
+    
+    .news-tab {
+        padding: 8px 12px;
+        font-size: 13px;
+    }
+}
+
+/* ==================== 记账统计图表样式 ==================== */
+.stats-charts {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.chart-container {
+    background: var(--bg-color);
+    border-radius: 12px;
+    padding: 16px;
+    box-shadow: var(--neu-shadow-sm);
+    position: relative;
+    min-height: 250px;
+}
+
+.chart-container canvas {
+    max-width: 100%;
+    max-height: 250px;
+}
+
+.chart-legend {
+    margin-top: 12px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    justify-content: center;
+    font-size: 12px;
+}
+
+.chart-legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.chart-legend-color {
+    width: 12px;
+    height: 12px;
+    border-radius: 3px;
+}
+
+/* 分类统计列表样式 */
+.stats-category-name {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-color);
+}
+
+.stats-category-count {
+    font-size: 12px;
+    color: var(--text-light);
+    margin-top: 2px;
+}
+
+.stats-category-amount {
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.stats-category-amount.income {
+    color: #27ae60;
+}
+
+.stats-category-amount.expense {
+    color: #e74c3c;
+}
+
+/* ==================== 记账功能 - 新样式 ==================== */
+
+/* 快速记账区域 */
+.accounting-quick-area {
+    padding: 12px;
+    background: linear-gradient(135deg, rgba(107, 124, 255, 0.1) 0%, rgba(80, 227, 194, 0.1) 100%);
+    border-radius: 12px;
+    box-shadow: var(--neu-shadow-in);
+}
+
+.quick-input-wrapper {
+    display: flex;
+    gap: 10px;
+}
+
+.quick-input-wrapper input {
+    flex: 1;
+    padding: 12px 16px;
+    border: none;
+    border-radius: 10px;
+    background: var(--bg-color);
+    color: var(--text-color);
+    font-size: 14px;
+    box-shadow: var(--neu-shadow-in);
+    transition: all 0.3s ease;
+}
+
+.quick-input-wrapper input:focus {
+    outline: none;
+    box-shadow: var(--neu-shadow-out);
+}
+
+.quick-input-wrapper .btn-add {
+    padding: 12px 18px;
+    border: none;
+    border-radius: 10px;
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: var(--neu-shadow-out);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.quick-input-wrapper .btn-add:hover {
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+    transform: translateY(-1px);
+}
+
+/* 通用记账区域 */
+.accounting-manual-area {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+/* 收支切换按钮 */
+.accounting-type-switch {
+    display: flex;
+    gap: 8px;
+    padding: 4px;
+    background: var(--bg-color);
+    border-radius: 10px;
+    box-shadow: var(--neu-shadow-in);
+}
+
+.type-switch-btn {
+    flex: 1;
+    padding: 10px 16px;
+    border: none;
+    border-radius: 8px;
+    background: transparent;
+    color: var(--text-color);
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+}
+
+.type-switch-btn:hover {
+    background: var(--bg-color);
+    box-shadow: var(--neu-shadow-sm);
+}
+
+.type-switch-btn.active {
+    background: var(--bg-color);
+    box-shadow: var(--neu-shadow-out);
+    color: var(--primary-color);
+}
+
+/* 分类选择区域 */
+.accounting-categories {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+}
+
+.accounting-categories .category-item {
+    padding: 8px 14px;
+    border: none;
+    border-radius: 20px;
+    background: var(--bg-color);
+    color: var(--text-color);
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: var(--neu-shadow-sm);
+}
+
+.accounting-categories .category-item:hover {
+    box-shadow: var(--neu-shadow-out);
+    transform: translateY(-1px);
+}
+
+.accounting-categories .category-item.active {
+    box-shadow: var(--neu-shadow-in);
+    background: var(--primary-color);
+    color: white;
+}
+
+/* 明细输入区域 */
+.accounting-detail-inputs {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.accounting-detail-inputs .input-group {
+    display: flex;
+    align-items: center;
+    background: var(--bg-color);
+    border-radius: 10px;
+    box-shadow: var(--neu-shadow-in);
+    padding: 4px;
+}
+
+.accounting-detail-inputs .input-prefix {
+    padding: 0 12px;
+    color: var(--text-light);
+    font-weight: 600;
+}
+
+.accounting-detail-inputs input[type="number"] {
+    flex: 1;
+    padding: 12px;
+    border: none;
+    background: transparent;
+    color: var(--text-color);
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.accounting-detail-inputs input[type="number"]:focus {
+    outline: none;
+}
+
+.accounting-detail-inputs input[type="text"] {
+    width: 100%;
+    padding: 12px 16px;
+    border: none;
+    border-radius: 10px;
+    background: var(--bg-color);
+    color: var(--text-color);
+    font-size: 14px;
+    box-shadow: var(--neu-shadow-in);
+    transition: all 0.3s ease;
+}
+
+.accounting-detail-inputs input[type="text"]:focus {
+    outline: none;
+    box-shadow: var(--neu-shadow-out);
+}
+
+.accounting-detail-inputs .btn-add {
+    padding: 12px 20px;
+    border: none;
+    border-radius: 10px;
+    background: var(--primary-color);
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: var(--neu-shadow-out);
+    align-self: flex-end;
+}
+
+.accounting-detail-inputs .btn-add:hover {
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+    transform: translateY(-1px);
+}
+
+/* 更新当日收支统计样式 */
+.accounting-day-summary {
+    display: flex;
+    gap: 12px;
+}
+
+.accounting-day-summary .summary-item {
+    flex: 1;
+    padding: 12px;
+}
+
+/* 记录列表样式 */
+.records-group {
+    margin-bottom: 12px;
+}
+
+.records-date {
+    font-size: 12px;
+    color: var(--text-light);
+    padding: 8px 0;
+    font-weight: 500;
+}
+
+.accounting-records .record-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px;
+    margin-bottom: 8px;
+    background: var(--bg-color);
+    border-radius: 10px;
+    box-shadow: var(--neu-shadow-sm);
+    transition: all 0.3s ease;
+}
+
+.accounting-records .record-item:hover {
+    box-shadow: var(--neu-shadow-out);
+    transform: translateY(-1px);
+}
+
+.accounting-records .record-left {
+    flex: 1;
+    min-width: 0;
+}
+
+.accounting-records .record-category {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-color);
+    margin-bottom: 4px;
+}
+
+.accounting-records .record-note {
+    font-size: 12px;
+    color: var(--text-light);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.accounting-records .record-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.accounting-records .record-amount {
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.accounting-records .record-amount.income {
+    color: #27ae60;
+}
+
+.accounting-records .record-amount.expense {
+    color: #e74c3c;
+}
+
+.accounting-records .record-delete {
+    padding: 6px;
+    border: none;
+    background: transparent;
+    color: var(--text-light);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border-radius: 6px;
+}
+
+.accounting-records .record-delete:hover {
+    color: #e74c3c;
+    background: rgba(231, 76, 60, 0.1);
+}
+
+.btn-text-sm {
+    padding: 4px 8px;
+    border: none;
+    background: transparent;
+    color: var(--text-light);
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border-radius: 6px;
+}
+
+.btn-text-sm:hover {
+    color: #e74c3c;
+    background: rgba(231, 76, 60, 0.1);
+}
+
+/* 确认弹窗样式 */
+#accounting-confirm-modal .confirm-info {
+    padding: 16px 0; margin-top: -20px;
+}
+
+#accounting-confirm-modal .info-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid rgba(163, 177, 198, 0.1);
+}
+
+#accounting-confirm-modal .info-row:last-child {
+    border-bottom: none;
+}
+
+#accounting-confirm-modal .info-label {
+    font-size: 14px;
+    color: var(--text-light);
+}
+
+#accounting-confirm-modal .info-value {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-color);
+}
+
+#accounting-confirm-modal .info-value.highlight {
+    color: var(--primary-color);
+    font-size: 18px;
+}
+
+#accounting-confirm-modal .confirm-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+    padding-top: 16px;
+}
+
+/* ==================== 记账功能 - 新拟物风格 ==================== */
+
+/* 快速记账区域 */
+.accounting-quick-area {
+    padding: 16px;
+    background: var(--bg-color);
+    border-radius: var(--radius);
+    box-shadow: var(--neu-shadow-in);
+}
+
+.quick-input-wrapper {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+.quick-input-wrapper input {
+    flex: 1;
+    padding: 16px 20px;
+    border: none;
+    border-radius: var(--radius);
+    background: var(--bg-color);
+    color: var(--text-color);
+    font-size: 15px;
+    box-shadow: var(--neu-shadow-in);
+    transition: all 0.3s ease;
+}
+
+.quick-input-wrapper input:focus {
+    outline: none;
+    box-shadow: var(--neu-shadow-out), 0 0 0 3px rgba(107, 124, 255, 0.1);
+}
+
+.quick-input-wrapper input::placeholder {
+    color: var(--text-light);
+}
+
+.quick-input-wrapper .btn-add {
+    padding: 16px 24px;
+    border: none;
+    border-radius: var(--radius);
+    background: linear-gradient(145deg, #6b7cff, #5a6be0);
+    color: white;
+    font-size: 18px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 6px 6px 12px rgba(107, 124, 255, 0.3),
+                -6px -6px 12px rgba(255, 255, 255, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.quick-input-wrapper .btn-add:hover {
+    box-shadow: 8px 8px 16px rgba(107, 124, 255, 0.4),
+                -8px -8px 16px rgba(255, 255, 255, 0.9);
+    transform: translateY(-2px);
+}
+
+.quick-input-wrapper .btn-add:active {
+    box-shadow: inset 3px 3px 6px rgba(0, 0, 0, 0.2),
+                inset -3px -3px 6px rgba(255, 255, 255, 0.1);
+    transform: translateY(0);
+}
+
+/* 通用记账区域 */
+.accounting-manual-area {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding: 16px;
+    background: var(--bg-color);
+    border-radius: var(--radius);
+    box-shadow: var(--neu-shadow-in);
+}
+
+/* 收支切换按钮 */
+.accounting-type-switch {
+    display: flex;
+    gap: 12px;
+    padding: 6px;
+    background: var(--bg-color);
+    border-radius: var(--radius);
+    box-shadow: var(--neu-shadow-in);
+}
+
+.type-switch-btn {
+    flex: 1;
+    padding: 12px 20px;
+    border: none;
+    border-radius: calc(var(--radius) - 4px);
+    background: var(--bg-color);
+    color: var(--text-color);
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 6px 6px 12px var(--shadow-dark),
+                -6px -6px 12px var(--shadow-light);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.type-switch-btn:hover {
+    box-shadow: 8px 8px 16px var(--shadow-dark),
+                -8px -8px 16px var(--shadow-light);
+    transform: translateY(-1px);
+}
+
+.type-switch-btn.active {
+    box-shadow: inset 4px 4px 8px var(--shadow-dark),
+                inset -4px -4px 8px var(--shadow-light);
+    color: var(--primary-color);
+    transform: translateY(0);
+}
+
+.type-switch-btn.active[data-type="expense"] {
+    color: #e74c3c;
+}
+
+.type-switch-btn.active[data-type="income"] {
+    color: #27ae60;
+}
+
+/* 分类选择区域 */
+.accounting-categories {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+}
+
+.accounting-categories .category-item {
+    padding: 10px 18px;
+    border: none;
+    border-radius: 12px;
+    background: var(--bg-color);
+    color: var(--text-color);
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 5px 5px 10px var(--shadow-dark),
+                -5px -5px 10px var(--shadow-light);
+}
+
+.accounting-categories .category-item:hover {
+    box-shadow: 7px 7px 14px var(--shadow-dark),
+                -7px -7px 14px var(--shadow-light);
+    transform: translateY(-2px);
+}
+
+.accounting-categories .category-item.active {
+    box-shadow: inset 3px 3px 6px var(--shadow-dark),
+                inset -3px -3px 6px var(--shadow-light);
+    background: linear-gradient(145deg, var(--primary-color), #5a6be0);
+    color: white;
+    transform: translateY(0);
+}
+
+/* 明细输入区域 */
+.accounting-detail-inputs {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.accounting-detail-inputs .input-group {
+    display: flex;
+    align-items: center;
+    background: var(--bg-color);
+    border-radius: var(--radius);
+    box-shadow: var(--neu-shadow-in);
+    padding: 6px;
+    transition: all 0.3s ease;
+}
+
+.accounting-detail-inputs .input-group:focus-within {
+    box-shadow: var(--neu-shadow-out), 0 0 0 3px rgba(107, 124, 255, 0.1);
+}
+
+.accounting-detail-inputs .input-prefix {
+    padding: 0 16px;
+    color: var(--text-color);
+    font-weight: 700;
+    font-size: 18px;
+}
+
+.accounting-detail-inputs input[type="number"] {
+    flex: 1;
+    padding: 14px 16px;
+    border: none;
+    background: transparent;
+    color: var(--text-color);
+    font-size: 14px;
+    font-weight: 400;
+}
+
+.accounting-detail-inputs input[type="number"]:focus {
+    outline: none;
+}
+
+.accounting-detail-inputs input[type="number"]::placeholder {
+    color: var(--text-light);
+    font-weight: 400;
+}
+
+.accounting-detail-inputs input[type="text"] {
+    width: 100%;
+    padding: 14px 20px;
+    border: none;
+    border-radius: var(--radius);
+    background: var(--bg-color);
+    color: var(--text-color);
+    font-size: 15px;
+    box-shadow: var(--neu-shadow-in);
+    transition: all 0.3s ease;
+}
+
+.accounting-detail-inputs input[type="text"]:focus {
+    outline: none;
+    box-shadow: var(--neu-shadow-out), 0 0 0 3px rgba(107, 124, 255, 0.1);
+}
+
+.accounting-detail-inputs input[type="text"]::placeholder {
+    color: var(--text-light);
+}
+
+.accounting-detail-inputs .btn-add {
+    padding: 14px 28px;
+    border: none;
+    border-radius: var(--radius);
+    background: linear-gradient(145deg, #27ae60, #229954);
+    color: white;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 6px 6px 12px rgba(39, 174, 96, 0.3),
+                -6px -6px 12px rgba(255, 255, 255, 0.8);
+    align-self: flex-end;
+}
+
+.accounting-detail-inputs .btn-add:hover {
+    box-shadow: 8px 8px 16px rgba(39, 174, 96, 0.4),
+                -8px -8px 16px rgba(255, 255, 255, 0.9);
+    transform: translateY(-2px);
+}
+
+.accounting-detail-inputs .btn-add:active {
+    box-shadow: inset 3px 3px 6px rgba(0, 0, 0, 0.2),
+                inset -3px -3px 6px rgba(255, 255, 255, 0.1);
+    transform: translateY(0);
+}
+
+/* 当日收支统计 - 更新样式 */
+.accounting-day-summary {
+    display: flex;
+    gap: 12px;
+    padding: 16px;
+    background: var(--bg-color);
+    border-radius: var(--radius);
+    box-shadow: var(--neu-shadow-in);
+}
+
+.accounting-day-summary .summary-item {
+    flex: 1;
+    padding: 16px;
+    background: var(--bg-color);
+    border-radius: calc(var(--radius) - 4px);
+    box-shadow: 5px 5px 10px var(--shadow-dark),
+                -5px -5px 10px var(--shadow-light);
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.accounting-day-summary .summary-item:hover {
+    box-shadow: 7px 7px 14px var(--shadow-dark),
+                -7px -7px 14px var(--shadow-light);
+    transform: translateY(-2px);
+}
+
+.accounting-day-summary .summary-item.expense {
+    border-left: 4px solid #e74c3c;
+}
+
+.accounting-day-summary .summary-item.income {
+    border-left: 4px solid #27ae60;
+}
+
+.accounting-day-summary .summary-label {
+    display: block;
+    font-size: 11px;
+    color: var(--text-light);
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: 600;
+}
+
+.accounting-day-summary .summary-value {
+    display: block;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--text-color);
+}
+
+/* 记录列表样式 */
+.accounting-records {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 250px;
+    padding: 16px;
+    background: var(--bg-color);
+    border-radius: var(--radius);
+    box-shadow: var(--neu-shadow-in);
+}
+
+.records-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 2px solid rgba(163, 177, 198, 0.2);
+    color: var(--text-color);
+    font-weight: 600;
+    font-size: 15px;
+}
+
+.records-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 12px 0;
+    max-height: 320px;
+}
+
+.records-list .empty-hint {
+    text-align: center;
+    color: var(--text-light);
+    padding: 60px 20px;
+    font-size: 14px;
+}
+
+.records-group {
+    margin-bottom: 16px;
+}
+
+.records-date {
+    font-size: 12px;
+    color: var(--text-light);
+    padding: 8px 0;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.accounting-records .record-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+    background: var(--bg-color);
+    border-radius: calc(var(--radius) - 4px);
+    box-shadow: 5px 5px 10px var(--shadow-dark),
+                -5px -5px 10px var(--shadow-light);
+    transition: all 0.3s ease;
+}
+
+.accounting-records .record-item:hover {
+    box-shadow: 7px 7px 14px var(--shadow-dark),
+                -7px -7px 14px var(--shadow-light);
+    transform: translateY(-2px);
+}
+
+.accounting-records .record-left {
+    flex: 1;
+    min-width: 0;
+    padding-right: 12px;
+}
+
+.accounting-records .record-category {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-color);
+    margin-bottom: 4px;
+}
+
+.accounting-records .record-note {
+    font-size: 13px;
+    color: var(--text-light);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.accounting-records .record-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.accounting-records .record-amount {
+    font-size: 18px;
+    font-weight: 700;
+    min-width: 80px;
+    text-align: right;
+}
+
+.accounting-records .record-amount.income {
+    color: #27ae60;
+}
+
+.accounting-records .record-amount.expense {
+    color: #e74c3c;
+}
+
+.accounting-records .record-delete {
+    padding: 8px;
+    border: none;
+    background: var(--bg-color);
+    color: var(--text-light);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border-radius: 8px;
+    box-shadow: 3px 3px 6px var(--shadow-dark),
+                -3px -3px 6px var(--shadow-light);
+}
+
+.accounting-records .record-delete:hover {
+    color: #e74c3c;
+    box-shadow: 4px 4px 8px var(--shadow-dark),
+                -4px -4px 8px var(--shadow-light);
+    transform: translateY(-1px);
+}
+
+.accounting-records .record-delete:active {
+    box-shadow: inset 2px 2px 4px var(--shadow-dark),
+                inset -2px -2px 4px var(--shadow-light);
+    transform: translateY(0);
+}
+
+.btn-text-sm {
+    padding: 6px 12px;
+    border: none;
+    background: var(--bg-color);
+    color: var(--text-light);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border-radius: 8px;
+    box-shadow: 3px 3px 6px var(--shadow-dark),
+                -3px -3px 6px var(--shadow-light);
+}
+
+.btn-text-sm:hover {
+    color: #e74c3c;
+    box-shadow: 4px 4px 8px var(--shadow-dark),
+                -4px -4px 8px var(--shadow-light);
+    transform: translateY(-1px);
+}
+
+.btn-text-sm:active {
+    box-shadow: inset 2px 2px 4px var(--shadow-dark),
+                inset -2px -2px 4px var(--shadow-light);
+    transform: translateY(0);
+}
+
+/* 确认弹窗样式 */
+#accounting-confirm-modal .confirm-info {
+    padding: 20px 0;
+}
+
+#accounting-confirm-modal .info-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 0;
+    border-bottom: 1px solid rgba(163, 177, 198, 0.15);
+}
+
+#accounting-confirm-modal .info-row:last-child {
+    border-bottom: none;
+}
+
+#accounting-confirm-modal .info-label {
+    font-size: 15px;
+    color: var(--text-light);
+    font-weight: 500;
+}
+
+#accounting-confirm-modal .info-value {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-color);
+}
+
+#accounting-confirm-modal .info-value.highlight {
+    color: var(--primary-color);
+    font-size: 20px;
+    font-weight: 700;
+}
+
+#accounting-confirm-modal .confirm-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+    padding-top: 20px;
+}
+
+#accounting-confirm-modal .confirm-actions .btn-secondary {
+    padding: 12px 24px;
+    border: none;
+    border-radius: var(--radius);
+    background: var(--bg-color);
+    color: var(--text-color);
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 5px 5px 10px var(--shadow-dark),
+                -5px -5px 10px var(--shadow-light);
+}
+
+#accounting-confirm-modal .confirm-actions .btn-secondary:hover {
+    box-shadow: 7px 7px 14px var(--shadow-dark),
+                -7px -7px 14px var(--shadow-light);
+    transform: translateY(-2px);
+}
+
+#accounting-confirm-modal .confirm-actions .btn-secondary:active {
+    box-shadow: inset 3px 3px 6px var(--shadow-dark),
+                inset -3px -3px 6px var(--shadow-light);
+    transform: translateY(0);
+}
+
+#accounting-confirm-modal .confirm-actions .btn-primary {
+    padding: 12px 24px;
+    border: none;
+    border-radius: var(--radius);
+    background: linear-gradient(145deg, var(--primary-color), #5a6be0);
+    color: white;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 6px 6px 12px rgba(107, 124, 255, 0.3),
+                -6px -6px 12px rgba(255, 255, 255, 0.8);
+}
+
+#accounting-confirm-modal .confirm-actions .btn-primary:hover {
+    box-shadow: 8px 8px 16px rgba(107, 124, 255, 0.4),
+                -8px -8px 16px rgba(255, 255, 255, 0.9);
+    transform: translateY(-2px);
+}
+
+#accounting-confirm-modal .confirm-actions .btn-primary:active {
+    box-shadow: inset 3px 3px 6px rgba(0, 0, 0, 0.2),
+                inset -3px -3px 6px rgba(255, 255, 255, 0.1);
+    transform: translateY(0);
+}
+
+/* ==================== 模块高度和滚动调整 ==================== */
+
+/* 待办清单卡片 - 固定高度 */
+.todo-card {
+    height: 600px;
+    display: flex;
+    flex-direction: column;
+}
+
+.todo-body {
+    height: 100%;
+    max-height: 600px;
+}
+
+.todo-input-group {
+    flex-shrink: 0;
+}
+
+.todo-stats {
+    flex-shrink: 0;
+}
+
+.todo-list-container {
+    flex: 1;
+    overflow-y: auto;
+    max-height: 460px;
+    padding: 8px;
+}
+
+/* 今日单词卡片 - 固定高度 */
+.word-card {
+    height: 400px;
+    display: flex;
+    flex-direction: column;
+}
+
+.word-content {
+    height: 100%;
+    max-height: 340px;
+    overflow-y: auto;
+    padding: 12px;
+}
+
+.word-footer {
+    flex-shrink: 0;
+    padding: 8px;
+    border-top: 1px solid rgba(163, 177, 198, 0.1);
+}
+
+/* 心情日记卡片 - 固定高度 */
+.mood-card {
+    height: 400px;
+    display: flex;
+    flex-direction: column;
+}
+
+.mood-body {
+    height: 100%;
+    max-height: 400px;
+}
+
+.mood-input-area {
+    flex-shrink: 0;
+    padding: 12px;
+}
+
+.mood-list-container {
+    flex: 1;
+    overflow-y: auto;
+    max-height: 280px;
+    padding: 8px;
+}
+
+/* 卡片body样式调整 */
+.todo-card .card-body,
+.word-card .card-body,
+.mood-card .card-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+}
+
+/* ==================== 隐藏滚动条样式 ==================== */
+
+/* 待办清单滚动容器隐藏滚动条 */
+.todo-list-container {
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE and Edge */
+}
+
+.todo-list-container::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera */
+}
+
+/* 今日单词滚动容器隐藏滚动条 */
+.word-content {
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE and Edge */
+}
+
+.word-content::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera */
+}
+
+/* 心情日记滚动容器隐藏滚动条 */
+.mood-list-container {
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE and Edge */
+}
+
+.mood-list-container::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera */
+}
+
+/* ==================== 第1行模块固定高度 ==================== */
+
+/* 健康打卡卡片 - 固定高度 */
+.health-card {
+    height: 200px;
+    display: flex;
+    flex-direction: column;
+}
+
+/* 放假倒计时卡片 - 固定高度 */
+.holiday-card {
+    height: 200px;
+    display: flex;
+    flex-direction: column;
+}
+
+/* ==================== 确保模块高度固定，内容内部滚动 ==================== */
+
+/* 强制待办清单卡片固定高度 */
+.todo-card {
+    height: 600px !important;
+    max-height: 600px !important;
+    min-height: 600px !important;
+}
+
+.todo-card .card-body {
+    height: calc(600px - 80px) !important;
+    max-height: calc(600px - 80px) !important;
+    overflow: hidden !important;
+}
+
+/* 强制今日单词卡片固定高度 */
+.word-card {
+    height: 400px !important;
+    max-height: 400px !important;
+    min-height: 400px !important;
+}
+
+.word-card .card-body {
+    height: calc(400px - 80px) !important;
+    max-height: calc(400px - 80px) !important;
+    overflow: hidden !important;
+}
+
+/* 强制心情日记卡片固定高度 */
+.mood-card {
+    height: 400px !important;
+    max-height: 400px !important;
+    min-height: 400px !important;
+}
+
+.mood-card .card-body {
+    height: calc(400px - 80px) !important;
+    max-height: calc(400px - 80px) !important;
+    overflow: hidden !important;
+}
+
+/* 强制健康打卡卡片固定高度 */
+.health-card {
+    height: 200px !important;
+    max-height: 200px !important;
+    min-height: 200px !important;
+}
+
+/* 强制放假倒计时卡片固定高度 */
+.holiday-card {
+    height: 200px !important;
+    max-height: 200px !important;
+    min-height: 200px !important;
+}
+
+/* 确保滚动容器正确工作 */
+.todo-list-container {
+    overflow-y: auto !important;
+    max-height: 480px !important;
+    height: 480px !important;
+}
+
+.word-content {
+    overflow-y: auto !important;
+    max-height: 300px !important;
+    height: 300px !important;
+}
+
+.mood-list-container {
+    overflow-y: auto !important;
+    max-height: 260px !important;
+    height: 260px !important;
+}
+
+/* ==================== 最终强制规则 - 确保生效 ==================== */
+
+/* 待办清单 */
+section.todo-card {
+    height: 600px !important;
+    max-height: 600px !important;
+    min-height: 600px !important;
+}
+
+section.todo-card > .card-body {
+    height: calc(600px - 80px) !important;
+    max-height: calc(600px - 80px) !important;
+    overflow: hidden !important;
+    flex: none !important;
+}
+
+section.todo-card .todo-list-container {
+    height: 480px !important;
+    max-height: 480px !important;
+    overflow-y: auto !important;
+    flex: none !important;
+}
+
+/* 今日单词 */
+section.word-card {
+    height: 400px !important;
+    max-height: 400px !important;
+    min-height: 400px !important;
+}
+
+section.word-card > .card-body {
+    height: calc(400px - 80px) !important;
+    max-height: calc(400px - 80px) !important;
+    overflow: hidden !important;
+    flex: none !important;
+}
+
+section.word-card .word-content {
+    height: 300px !important;
+    max-height: 300px !important;
+    overflow-y: auto !important;
+    flex: none !important;
+}
+
+/* 心情日记 */
+section.mood-card {
+    height: 400px !important;
+    max-height: 400px !important;
+    min-height: 400px !important;
+}
+
+section.mood-card > .card-body {
+    height: calc(400px - 80px) !important;
+    max-height: calc(400px - 80px) !important;
+    overflow: hidden !important;
+    flex: none !important;
+}
+
+section.mood-card .mood-list-container {
+    height: 260px !important;
+    max-height: 260px !important;
+    overflow-y: auto !important;
+    flex: none !important;
+}
+
+/* 健康打卡 */
+section.health-card {
+    height: 200px !important;
+    max-height: 200px !important;
+    min-height: 200px !important;
+}
+
+/* 放假倒计时 */
+section.holiday-card {
+    height: 200px !important;
+    max-height: 200px !important;
+    min-height: 200px !important;
+}
+
+/* ==================== Grid布局已固定，确保内容不溢出 ==================== */
+
+/* Grid行高已设置为：200px 400px auto */
+/* 待办清单跨两行：200px + 400px = 600px */
+/* 今日单词在第2行：400px */
+/* 心情日记在第2行：400px */
+
+/* 确保卡片不会超出Grid行高 */
+section.todo-card {
+    height: 100% !important;
+    max-height: 100% !important;
+    overflow: hidden !important;
+}
+
+section.word-card {
+    height: 100% !important;
+    max-height: 100% !important;
+    overflow: hidden !important;
+}
+
+section.mood-card {
+    height: 100% !important;
+    max-height: 100% !important;
+    overflow: hidden !important;
+}
+
+section.health-card {
+    height: 100% !important;
+    max-height: 100% !important;
+    overflow: hidden !important;
+}
+
+section.holiday-card {
+    height: 100% !important;
+    max-height: 100% !important;
+    overflow: hidden !important;
+}
+
+/* 确保内容区域可以滚动 */
+.todo-list-container {
+    overflow-y: auto !important;
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
+}
+
+.todo-list-container::-webkit-scrollbar {
+    display: none !important;
+}
+
+.word-content {
+    overflow-y: auto !important;
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
+}
+
+.word-content::-webkit-scrollbar {
+    display: none !important;
+}
+
+.mood-list-container {
+    overflow-y: auto !important;
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
+}
+
+.mood-list-container::-webkit-scrollbar {
+    display: none !important;
+}
+
+/* ==================== 最近记录样式 ==================== */
+.accounting-records .accounting-record {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 64px;
+    padding: 14px;
+    margin-bottom: 12px;
+    background: #e0e5ec;
+    border-radius: 12px;
+    box-shadow: 4px 4px 8px #a3b1c6, -4px -4px 8px #ffffff;
+    transition: all 0.3s ease;
+}
+
+.accounting-records .accounting-record:hover {
+    box-shadow: 12px 12px 24px var(--shadow-dark), -12px -12px 24px var(--shadow-light);
+    transform: translateY(-1px);
+}
+
+.accounting-records .accounting-record-left {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.accounting-records .accounting-record-icon-wrapper {
+    width: 40px;
+    height: 40px;
+    background: #e0e5ec;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    box-shadow: 2px 2px 4px #a3b1c6, -2px -2px 4px #ffffff;
+}
+
+.accounting-records .accounting-record-icon-wrapper i {
+    width: 18px;
+    height: 18px;
+}
+
+.accounting-records .accounting-record.expense .accounting-record-icon-wrapper i {
+    color: #e74c3c;
+}
+
+.accounting-records .accounting-record.income .accounting-record-icon-wrapper i {
+    color: #27ae60;
+}
+
+.accounting-records .accounting-record-content {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.accounting-records .accounting-record-category {
+    color: #4a5568;
+    font-weight: 500;
+    font-size: 14px;
+}
+
+.accounting-records .accounting-record-note {
+    color: #718096;
+    font-size: 13px;
+}
+
+.accounting-records .accounting-record-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    position: relative;
+}
+
+.accounting-records .accounting-record-amount-time {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 2px;
+    transition: all 0.3s ease;
+}
+
+.accounting-records .accounting-record-amount {
+    font-size: 16px;
+    font-weight: 700;
+}
+
+.accounting-record-amount.expense {
+    color: #e74c3c;
+}
+
+.accounting-record-amount.income {
+    color: #27ae60;
+}
+
+.accounting-records .accounting-record-time {
+    font-size: 11px;
+    color: #a0aec0;
+    font-weight: 400;
+}
+
+.accounting-records .accounting-record:hover .accounting-record-amount-time {
+    transform: translateX(-80px);
+}
+
+.accounting-records .accounting-record-edit {
+    position: absolute;
+    right: 50px;
+    top: 50%;
+    transform: translateY(-50%);
+    opacity: 0;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    border: none;
+    border-radius: 8px;
+    background: #e0e5ec;
+    box-shadow: 2px 2px 4px #a3b1c6, -2px -2px 4px #ffffff;
+    color: #6b7fff;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+}
+
+.accounting-records .accounting-record-delete {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    opacity: 0;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    border: none;
+    border-radius: 8px;
+    background: #e0e5ec;
+    box-shadow: 2px 2px 4px #a3b1c6, -2px -2px 4px #ffffff;
+    color: #e74c3c;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+}
+
+.accounting-records .accounting-record:hover .accounting-record-edit,
+.accounting-records .accounting-record:hover .accounting-record-delete {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.accounting-record-edit:hover {
+    box-shadow: inset 3px 3px 6px #a3b1c6, inset -3px -3px 6px #ffffff;
+}
+
+.accounting-record-delete:hover {
+    box-shadow: inset 3px 3px 6px #a3b1c6, inset -3px -3px 6px #ffffff;
+}
+
+.accounting-records .accounting-record-edit i {
+    font-size: 14px;
+}
+
+.accounting-records .accounting-record-delete i {
+    font-size: 14px;
+}
+}
+
+/* 修改金额输入框字体大小，使其与备注框一致 */
+#accounting-amount-input {
+    font-size: 15px !important;
+    font-weight: 400 !important;
+}
+
+.accounting-detail-inputs input[type="number"]#accounting-amount-input {
+    font-size: 15px !important;
+    font-weight: 400 !important;
+}
+
+/* 确认记账弹窗内容上移20px */
+#accounting-confirm-modal .modal-body {
+    padding-top: 0 !important;
+}
+
+/* 修改news-body的左右padding，让列表阴影不被遮挡 */
+.news-body {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+}
+
+/* 隐藏新闻加载状态 */
+.news-loading {
+    display: none !important;
+}
+
+/* 增加tab和列表之间的间距 */
+.news-content {
+    margin-top: 20px !important;
+}
+
+/* 确保列表左右阴影不被裁剪 */
+.news-list {
+    overflow-x: visible !important;
+}
+
+.accounting-records {
+    overflow-x: visible !important;
+}
+
+/* 强制移除news-body的左右padding（简写属性覆盖） */
+.news-body {
+    padding: 0 0 0 0 !important;
+}
+
+/* 修复滚动容器裁剪左右阴影的问题 */
+.news-list {
+    overflow-x: visible !important;
+    overflow-y: auto !important;
+}
+
+.news-content {
+    overflow-x: visible !important;
+}
+
+/* 给记账记录列表添加负margin，让阴影能完全显示 */
+.accounting-records {
+    margin-left: -8px !important;
+    margin-right: -8px !important;
+}
+
+/* 给每条记录添加margin来补偿，确保边框宽度和通用记账一致 */
+.accounting-records .accounting-record {
+    margin: 0 8px 12px 8px !important;
+}
+
+/* 增大负margin到32px，让阴影完全显示 */
+
+/* 增大负margin到32px，让阴影完全显示 */
+.accounting-records {
+    margin-left: -32px !important;
+    margin-right: -32px !important;
+}
+
+/* 确保记账记录每条的宽度保持518px，和通用记账一致 */
+.accounting-records .accounting-record {
+    width: 518px !important;
+    max-width: 518px !important;
+    box-sizing: border-box !important;
+    margin: 0 32px 12px 32px !important;
+}
+
+/* 确保记账记录和通用记账模块左对齐 */
+.accounting-records .accounting-record {
+    margin-left: 0 !important;
+    margin-right: auto !important;
+}
+
+/* 确保记账记录和通用记账模块左对齐，保持底部间距 */
+
+/* 记账列表样式：左右负margin让阴影显示，整体向右移动30px */
+.accounting-records {
+    margin-left: -32px !important;
+    margin-right: -32px !important;
+    padding: 0 !important;
+}
+
+.accounting-records .accounting-record {
+    width: 518px !important;
+    max-width: 518px !important;
+    box-sizing: border-box !important;
+    margin-left: 62px !important;
+    margin-right: 0 !important;
+    margin-bottom: 12px !important;
+}
+
+/* 将记账记录列表居中排列 */
+.accounting-records {
+    justify-content: center !important;
+    align-items: center !important;
+}
+
+.accounting-records .accounting-record {
+    margin-left: auto !important;
+    margin-right: auto !important;
+}
+
+/* 热点新闻列表样式：左右负margin让阴影显示，列表居中展示 */
+.news-list {
+    margin-left: -32px !important;
+    margin-right: -32px !important;
+    padding: 16px 4px 4px 4px !important;
+    display: flex !important;
+    transform: translateY(-15px) !important;
+    flex-direction: column !important;
+
+
+/* 热点新闻列表样式：左右负margin让阴影显示，列表居中展示，宽度518px */
+.news-list {
+    margin-left: -32px !important;
+    margin-right: -32px !important;
+    padding: 16px 4px 4px 4px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+    align-items: center !important;
+    transform: translateY(-15px) !important;
+}
+.news-item {
+    width: 518px !important;
+    max-width: 518px !important;
+    min-width: 518px !important;
+    box-sizing: border-box !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+}
+
+/* 给新闻列表添加上下负margin让阴影显示 */
+.news-list {
+    margin-top: -32px !important;
+    margin-bottom: -32px !important;
+}
+
+/* 移除news-content的margin-top，让news-list的负margin生效 */
+.news-content {
+    margin-top: 0 !important;
+}
+
+/* 给news-body添加负margin和padding，让内部列表的上方阴影显示 */
+.news-body {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+}
+
+/* 确保news-body和card-body没有overflow裁剪 */
+.news-body, .card-body {
+    overflow: visible !important;
+}
+
+/* 确保news-card也没有overflow裁剪 */
+.news-card {
+    overflow: visible !important;
+}
+
+/* 减少card-header的底部margin，给新闻列表上方阴影留出空间 */
+.news-card .card-header {
+    margin-bottom: 0 !important;
+}
+
+/* 去掉news-card的固定高度，改为自适应 */
+.news-card {
+    height: auto !important;
+    min-height: auto !important;
+}
+
+/* 设置news-list最多显示8条新闻 */
+.news-list {
+    max-height: none !important;
+    overflow: visible !important;
+}
+
+/* 快速记账提交按钮右对齐 */
+
+/* 快速记账提交按钮右对齐 */
+
+/* 快速记账和最近记录样式调整 */
+.quick-input-row {
+    display: flex !important;
+    gap: 0 !important;
+}
+
+.quick-input-field {
+    flex: 1 !important;
+}
+
+.quick-add-btn {
+    margin-left: auto !important;
+}
+
+.records-header {
+    border: none !important;
+    border-bottom: none !important;
+}
+
+/* ==================== 收支按钮样式修复 ==================== */
+
+/* 支出按钮未激活状态：紫色icon和文字 */
+.type-toggle-btn.expense:not(.active) {
+    color: #6b7fff !important;
+}
+
+/* 收入按钮未激活状态：绿色icon和文字 */
+.type-toggle-btn.income:not(.active) {
+    color: #27ae60 !important;
+}
+
+/* 收入按钮激活状态：绿色背景+白色文字/icon */
+.type-toggle-btn.income.active {
+    background: #27ae60 !important;
+    color: #ffffff !important;
+    box-shadow: var(--neu-shadow-in) !important;
+}
+
+/* 收入分类选中效果：绿色背景+白色文字/icon */
+.category-item.selected[data-category="income"] {
+    background: #27ae60 !important;
+    color: #ffffff !important;
+}
+
+.category-item.selected[data-category="income"] .category-icon {
+    color: #ffffff !important;
+}
