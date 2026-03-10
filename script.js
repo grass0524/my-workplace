@@ -2925,9 +2925,15 @@ async function fetchAllNews(category = 'tech') {
                 title: item.title || '无标题',
                 source: item.author_name || item.source || '聚合数据',
                 url: item.url,
-                time: formatNewsTime(item.ctime || item.pubdate || new Date().toISOString()),
-                date: item.ctime || item.pubdate || new Date().toISOString()
+                time: formatNewsTime(item.date || item.ctime || item.pubdate || new Date().toISOString()),
+                date: item.date || item.ctime || item.pubdate || new Date().toISOString()
             }));
+            
+            // 调试：查看原始date和处理后的time
+            console.log(`时间处理示例 (${category}):`, {
+                原始date: articles[0].date,
+                显示time: newsList[0].time
+            });
 
             console.log(`新闻数据获取成功（聚合数据API - ${category}, type=${newsType})`);
             return newsList;
@@ -2944,9 +2950,15 @@ async function fetchAllNews(category = 'tech') {
 
 // 格式化新闻时间
 function formatNewsTime(timestamp) {
+    // 去掉时区标识Z，避免时区转换
+    const localTimestamp = timestamp ? timestamp.replace('Z', '').replace('z', '') : new Date().toISOString();
+    
     const now = new Date();
-    const newsTime = new Date(timestamp);
+    const newsTime = new Date(localTimestamp);
     const diff = Math.floor((now - newsTime) / 1000 / 60); // 分钟
+    
+    // 调试日志
+    console.log('formatNewsTime - 原始:', timestamp, '处理后:', localTimestamp, 'diff:', diff);
     
     if (diff < 60) return `${diff}分钟前`;
     if (diff < 1440) return `${Math.floor(diff / 60)}小时前`;
