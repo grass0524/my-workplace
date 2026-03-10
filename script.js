@@ -3800,3 +3800,89 @@ window.debugIncomeCategory = forceFixIncomeCategoryBackground;
 window.fixIncomeCategory = forceFixIncomeCategoryBackground;
 
 console.log('Debug function loaded! Call window.fixIncomeCategory() in console to test');
+
+const HD2026 = {
+    '2026-01-01':{n:'元旦',r:'01-01至01-03'},'2026-01-02':{n:'元旦',r:'01-01至01-03'},'2026-01-03':{n:'元旦',r:'01-01至01-03'},
+    '2026-02-15':{n:'春节',r:'02-15至02-21'},'2026-02-16':{n:'春节',r:'02-15至02-21'},'2026-02-17':{n:'春节',r:'02-15至02-21'},'2026-02-18':{n:'春节',r:'02-15至02-21'},'2026-02-19':{n:'春节',r:'02-15至02-21'},'2026-02-20':{n:'春节',r:'02-15至02-21'},'2026-02-21':{n:'春节',r:'02-15至02-21'},
+    '2026-04-04':{n:'清明',r:'04-04至04-06'},'2026-04-05':{n:'清明',r:'04-04至04-06'},'2026-04-06':{n:'清明',r:'04-04至04-06'},
+    '2026-05-01':{n:'劳动节',r:'05-01至05-05'},'2026-05-02':{n:'劳动节',r:'05-01至05-05'},'2026-05-03':{n:'劳动节',r:'05-01至05-05'},'2026-05-04':{n:'劳动节',r:'05-01至05-05'},'2026-05-05':{n:'劳动节',r:'05-01至05-05'},
+    '2026-06-19':{n:'端午',r:'06-19至06-21'},'2026-06-20':{n:'端午',r:'06-19至06-21'},'2026-06-21':{n:'端午',r:'06-19至06-21'},
+    '2026-09-25':{n:'中秋',r:'09-25至09-27'},'2026-09-26':{n:'中秋',r:'09-25至09-27'},'2026-09-27':{n:'中秋',r:'09-25至09-27'},
+    '2026-10-01':{n:'国庆节',r:'10-01至10-07'},'2026-10-02':{n:'国庆节',r:'10-01至10-07'},'2026-10-03':{n:'国庆节',r:'10-01至10-07'},'2026-10-04':{n:'国庆节',r:'10-01至10-07'},'2026-10-05':{n:'国庆节',r:'10-01至10-07'},'2026-10-06':{n:'国庆节',r:'10-01至10-07'},'2026-10-07':{n:'国庆节',r:'10-01至10-07'}
+};
+const MD2026 = {'2026-01-04':'元旦补班','2026-02-14':'春节补班','2026-02-22':'春节补班','2026-04-12':'清明补班','2026-05-09':'五一补班','2026-09-27':'中秋补班','2026-10-10':'国庆补班'};
+let curHMonth = new Date();
+
+function openHolidayModal(){
+    const m=document.getElementById('holiday-calendar-modal');
+    if(m){
+        m.classList.remove('hidden');
+        m.classList.add('active');
+        curHMonth=new Date();
+        RHCal();
+    }
+}
+function closeHolidayModal(){
+    const m=document.getElementById('holiday-calendar-modal');
+    if(m){
+        m.classList.add('hidden');
+        m.classList.remove('active');
+    }
+}
+function changeHolidayMonth(d){
+    curHMonth.setMonth(curHMonth.getMonth()+d);
+    RHCal();
+}
+function RHCal(){
+    const g=document.getElementById('holiday-calendar');
+    const l=document.getElementById('holiday-calendar-month');
+    if(!g)return;
+    const y=curHMonth.getFullYear();
+    const mo=curHMonth.getMonth();
+    if(l)l.textContent=y+'年'+(mo+1)+'月';
+    const fd=new Date(y,mo,1);
+    const ld=new Date(y,mo+1,0);
+    const sd=fd.getDay();
+    const days=ld.getDate();
+    let html='<div class="calendar-weekdays">';
+    ['日','一','二','三','四','五','六'].forEach(wd=>html+='<div class="calendar-weekday">'+wd+'</div>');
+    html+='</div><div class="calendar-days">';
+    for(let i=0;i<sd;i++)html+='<div class="holiday-day empty"></div>';
+    for(let d=1;d<=days;d++){
+        const ds=y+'-'+String(mo+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
+        const hd=HD2026[ds];
+        const md=MD2026[ds];
+        const iw=new Date(y,mo,d).getDay()===0||new Date(y,mo,d).getDay()===6;
+        let cls='holiday-day',label='';
+        if(hd){
+            cls+=' holiday';
+            label='<span class="holiday-day-label">假</span>';
+        }else if(md){
+            cls+=' makeup';
+            label='<span class="holiday-day-label">班</span>';
+        }else if(iw){
+            cls+=' weekend';
+        }
+        html+=`<div class="${cls}" onclick="showHInfo('${ds}')">${d}${label}</div>`;
+    }
+    html+='</div>';
+    g.innerHTML=html;
+}
+function showHInfo(ds){
+    const d=new Date(ds);
+    const wd=['周日','周一','周二','周三','周四','周五','周六'][d.getDay()];
+    const hd=HD2026[ds];
+    const md=MD2026[ds];
+    const iw=d.getDay()===0||d.getDay()===6;
+    let msg=`${ds} ${wd}`;
+    if(hd){
+        msg+=`\n${hd.n}\n${hd.r}`;
+    }else if(md){
+        msg+=`\n${md}\n需要上班`;
+    }else if(iw){
+        msg+='\n正常休息';
+    }else{
+        msg+='\n正常上班';
+    }
+    alert(msg);
+}

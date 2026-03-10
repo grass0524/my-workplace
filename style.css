@@ -5802,3 +5802,106 @@ section.holiday-card {
 .category-item.selected[data-category="income"] .category-icon {
     color: #ffffff !important;
 }
+
+/* 放假日历 - 使用健康打卡样式 */
+.holiday-calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 10px;
+    margin: 0 0 20px 0;
+    padding: 0 4px;
+}
+
+.holiday-day {
+    aspect-ratio: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    border-radius: 10px;
+    font-size: 12px;
+    cursor: pointer;
+    position: relative;
+    background: var(--bg-color);
+    padding: 4px;
+    box-shadow: var(--neu-shadow-sm);
+    transition: all 0.3s ease;
+}
+
+.holiday-day:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--neu-shadow-out);
+}
+
+.holiday-day.empty {
+    background: transparent;
+    box-shadow: none;
+    cursor: default;
+}
+
+.holiday-day.holiday {
+    background: var(--bg-color);
+    position: relative;
+}
+
+.holiday-day.holiday::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(72, 187, 120, 0.2);
+    border-radius: 10px;
+    pointer-events: none;
+}
+
+.holiday-day.makeup {
+    background: var(--bg-color);
+    position: relative;
+}
+
+.holiday-day.makeup::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(236, 201, 75, 0.2);
+    border-radius: 10px;
+    pointer-events: none;
+}
+
+.holiday-day.weekend {
+    color: var(--text-light);
+}
+
+.holiday-day-num {
+    font-weight: bold;
+}
+
+.holiday-day-label {
+    font-size: 9px;
+    padding: 2px 4px;
+    border-radius: 3px;
+    background: rgba(72, 187, 120, 0.3);
+    margin-top: 2px;
+    font-weight: 600;
+}
+
+.holiday-day.makeup .holiday-day-label {
+    background: rgba(236, 201, 75, 0.3);
+}
+
+.legend .dot.holiday {
+    background: rgba(72, 187, 120, 0.2);
+}
+
+.legend .dot.makeup {
+    background: rgba(236, 201, 75, 0.2);
+}
+
+#holiday-calendar-modal .modal-content {
+    max-width: 1000px;
+}
