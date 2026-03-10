@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>测试快速记账新拟物风格</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* 调试边框 */
+        .accounting-quick-area {
+            outline: 3px solid red !important;
+        }
+        .quick-input-wrapper input {
+            outline: 2px solid blue !important;
+        }
+        .quick-input-wrapper .btn-add {
+            outline: 2px solid green !important;
+        }
+        .debug-info {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 12px;
+            z-index: 9999;
+        }
+    </style>
+</head>
+<body>
+    <div class="debug-info" id="debug-info">
+        正在检测样式...
+    </div>
+    
+    <div class="container">
+        <div style="padding: 40px;">
+            <!-- 记账模块 -->
+            <section class="card accounting-card">
+                <div class="card-header">
+                    <h2>记账</h2>
+                </div>
+                <div class="card-body accounting-body">
+                    <!-- 快速记账区域 -->
+                    <div class="accounting-quick-area">
+                        <div class="quick-input-wrapper">
+                            <input type="text" id="accounting-quick-input"
+                                   placeholder="快速记账：午餐35元、打车20元">
+                            <button class="btn-add">
+                                <i class="fas fa-bolt"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script>
+        // 检测样式是否应用
+        function checkStyles() {
+            const input = document.querySelector('.quick-input-wrapper input');
+            const button = document.querySelector('.quick-input-wrapper .btn-add');
+            const area = document.querySelector('.accounting-quick-area');
+            
+            const inputStyle = window.getComputedStyle(input);
+            const buttonStyle = window.getComputedStyle(button);
+            const areaStyle = window.getComputedStyle(area);
+            
+            const debugInfo = document.getElementById('debug-info');
+            debugInfo.innerHTML = `
+                <strong>样式检测：</strong><br>
+                <br>
+                <strong>输入框：</strong><br>
+                背景色: ${inputStyle.backgroundColor}<br>
+                box-shadow: ${inputStyle.boxShadow.substring(0, 50)}...<br>
+                padding: ${inputStyle.padding}<br>
+                border-radius: ${inputStyle.borderRadius}<br>
+                <br>
+                <strong>按钮：</strong><br>
+                宽度: ${buttonStyle.width}<br>
+                高度: ${buttonStyle.height}<br>
+                背景: ${buttonStyle.background.substring(0, 50)}...<br>
+                box-shadow: ${buttonStyle.boxShadow.substring(0, 60)}...
+            `;
+        }
+        
+        setTimeout(checkStyles, 100);
+    </script>
+</body>
+</html>

@@ -7,9 +7,9 @@
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
     <title>My Workplace</title>
-<link rel="stylesheet" href="style.css?v=1773110782">
+<link rel="stylesheet" href="style.css?v=1773029000">
     <!-- 引入 Font Awesome 图标库 (CDN) -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" media="print" onload="this.media='all'">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- 引入 Lucide 图标库 (pencil设计使用) -->
     <script src="https://unpkg.com/lucide@latest"></script>
 <style>
@@ -187,7 +187,7 @@ input[type="number"] {
 
 .type-toggle-group {
     display: flex;
-    gap: 10px;
+    gap: 6px;
 }
 
 .type-toggle-group .type-toggle-btn {
@@ -212,7 +212,7 @@ input[type="number"] {
 }
 
 .type-toggle-group .type-toggle-btn.expense {
-    color: #6b7fff ;
+    color: #718096;
 }
 
 .type-toggle-group .type-toggle-btn.expense.active {
@@ -222,7 +222,7 @@ input[type="number"] {
 }
 
 .type-toggle-group .type-toggle-btn.income {
-    color: #27ae60;
+    color: #718096;
 }
 
 .type-toggle-group .type-toggle-btn.income.active {
@@ -270,7 +270,7 @@ input[type="number"] {
 .confirm-amount-input .currency-symbol {
     font-size: 14px;
     font-weight: 600;
-    color: #6b7fff ;
+    color: #6b7fff;
 }
 
 .confirm-amount-input input {
@@ -346,16 +346,14 @@ input[type="number"] {
     /* 快速记账样式调整 */
     .quick-input-row {
         display: flex !important;
-        gap: 20px !important;
+        gap: 0 !important;
     }
     .quick-input-field {
-        width: 450px !important;
-        max-width: 450px !important;
-        flex: none !important;
+        flex: 1 !important;
+        max-width: calc(100% - 30px) !important;
     }
     .quick-add-btn {
         margin-left: auto !important;
-        margin-right: -10px !important;
     }
 </style>
 <style>
@@ -395,7 +393,7 @@ input[type="number"] {
 }
 
 .accounting-card .accounting-stats-btn:hover {
-    color: #6b7fff ;
+    color: #6b7fff;
     box-shadow: 6px 6px 12px #a3b1c6, -6px -6px 12px #ffffff;
     transform: translateY(-1px);
 }
@@ -414,7 +412,7 @@ input[type="number"] {
 }
 
 .accounting-card .accounting-stats-btn span {
-    color: #6b7fff ;
+    color: #6b7fff;
     font-size: 13px;
     font-weight: 600;
 }
@@ -474,7 +472,7 @@ input[type="number"] {
 .quick-input-field .input-icon {
     width: 20px;
     height: 20px;
-    color: #6b7fff ;
+    color: #6b7fff;
     flex-shrink: 0;
 }
 
@@ -597,12 +595,9 @@ input[type="number"] {
 }
 
 /* 收入按钮的icon特殊处理 */
-}
-
-/* 支出按钮的icon特殊处理 - 紫色 */
-.type-toggle-btn.expense:not(.active) i,
-.type-toggle-btn.expense:not(.active) svg {
-    color: #6b7fff !important;
+.type-toggle-btn:not(.active) i,
+.type-toggle-btn:not(.active) svg {
+    color: #48bb78;
 }
 
 .type-toggle-btn i,
@@ -618,9 +613,9 @@ input[type="number"] {
 }
 
 /* 收入按钮的icon特殊处理 */
-.type-toggle-btn.income:not(.active) i,
-.type-toggle-btn.income:not(.active) svg {
-    color: #48bb78 !important;
+.type-toggle-btn:not(.active) i,
+.type-toggle-btn:not(.active) svg {
+    color: #48bb78;
 }
 
 .type-toggle-btn i,
@@ -775,7 +770,7 @@ input[type="number"] {
 .accounting-detail-inputs .input-prefix {
     position: absolute;
     left: 20px;
-    color: #6b7fff !important;
+    color: #6b7fff;
     font-size: 16px;
     font-weight: 600;
     z-index: 1;
@@ -966,7 +961,7 @@ input[type="number"] {
 /* Modal Body */
 .quick-accounting-modal-content .modal-body {
     flex: 1;
-    padding: 10px 20px 30px 20px;
+    padding: 30px 20px;
     display: flex;
     flex-direction: column;
     gap: 20px !important;
@@ -1003,7 +998,7 @@ input[type="number"] {
 
 .type-toggle-group {
     display: flex;
-    gap: 10px !important;
+    gap: 4px !important;
 }
 
 .type-toggle-group .type-toggle-btn {
@@ -1011,7 +1006,6 @@ input[type="number"] {
     align-items: center;
     gap: 3px;
     height: 35px;
-    width: 90px;
     padding: 4px 10px !important;
     border: none;
     background: #e0e5ec;
@@ -1030,7 +1024,7 @@ input[type="number"] {
 }
 
 .type-toggle-group .type-toggle-btn.expense {
-    color: #6b7fff !important;
+    color: #718096;
 }
 
 .type-toggle-group .type-toggle-btn.expense.active {
@@ -1040,7 +1034,7 @@ input[type="number"] {
 }
 
 .type-toggle-group .type-toggle-btn.income {
-    color: #27ae60;
+    color: #718096;
 }
 
 .type-toggle-group .type-toggle-btn.income.active {
@@ -1091,7 +1085,7 @@ input[type="number"] {
 .confirm-amount-input .currency-symbol {
     font-size: 13px;
     font-weight: 600;
-    color: #6b7fff !important;
+    color: #6b7fff;
 }
 
 .confirm-amount-input input {
@@ -1158,16 +1152,14 @@ input[type="number"] {
     /* 快速记账样式调整 */
     .quick-input-row {
         display: flex !important;
-        gap: 20px !important;
+        gap: 0 !important;
     }
     .quick-input-field {
-        width: 450px !important;
-        max-width: 450px !important;
-        flex: none !important;
+        flex: 1 !important;
+        max-width: calc(100% - 30px) !important;
     }
     .quick-add-btn {
         margin-left: auto !important;
-        margin-right: -10px !important;
     }
 </style>
 <style>
@@ -1279,16 +1271,14 @@ input[type="number"] {
     /* 快速记账样式调整 */
     .quick-input-row {
         display: flex !important;
-        gap: 20px !important;
+        gap: 0 !important;
     }
     .quick-input-field {
-        width: 450px !important;
-        max-width: 450px !important;
-        flex: none !important;
+        flex: 1 !important;
+        max-width: calc(100% - 30px) !important;
     }
     .quick-add-btn {
         margin-left: auto !important;
-        margin-right: -10px !important;
     }
 </style>
 <style>
@@ -1315,99 +1305,20 @@ input[type="number"] {
     /* 快速记账样式调整 */
     .quick-input-row {
         display: flex !important;
-        gap: 20px !important;
+        gap: 0 !important;
     }
     .quick-input-field {
-        width: 450px !important;
-        max-width: 450px !important;
-        flex: none !important;
+        flex: 1 !important;
+        max-width: calc(100% - 30px) !important;
     }
     .quick-add-btn {
         margin-left: auto !important;
-        margin-right: -10px !important;
     }
 </style>
-    <style>
-    /* 减少记账记录之间的间距5px */
-    .accounting-records .accounting-record {
-        margin-bottom: 7px !important;
-    }
-    </style>
-    
-    <style>
-    /* 收支按钮样式强制修复 */
-    .type-toggle-btn.expense:not(.active) {
-        color: #6b7fff !important;
-    }
-    .type-toggle-btn.income:not(.active) {
-        color: #27ae60 !important;
-    }
-    .type-toggle-btn.income.active {
-        background: #27ae60 !important;
-        color: #ffffff !important;
-        box-shadow: var(--neu-shadow-out) !important;
-    }
-    </style>
-    <style>
-    /* 收支按钮样式强制修复 */
-    .type-toggle-btn.expense:not(.active) {
-        color: #6b7fff !important;
-    }
-    .type-toggle-btn.income:not(.active) {
-        color: #27ae60 !important;
-    }
-    .type-toggle-btn.income.active {
-        background: #27ae60 !important;
-        color: #ffffff !important;
-        box-shadow: var(--neu-shadow-out) !important;
-    }
-    </style>
-
+</head>
 <body>
     <div class="container">
         <!-- 头部 -->
-
-<style>
-/* 修复收支按钮icon颜色 */
-.type-toggle-btn.expense:not(.active) i,
-.type-toggle-btn.expense:not(.active) svg {
-    color: #6b7fff !important;
-}
-.type-toggle-btn.income:not(.active) i,
-.type-toggle-btn.income:not(.active) svg {
-    color: #48bb78 !important;
-}
-.type-toggle-group .type-toggle-btn.expense:not(.active) i,
-.type-toggle-group .type-toggle-btn.expense:not(.active) svg {
-    color: #6b7fff !important;
-}
-.type-toggle-group .type-toggle-btn.income:not(.active) i,
-.type-toggle-group .type-toggle-btn.income:not(.active) svg {
-    color: #48bb78 !important;
-}
-
-/* 激活状态下的icon和文字都是白色 */
-.type-toggle-group .type-toggle-btn.expense.active i,
-.type-toggle-group .type-toggle-btn.expense.active svg {
-    color: #ffffff !important;
-}
-.type-toggle-group .type-toggle-btn.income.active i,
-.type-toggle-group .type-toggle-btn.income.active svg {
-    color: #ffffff !important;
-}
-.type-toggle-group .type-toggle-btn.expense i,
-.type-toggle-group .type-toggle-btn.expense svg {
-    color: #6b7fff !important;
-}
-.type-toggle-group .type-toggle-btn.income i,
-.type-toggle-group .type-toggle-btn.income svg {
-    color: #48bb78 !important;
-}
-/* 激活状态下的文字都是白色 */
-.type-toggle-group .type-toggle-btn.expense.active span,
-.type-toggle-group .type-toggle-btn.income.active span {
-    color: #ffffff !important;
-}</style>
         <header class="header">
             <h1>My Workplace</h1>
             <div class="date-info" id="current-date"></div>
@@ -1703,7 +1614,7 @@ input[type="number"] {
                                            placeholder="输入如：午餐35 或 地铁充值100"
                                            onkeypress="handleAccountingQuickInput(event)">
                                 </div>
-                                <button class="quick-add-btn" onclick="addQuickAccounting()" style="transform: translateX(-20px) !important;">
+                                <button class="quick-add-btn" onclick="addQuickAccounting()">
                                     <i data-lucide="send"></i>
                                 </button>
                             </div>
@@ -1780,10 +1691,7 @@ input[type="number"] {
                                 <i class="fas fa-chart-line"></i> 财经
                             </button>
                             <button class="news-tab" data-category="general" onclick="switchNewsCategory('general')">
-                                <i class="fas fa-globe-asia"></i> 国内
-                            </button>
-                            <button class="news-tab" data-category="international" onclick="switchNewsCategory('international')">
-                                <i class="fas fa-globe"></i> 国际
+                                <i class="fas fa-globe"></i> 综合
                             </button>
                         </div>
                         <div class="news-loading" id="news-loading">
@@ -2000,19 +1908,8 @@ input[type="number"] {
     </div>
 
     <!-- Chart.js 图表库 -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js" defer></script>
-    <script>
-    // 强制清除新闻缓存以显示7条新闻
-    if (localStorage.getItem('newsData')) {
-        const data = JSON.parse(localStorage.getItem('newsData'));
-        if (!data.version || data.version < 2 || (data.tech && data.tech.length < 8)) {
-            console.log('清除旧版本新闻缓存...');
-            localStorage.removeItem('newsData');
-        }
-    }
-    </script>
-    
-<script src="script.js?v=1773111001"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="script.js?v=1773028038"></script>
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">

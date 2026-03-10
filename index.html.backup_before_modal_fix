@@ -7,9 +7,9 @@
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
     <title>My Workplace</title>
-<link rel="stylesheet" href="style.css?v=1773110782">
+    <link rel="stylesheet" href="style.css">
     <!-- 引入 Font Awesome 图标库 (CDN) -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" media="print" onload="this.media='all'">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- 引入 Lucide 图标库 (pencil设计使用) -->
     <script src="https://unpkg.com/lucide@latest"></script>
 <style>
@@ -74,8 +74,6 @@ input[type="number"] {
 /* 记录头部样式 */
 .records-header {
     padding: 0;
-    margin-bottom: -10px;
-    border-bottom: none !important;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -101,22 +99,15 @@ input[type="number"] {
 
 /* 快速记账确认弹窗样式 */
 .quick-accounting-modal-content {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
     width: 480px;
     max-width: 90vw;
-    background: #e0e5ec;
-    border-radius: 16px;
-    box-shadow: 6px 6px 12px #a3b1c6, -6px -6px 12px #ffffff;
-    padding: 0;
 }
+
 .quick-accounting-modal-content .modal-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 30px 20px 20px 20px;
+    padding: 12px 20px;
     border-bottom: 1px solid rgba(163, 177, 198, 0.2);
 }
 
@@ -127,7 +118,7 @@ input[type="number"] {
     margin: 0;
 }
 
-.quick-accounting-modal-content .modal-close-btn {    background: none !important;    border: none !important;    box-shadow: none !important;    padding: 4px;    width: auto;    height: auto;    cursor: pointer;    color: #718096;    display: flex;    align-items: center;    justify-content: center;    transition: all 0.2s ease;}
+.quick-accounting-modal-content .modal-close-btn {
     width: 28px;
     height: 28px;
     border-radius: 50%;
@@ -154,16 +145,16 @@ input[type="number"] {
 }
 
 .quick-accounting-modal-content .modal-body {
-    padding: 30px 20px;
+    padding: 12px 20px;
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: 10px;
 }
 
 .confirm-row {
     display: flex;
     align-items: center;
-    gap: 20px;
+    gap: 12px;
 }
 
 .confirm-row label {
@@ -187,7 +178,7 @@ input[type="number"] {
 
 .type-toggle-group {
     display: flex;
-    gap: 10px;
+    gap: 6px;
 }
 
 .type-toggle-group .type-toggle-btn {
@@ -212,7 +203,7 @@ input[type="number"] {
 }
 
 .type-toggle-group .type-toggle-btn.expense {
-    color: #6b7fff ;
+    color: #718096;
 }
 
 .type-toggle-group .type-toggle-btn.expense.active {
@@ -222,7 +213,7 @@ input[type="number"] {
 }
 
 .type-toggle-group .type-toggle-btn.income {
-    color: #27ae60;
+    color: #718096;
 }
 
 .type-toggle-group .type-toggle-btn.income.active {
@@ -270,7 +261,7 @@ input[type="number"] {
 .confirm-amount-input .currency-symbol {
     font-size: 14px;
     font-weight: 600;
-    color: #6b7fff ;
+    color: #6b7fff;
 }
 
 .confirm-amount-input input {
@@ -286,8 +277,8 @@ input[type="number"] {
 .quick-accounting-modal-content .modal-footer {
     display: flex;
     justify-content: flex-end;
-    gap: 20px;
-    padding: 30px 20px;
+    gap: 12px;
+    padding: 12px 20px;
     border-top: 1px solid rgba(163, 177, 198, 0.2);
 }
 
@@ -342,21 +333,6 @@ input[type="number"] {
     box-shadow: inset 2px 2px 4px #a3b1c6, inset -2px -2px 4px #ffffff;
     transform: translateY(0);
 }
-
-    /* 快速记账样式调整 */
-    .quick-input-row {
-        display: flex !important;
-        gap: 20px !important;
-    }
-    .quick-input-field {
-        width: 450px !important;
-        max-width: 450px !important;
-        flex: none !important;
-    }
-    .quick-add-btn {
-        margin-left: auto !important;
-        margin-right: -10px !important;
-    }
 </style>
 <style>
 /* ==================== 记账模块 - 完整pencil设计样式 ==================== */
@@ -395,7 +371,7 @@ input[type="number"] {
 }
 
 .accounting-card .accounting-stats-btn:hover {
-    color: #6b7fff ;
+    color: #6b7fff;
     box-shadow: 6px 6px 12px #a3b1c6, -6px -6px 12px #ffffff;
     transform: translateY(-1px);
 }
@@ -414,7 +390,7 @@ input[type="number"] {
 }
 
 .accounting-card .accounting-stats-btn span {
-    color: #6b7fff ;
+    color: #6b7fff;
     font-size: 13px;
     font-weight: 600;
 }
@@ -427,7 +403,7 @@ input[type="number"] {
     box-shadow: none;
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: 12px;
 }
 
 /* 快速记账标签行 */
@@ -453,14 +429,13 @@ input[type="number"] {
 /* 快速记账输入框行 */
 .quick-input-row {
     display: flex;
-    gap: 20px;
+    gap: 12px;
     height: 56px;
     width: 528px;
 }
 
 .quick-input-field {
     flex: 1;
-    max-width: calc(100% - 30px);
     height: 56px;
     background: #e0e5ec;
     border-radius: 14px;
@@ -468,13 +443,13 @@ input[type="number"] {
     padding: 0 20px;
     display: flex;
     align-items: center;
-    gap: 20px;
+    gap: 12px;
 }
 
 .quick-input-field .input-icon {
     width: 20px;
     height: 20px;
-    color: #6b7fff ;
+    color: #6b7fff;
     flex-shrink: 0;
 }
 
@@ -550,7 +525,7 @@ input[type="number"] {
 
 .toggle-row {
     display: flex;
-    gap: 20px;
+    gap: 12px;
     justify-content: center;
     align-items: center;
 }
@@ -597,12 +572,9 @@ input[type="number"] {
 }
 
 /* 收入按钮的icon特殊处理 */
-}
-
-/* 支出按钮的icon特殊处理 - 紫色 */
-.type-toggle-btn.expense:not(.active) i,
-.type-toggle-btn.expense:not(.active) svg {
-    color: #6b7fff !important;
+.type-toggle-btn:not(.active) i,
+.type-toggle-btn:not(.active) svg {
+    color: #48bb78;
 }
 
 .type-toggle-btn i,
@@ -618,9 +590,9 @@ input[type="number"] {
 }
 
 /* 收入按钮的icon特殊处理 */
-.type-toggle-btn.income:not(.active) i,
-.type-toggle-btn.income:not(.active) svg {
-    color: #48bb78 !important;
+.type-toggle-btn:not(.active) i,
+.type-toggle-btn:not(.active) svg {
+    color: #48bb78;
 }
 
 .type-toggle-btn i,
@@ -760,7 +732,7 @@ input[type="number"] {
 .accounting-detail-inputs {
     margin-top: 15px;
     display: flex;
-    gap: 20px;
+    gap: 12px;
     align-items: center;
 }
 
@@ -775,7 +747,7 @@ input[type="number"] {
 .accounting-detail-inputs .input-prefix {
     position: absolute;
     left: 20px;
-    color: #6b7fff !important;
+    color: #6b7fff;
     font-size: 16px;
     font-weight: 600;
     z-index: 1;
@@ -876,8 +848,6 @@ input[type="number"] {
 /* 记录头部样式 */
 .records-header {
     padding: 0;
-    margin-bottom: -10px;
-    border-bottom: none !important;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -901,99 +871,78 @@ input[type="number"] {
     font-weight: 600;
 }
 
-/* 快速记账确认弹窗样式 - 紧凑版 */
+/* 快速记账确认弹窗样式 */
 .quick-accounting-modal-content {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
     width: 480px;
     max-width: 90vw;
-    max-height: 70vh;
-    height: 480px;
-    display: flex;
-    flex-direction: column;
-    background: #e0e5ec;
-    border-radius: 16px;
-    box-shadow: 12px 12px 24px var(--shadow-dark), -12px -12px 24px var(--shadow-light);
-    border: 1px solid rgba(163, 177, 198, 0.3);
-    padding: 0;
 }
 
 .quick-accounting-modal-content .modal-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 30px 20px 20px 20px !important;
+    padding: 12px 20px;
     border-bottom: 1px solid rgba(163, 177, 198, 0.2);
 }
 
 .quick-accounting-modal-content .modal-header h3 {
-    font-size: 15px;
+    font-size: 16px;
     font-weight: 600;
     color: #4a5568;
     margin: 0;
 }
 
-/* 关闭按钮 - 去掉圆框 */
 .quick-accounting-modal-content .modal-close-btn {
-    background: none !important;
-    border: none !important;
-    box-shadow: none !important;
-    padding: 2px !important;
-    width: auto !important;
-    height: auto !important;
-    cursor: pointer;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: none;
+    background: #e0e5ec;
     color: #718096;
+    cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
+    box-shadow: 2px 2px 4px #a3b1c6, -2px -2px 4px #ffffff;
     transition: all 0.2s ease;
 }
 
 .quick-accounting-modal-content .modal-close-btn:hover {
-    color: #4a5568;
-    background: none !important;
-    box-shadow: none !important;
+    color: #e74c3c;
+    box-shadow: 3px 3px 6px #a3b1c6, -3px -3px 6px #ffffff;
 }
 
 .quick-accounting-modal-content .modal-close-btn i,
 .quick-accounting-modal-content .modal-close-btn svg {
-    width: 18px;
-    height: 18px;
+    width: 14px;
+    height: 14px;
 }
 
-/* Modal Body */
 .quick-accounting-modal-content .modal-body {
-    flex: 1;
-    padding: 10px 20px 30px 20px;
+    padding: 12px 20px;
     display: flex;
     flex-direction: column;
-    gap: 20px !important;
-    overflow-y: auto;
+    gap: 10px;
 }
 
 .confirm-row {
     display: flex;
     align-items: center;
-    gap: 20px !important;
-    padding: 0 !important;
-    margin: 0 !important;
+    gap: 12px;
 }
 
 .confirm-row label {
     font-size: 14px;
     font-weight: 500;
     color: #4a5568;
-    min-width: 60px !important;
+    min-width: 60px;
 }
 
 .confirm-time-input {
     flex: 1;
-    height: 35px;
-    padding: 5px 8px !important;
+    padding: 8px 12px;
     border: none;
-    border-radius: 6px;
+    border-radius: 8px;
     background: #e0e5ec;
     box-shadow: inset 2px 2px 4px #a3b1c6, inset -2px -2px 4px #ffffff;
     color: #4a5568;
@@ -1003,34 +952,32 @@ input[type="number"] {
 
 .type-toggle-group {
     display: flex;
-    gap: 10px !important;
+    gap: 6px;
 }
 
 .type-toggle-group .type-toggle-btn {
     display: flex;
     align-items: center;
-    gap: 3px;
-    height: 35px;
-    width: 90px;
-    padding: 4px 10px !important;
+    gap: 4px;
+    padding: 6px 12px;
     border: none;
     background: #e0e5ec;
-    border-radius: 6px;
+    border-radius: 8px;
     cursor: pointer;
     transition: all 0.2s ease;
-    font-size: 12px;
+    font-size: 13px;
     font-weight: 500;
     box-shadow: 2px 2px 4px #a3b1c6, -2px -2px 4px #ffffff;
 }
 
 .type-toggle-group .type-toggle-btn i,
 .type-toggle-group .type-toggle-btn svg {
-    width: 12px;
-    height: 12px;
+    width: 14px;
+    height: 14px;
 }
 
 .type-toggle-group .type-toggle-btn.expense {
-    color: #6b7fff !important;
+    color: #718096;
 }
 
 .type-toggle-group .type-toggle-btn.expense.active {
@@ -1040,7 +987,7 @@ input[type="number"] {
 }
 
 .type-toggle-group .type-toggle-btn.income {
-    color: #27ae60;
+    color: #718096;
 }
 
 .type-toggle-group .type-toggle-btn.income.active {
@@ -1051,10 +998,9 @@ input[type="number"] {
 
 .confirm-category-select {
     flex: 1;
-    height: 35px;
-    padding: 5px 8px !important;
+    padding: 8px 12px;
     border: none;
-    border-radius: 6px;
+    border-radius: 8px;
     background: #e0e5ec;
     box-shadow: inset 2px 2px 4px #a3b1c6, inset -2px -2px 4px #ffffff;
     color: #4a5568;
@@ -1065,10 +1011,9 @@ input[type="number"] {
 
 .confirm-detail-input {
     flex: 1;
-    height: 35px;
-    padding: 5px 8px !important;
+    padding: 8px 12px;
     border: none;
-    border-radius: 6px;
+    border-radius: 8px;
     background: #e0e5ec;
     box-shadow: inset 2px 2px 4px #a3b1c6, inset -2px -2px 4px #ffffff;
     color: #4a5568;
@@ -1080,334 +1025,93 @@ input[type="number"] {
     flex: 1;
     display: flex;
     align-items: center;
-    height: 35px;
-    padding: 5px 8px !important;
+    padding: 8px 12px;
     background: #e0e5ec;
-    border-radius: 6px;
+    border-radius: 8px;
     box-shadow: inset 2px 2px 4px #a3b1c6, inset -2px -2px 4px #ffffff;
-    gap: 6px;
+    gap: 8px;
 }
 
 .confirm-amount-input .currency-symbol {
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 600;
-    color: #6b7fff !important;
+    color: #6b7fff;
 }
 
 .confirm-amount-input input {
     flex: 1;
     border: none;
     background: transparent;
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 600;
     color: #4a5568;
     outline: none;
 }
 
-/* Footer - 极度紧凑 */
 .quick-accounting-modal-content .modal-footer {
     display: flex;
-    justify-content: center;
-    gap: 10px;
-    padding: 30px 20px !important;
+    justify-content: flex-end;
+    gap: 12px;
+    padding: 12px 20px;
     border-top: 1px solid rgba(163, 177, 198, 0.2);
 }
 
-.quick-accounting-modal-content .modal-footer button {
-    flex: 1;
-    min-width: 90px;
-    max-width: 130px;
-    height: 36px !important;
-    padding: 8px 16px !important;
+.btn-cancel {
+    padding: 8px 16px;
     border: none;
     border-radius: 8px;
+    background: #e0e5ec;
+    color: #718096;
     font-size: 13px;
     font-weight: 500;
     cursor: pointer;
-    transition: all 0.3s ease;
+    box-shadow: 2px 2px 4px #a3b1c6, -2px -2px 4px #ffffff;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+.btn-cancel:hover {
+    box-shadow: 3px 3px 6px #a3b1c6, -3px -3px 6px #ffffff;
+    transform: translateY(-1px);
+}
+
+.btn-confirm {
     display: flex;
     align-items: center;
-    justify-content: center;
-    gap: 5px;
+    gap: 4px;
+    padding: 8px 16px;
+    border: none;
+    border-radius: 8px;
+    background: #6b7fff;
+    color: #ffffff;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 2px 2px 4px #a3b1c6, -2px -2px 4px #ffffff;
+    transition: all 0.2s ease;
+    white-space: nowrap;
 }
 
-.quick-accounting-modal-content .btn-cancel {
-    background: #e0e5ec !important;
-    color: #4a5568 !important;
-    box-shadow: 2px 2px 4px #a3b1c6, -2px -2px 4px #ffffff !important;
+.btn-confirm i,
+.btn-confirm svg {
+    width: 14px;
+    height: 14px;
 }
 
-.quick-accounting-modal-content .btn-cancel:hover {
-    box-shadow: 4px 4px 8px #a3b1c6, -4px -4px 8px #ffffff !important;
+.btn-confirm:hover {
+    box-shadow: 3px 3px 6px #a3b1c6, -3px -3px 6px #ffffff;
     transform: translateY(-1px);
 }
 
-.quick-accounting-modal-content .btn-confirm {
-    background: #6b7cff !important;
-    color: white !important;
-    box-shadow: 2px 2px 4px #a3b1c6, -2px -2px 4px #ffffff !important;
+.btn-confirm:active {
+    box-shadow: inset 2px 2px 4px #a3b1c6, inset -2px -2px 4px #ffffff;
+    transform: translateY(0);
 }
-
-.quick-accounting-modal-content .btn-confirm:hover {
-    box-shadow: 4px 4px 8px #a3b1c6, -4px -4px 8px #ffffff !important;
-    transform: translateY(-1px);
-}
-
-
-
-    /* 快速记账样式调整 */
-    .quick-input-row {
-        display: flex !important;
-        gap: 20px !important;
-    }
-    .quick-input-field {
-        width: 450px !important;
-        max-width: 450px !important;
-        flex: none !important;
-    }
-    .quick-add-btn {
-        margin-left: auto !important;
-        margin-right: -10px !important;
-    }
 </style>
-<style>
-/* 记录样式紧急修复 */
-.accounting-records .accounting-record {
-    display: flex !important;
-    justify-content: space-between !important;
-    align-items: center !important;
-    height: 64px !important;
-    padding: 14px !important;
-    margin-bottom: 12px !important;
-    background: #e0e5ec !important;
-    border-radius: 12px !important;
-    box-shadow: 4px 4px 8px #a3b1c6, -4px -4px 8px #ffffff !important;
-    transition: all 0.3s ease !important;
-    position: relative !important;
-}
-.accounting-records .accounting-record-left {
-    flex: 1 !important;
-    display: flex !important;
-    align-items: center !important;
-    gap: 12px !important;
-}
-.accounting-records .accounting-record-icon-wrapper {
-    width: 40px !important;
-    height: 40px !important;
-    background: #e0e5ec !important;
-    border-radius: 10px !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    flex-shrink: 0 !important;
-    box-shadow: 2px 2px 4px #a3b1c6, -2px -2px 4px #ffffff !important;
-}
-.accounting-records .accounting-record-content {
-    display: flex !important;
-    flex-direction: column !important;
-    gap: 2px !important;
-}
-.accounting-records .accounting-record-category {
-    color: #4a5568 !important;
-    font-weight: 500 !important;
-    font-size: 14px !important;
-}
-.accounting-records .accounting-record-note {
-    color: #718096 !important;
-    font-size: 13px !important;
-}
-.accounting-records .accounting-record-right {
-    display: flex !important;
-    align-items: center !important;
-    gap: 12px !important;
-}
-.accounting-records .accounting-record-amount-time {
-    display: flex !important;
-    flex-direction: column !important;
-    align-items: flex-end !important;
-    gap: 2px !important;
-}
-.accounting-records .accounting-record-amount {
-    font-size: 16px !important;
-    font-weight: 700 !important;
-}
-.accounting-records .accounting-record-amount.expense {
-    color: #e74c3c !important;
-}
-.accounting-records .accounting-record-amount.income {
-    color: #27ae60 !important;
-}
-.accounting-records .accounting-record-time {
-    font-size: 11px !important;
-    color: #a0aec0 !important;
-    font-weight: 400 !important;
-}
-.accounting-records .accounting-record-edit,
-.accounting-records .accounting-record-delete {
-    position: absolute !important;
-    top: 50% !important;
-    transform: translateY(-50%) !important;
-    opacity: 0 !important;
-    width: 28px !important;
-    height: 28px !important;
-    padding: 0 !important;
-    border: none !important;
-    border-radius: 8px !important;
-    background: #e0e5ec !important;
-    box-shadow: 2px 2px 4px #a3b1c6, -2px -2px 4px #ffffff !important;
-    cursor: pointer !important;
-    transition: all 0.3s ease !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    pointer-events: none !important;
-}
-.accounting-records .accounting-record-edit {
-    right: 50px !important;
-    color: #6b7fff !important;
-}
-.accounting-records .accounting-record-delete {
-    right: 15px !important;
-    color: #e74c3c !important;
-}
-.accounting-records .accounting-record:hover .accounting-record-edit,
-.accounting-records .accounting-record:hover .accounting-record-delete {
-    opacity: 1 !important;
-    pointer-events: auto !important;
-}
-
-    /* 快速记账样式调整 */
-    .quick-input-row {
-        display: flex !important;
-        gap: 20px !important;
-    }
-    .quick-input-field {
-        width: 450px !important;
-        max-width: 450px !important;
-        flex: none !important;
-    }
-    .quick-add-btn {
-        margin-left: auto !important;
-        margin-right: -10px !important;
-    }
-</style>
-<style>
-/* 修复阴影被遮住和hover时按钮遮挡文字的问题 */
-.accounting-records {
-    overflow-y: auto !important;
-    overflow-x: visible !important;
-    padding: 8px 0 !important;
-}
-
-.accounting-records .accounting-record {
-    margin: 8px 4px !important;
-}
-
-.accounting-records .accounting-record-amount-time {
-    transition: transform 0.3s ease !important;
-}
-
-.accounting-records .accounting-record:hover .accounting-record-amount-time {
-    transform: translateX(-80px) !important;
-    margin-right: 0 !important;
-}
-
-    /* 快速记账样式调整 */
-    .quick-input-row {
-        display: flex !important;
-        gap: 20px !important;
-    }
-    .quick-input-field {
-        width: 450px !important;
-        max-width: 450px !important;
-        flex: none !important;
-    }
-    .quick-add-btn {
-        margin-left: auto !important;
-        margin-right: -10px !important;
-    }
-</style>
-    <style>
-    /* 减少记账记录之间的间距5px */
-    .accounting-records .accounting-record {
-        margin-bottom: 7px !important;
-    }
-    </style>
-    
-    <style>
-    /* 收支按钮样式强制修复 */
-    .type-toggle-btn.expense:not(.active) {
-        color: #6b7fff !important;
-    }
-    .type-toggle-btn.income:not(.active) {
-        color: #27ae60 !important;
-    }
-    .type-toggle-btn.income.active {
-        background: #27ae60 !important;
-        color: #ffffff !important;
-        box-shadow: var(--neu-shadow-out) !important;
-    }
-    </style>
-    <style>
-    /* 收支按钮样式强制修复 */
-    .type-toggle-btn.expense:not(.active) {
-        color: #6b7fff !important;
-    }
-    .type-toggle-btn.income:not(.active) {
-        color: #27ae60 !important;
-    }
-    .type-toggle-btn.income.active {
-        background: #27ae60 !important;
-        color: #ffffff !important;
-        box-shadow: var(--neu-shadow-out) !important;
-    }
-    </style>
-
+</head>
 <body>
     <div class="container">
         <!-- 头部 -->
-
-<style>
-/* 修复收支按钮icon颜色 */
-.type-toggle-btn.expense:not(.active) i,
-.type-toggle-btn.expense:not(.active) svg {
-    color: #6b7fff !important;
-}
-.type-toggle-btn.income:not(.active) i,
-.type-toggle-btn.income:not(.active) svg {
-    color: #48bb78 !important;
-}
-.type-toggle-group .type-toggle-btn.expense:not(.active) i,
-.type-toggle-group .type-toggle-btn.expense:not(.active) svg {
-    color: #6b7fff !important;
-}
-.type-toggle-group .type-toggle-btn.income:not(.active) i,
-.type-toggle-group .type-toggle-btn.income:not(.active) svg {
-    color: #48bb78 !important;
-}
-
-/* 激活状态下的icon和文字都是白色 */
-.type-toggle-group .type-toggle-btn.expense.active i,
-.type-toggle-group .type-toggle-btn.expense.active svg {
-    color: #ffffff !important;
-}
-.type-toggle-group .type-toggle-btn.income.active i,
-.type-toggle-group .type-toggle-btn.income.active svg {
-    color: #ffffff !important;
-}
-.type-toggle-group .type-toggle-btn.expense i,
-.type-toggle-group .type-toggle-btn.expense svg {
-    color: #6b7fff !important;
-}
-.type-toggle-group .type-toggle-btn.income i,
-.type-toggle-group .type-toggle-btn.income svg {
-    color: #48bb78 !important;
-}
-/* 激活状态下的文字都是白色 */
-.type-toggle-group .type-toggle-btn.expense.active span,
-.type-toggle-group .type-toggle-btn.income.active span {
-    color: #ffffff !important;
-}</style>
         <header class="header">
             <h1>My Workplace</h1>
             <div class="date-info" id="current-date"></div>
@@ -1703,9 +1407,12 @@ input[type="number"] {
                                            placeholder="输入如：午餐35 或 地铁充值100"
                                            onkeypress="handleAccountingQuickInput(event)">
                                 </div>
-                                <button class="quick-add-btn" onclick="addQuickAccounting()" style="transform: translateX(-20px) !important;">
+                                <button class="quick-add-btn" onclick="addQuickAccounting()">
                                     <i data-lucide="send"></i>
                                 </button>
+                            </div>
+                            <div style="text-align: center; margin-top: 8px;">
+                                <button onclick="testQuickAccounting()" style="padding: 4px 8px; font-size: 12px; background: #e0e5ec; border: none; border-radius: 6px; cursor: pointer;">测试：午餐53</button>
                             </div>
                         </div>
 
@@ -1743,12 +1450,12 @@ input[type="number"] {
                                     <input type="number" id="accounting-amount-input"
                                            placeholder="金额"
                                            step="0.01"
-                                           onkeypress="handleAccountingDetailInput(event)">
+                                           onkeypress="handleAccountingAmountInput(event)">
                                 </div>
                                 <input type="text" id="accounting-note-input"
                                        placeholder="备注（选填）"
-                                       onkeypress="handleAccountingDetailInput(event)">
-                                <button class="btn-add" onclick="addAccountingRecord()">
+                                       onkeypress="handleAccountingNoteInput(event)">
+                                <button class="btn-add" onclick="addManualAccounting()">
                                     <i class="fas fa-check"></i>
                                 </button>
                             </div>
@@ -1780,10 +1487,7 @@ input[type="number"] {
                                 <i class="fas fa-chart-line"></i> 财经
                             </button>
                             <button class="news-tab" data-category="general" onclick="switchNewsCategory('general')">
-                                <i class="fas fa-globe-asia"></i> 国内
-                            </button>
-                            <button class="news-tab" data-category="international" onclick="switchNewsCategory('international')">
-                                <i class="fas fa-globe"></i> 国际
+                                <i class="fas fa-globe"></i> 综合
                             </button>
                         </div>
                         <div class="news-loading" id="news-loading">
@@ -2000,19 +1704,8 @@ input[type="number"] {
     </div>
 
     <!-- Chart.js 图表库 -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js" defer></script>
-    <script>
-    // 强制清除新闻缓存以显示7条新闻
-    if (localStorage.getItem('newsData')) {
-        const data = JSON.parse(localStorage.getItem('newsData'));
-        if (!data.version || data.version < 2 || (data.tech && data.tech.length < 8)) {
-            console.log('清除旧版本新闻缓存...');
-            localStorage.removeItem('newsData');
-        }
-    }
-    </script>
-    
-<script src="script.js?v=1773111001"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="script.js?v=1772873001"></script>
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">

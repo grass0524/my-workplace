@@ -1,0 +1,947 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Workplace</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- 引入 Font Awesome 图标库 (CDN) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- 引入 Lucide 图标库 (pencil设计使用) -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+<style>
+    /* 快速记账 - 新拟物风格（来自pencil设计稿） */
+    .accounting-card .accounting-quick-area {
+        padding: 16px !important;
+        background: #e0e5ec !important;
+        border-radius: 16px !important;
+        box-shadow: 8px 8px 16px #a3b1c6, -8px -8px 16px #ffffff !important;
+    }
+    .accounting-card .quick-input-wrapper input {
+        padding: 0 20px !important;
+        height: 56px !important;
+        border: none !important;
+        border-radius: 14px !important;
+        background: #e0e5ec !important;
+        color: #2d3748 !important;
+        font-size: 14px !important;
+        box-shadow: 4px 4px 8px #a3b1c6, -4px -4px 8px #ffffff !important;
+    }
+    .accounting-card .quick-input-wrapper input::placeholder {
+        color: #718096 !important;
+        font-size: 14px !important;
+    }
+    .accounting-card .quick-input-wrapper input:focus {
+        outline: none !important;
+        box-shadow: 4px 4px 8px #a3b1c6, -4px -4px 8px #ffffff, 0 0 0 3px rgba(107, 127, 255, 0.1) !important;
+    }
+    .accounting-card .quick-input-wrapper .btn-add {
+        width: 56px !important;
+        height: 56px !important;
+        padding: 0 !important;
+        border: none !important;
+        border-radius: 14px !important;
+        background: #6b7fff !important;
+        font-size: 20px !important;
+        box-shadow: 4px 4px 8px #a3b1c6, -4px -4px 8px #ffffff !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+    .accounting-card .quick-input-wrapper .btn-add:hover {
+        transform: translateY(-2px) !important;
+        box-shadow: 6px 6px 12px #a3b1c6, -6px -6px 12px #ffffff !important;
+    }
+    .accounting-card .quick-input-wrapper .btn-add:active {
+        transform: translateY(0) !important;
+        box-shadow: inset 3px 3px 6px #a3b1c6, inset -3px -3px 6px #ffffff !important;
+    }
+</style>
+<style>
+/* ==================== 记账模块 - 完整pencil设计样式 ==================== */
+
+/* 标题区域 */
+.accounting-card .accounting-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid rgba(163, 177, 198, 0.3);
+}
+
+.accounting-card .accounting-title {
+    font-size: 28px;
+    font-weight: 700;
+    color: #6b7fff;
+    margin: 0;
+}
+
+.accounting-card .accounting-stats-btn {
+    height: 40px;
+    padding: 10px 16px;
+    border: none;
+    border-radius: 12px;
+    background: #e0e5ec;
+    box-shadow: 4px 4px 8px #a3b1c6, -4px -4px 8px #ffffff;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.accounting-card .accounting-stats-btn:hover {
+    box-shadow: 6px 6px 12px #a3b1c6, -6px -6px 12px #ffffff;
+}
+
+.accounting-card .accounting-stats-btn i {
+    width: 18px;
+    height: 18px;
+    color: #6b7fff;
+}
+
+.accounting-card .accounting-stats-btn span {
+    color: #6b7fff;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+/* 快速记账区域 */
+.accounting-card .accounting-quick-area {
+    padding: 0;
+    background: transparent;
+    border-radius: 0;
+    box-shadow: none;
+    border: none;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+/* 快速记账标签行 */
+.quick-input-label {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.quick-input-label .label-title {
+    color: #4a5568;
+    font-size: 15px;
+    font-weight: 600;
+}
+
+.quick-input-label .label-hint {
+    color: #718096;
+    font-size: 12px;
+    font-weight: normal;
+}
+
+/* 快速记账输入框行 */
+.quick-input-row {
+    display: flex;
+    gap: 12px;
+    height: 56px;
+}
+
+.quick-input-field {
+    flex: 1;
+    height: 56px;
+    background: #e0e5ec;
+    border-radius: 14px;
+    box-shadow: 4px 4px 8px #a3b1c6, -4px -4px 8px #ffffff;
+    padding: 0 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.quick-input-field .input-icon {
+    width: 20px;
+    height: 20px;
+    color: #6b7fff;
+    flex-shrink: 0;
+}
+
+.quick-input-field input {
+    flex: 1;
+    border: none;
+    background: transparent;
+    font-size: 14px;
+    color: #2d3748;
+    outline: none;
+}
+
+.quick-input-field input::placeholder {
+    color: #718096;
+}
+
+.quick-add-btn {
+    width: 56px;
+    height: 56px;
+    padding: 0;
+    border: none;
+    border-radius: 14px;
+    background: #6b7fff;
+    box-shadow: 4px 4px 8px #a3b1c6, -4px -4px 8px #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.quick-add-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 6px 6px 12px #a3b1c6, -6px -6px 12px #ffffff;
+}
+
+.quick-add-btn:active {
+    transform: translateY(0);
+    box-shadow: inset 3px 3px 6px #a3b1c6, inset -3px -3px 6px #ffffff;
+}
+
+.quick-add-btn i,
+.quick-add-btn svg {
+    width: 20px;
+    height: 20px;
+    color: #ffffff;
+}
+
+/* 通用记账区域 */
+.accounting-manual-area {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.manual-input-label {
+    margin-bottom: 4px;
+}
+
+.manual-input-label .label-title {
+    color: #4a5568;
+    font-size: 15px;
+    font-weight: 600;
+}
+
+/* 顶部容器 */
+.accounting-top-container {
+    background: #e0e5ec;
+    border-radius: 16px;
+    box-shadow: 6px 6px 12px #a3b1c6, -6px -6px 12px #ffffff;
+    padding: 20px;
+}
+
+.toggle-row {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    align-items: center;
+}
+
+/* 收支切换容器 */
+.type-toggle-container {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    align-items: center;
+}
+
+.type-toggle-btn {
+    height: 38px;
+    padding: 8px 14px;
+    border: none;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.type-toggle-btn.expense {
+    background: #6b7fff;
+    box-shadow: 4px 4px 8px #a3b1c6, -4px -4px 8px #ffffff;
+    color: #ffffff;
+}
+
+.type-toggle-btn.expense i,
+.type-toggle-btn.expense svg {
+    color: #ffffff;
+}
+
+.type-toggle-btn.income {
+    background: #e0e5ec;
+    box-shadow: 4px 4px 8px #a3b1c6, -4px -4px 8px #ffffff;
+    color: #48bb78;
+}
+
+.type-toggle-btn.income i,
+.type-toggle-btn.income svg {
+    color: #48bb78;
+}
+
+.type-toggle-btn i,
+.type-toggle-btn svg {
+    width: 16px;
+    height: 16px;
+}
+
+/* 分隔线 */
+.divider {
+    width: 1px;
+    height: 100px;
+    background: #cbd5e0;
+    opacity: 0.5;
+}
+
+/* 分类区域 */
+.category-side {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.category-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.category-row button {
+    height: 38px;
+    padding: 8px 14px;
+    border: none;
+    border-radius: 19px;
+    background: #e0e5ec;
+    box-shadow: 2px 2px 4px #a3b1c6, -2px -2px 4px #ffffff;
+    font-size: 13px;
+    font-weight: 500;
+    color: #4a5568;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.category-row button:hover {
+    box-shadow: 3px 3px 6px #a3b1c6, -3px -3px 6px #ffffff;
+}
+
+.category-row button.active {
+    background: #6b7fff;
+    color: #ffffff;
+    box-shadow: 2px 2px 4px #a3b1c6, -2px -2px 4px #ffffff;
+}
+</style>
+</head>
+<body>
+    <div class="container">
+        <!-- 头部 -->
+        <header class="header">
+            <h1>My Workplace</h1>
+            <div class="date-info" id="current-date"></div>
+        </header>
+
+        <!-- 每日一言 -->
+        <div class="daily-quote-banner">
+            <div class="quote-banner-content">
+                <span class="quote-banner-text" id="quote-text">正在加载...</span>
+                <span class="quote-banner-author" id="quote-author"></span>
+            </div>
+            <button class="quote-refresh-btn" onclick="refreshQuote()" title="换一言">
+                <i class="fas fa-rotate"></i>
+            </button>
+        </div>
+
+        <!-- 主内容区：Grid 布局 -->
+        <main class="dashboard-grid">
+            
+            <!-- 模块一：健康打卡 -->
+            <section class="card health-card">
+                <div class="card-header">
+                    <h2>健康打卡</h2>
+                    <button class="btn-icon-neu" onclick="showHealthHistory()" title="统计"><i class="fas fa-chart-bar"></i></button>
+                </div>
+                <div class="card-body health-stats">
+                    <div class="health-item water" onclick="toggleHealth('water')">
+                        <div class="icon-circle water" id="btn-water"><i class="fas fa-glass-water"></i></div>
+                        <div class="status-text" id="status-water">未打卡</div>
+                        <div class="label">喝水</div>
+                    </div>
+                    <div class="health-item toilet" onclick="toggleHealth('toilet')">
+                        <div class="icon-circle toilet" id="btn-toilet"><i class="fas fa-restroom"></i></div>
+                        <div class="status-text" id="status-toilet">未打卡</div>
+                        <div class="label">如厕</div>
+                    </div>
+                    <div class="health-item exercise" onclick="toggleHealth('exercise')">
+                        <div class="icon-circle exercise" id="btn-exercise"><i class="fas fa-person-running"></i></div>
+                        <div class="status-text" id="status-exercise">未打卡</div>
+                        <div class="label">运动</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 健康统计与补卡弹窗 -->
+            <div id="health-modal" class="modal hidden">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3>健康打卡统计</h3>
+                        <button class="btn-close" onclick="closeHealthModal()"><i class="fas fa-times"></i></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="calendar-header-controls">
+                            <button onclick="changeHealthMonth(-1)"><i class="fas fa-chevron-left"></i></button>
+                            <span id="health-calendar-month">2026年2月</span>
+                            <button onclick="changeHealthMonth(1)"><i class="fas fa-chevron-right"></i></button>
+                        </div>
+                        <div class="health-calendar-grid" id="health-calendar">
+                            <!-- 动态生成日历，支持点击补卡 -->
+                        </div>
+                        <div class="health-month-stats" id="health-month-stats">
+                            <!-- 动态生成月度统计 -->
+                        </div>
+                        <div class="legend">
+                            <span class="dot done"></span> 全部完成
+                            <span class="dot partial"></span> 部分完成
+                            <span class="dot none"></span> 未打卡
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 健康补卡编辑弹窗 -->
+            <div id="health-edit-modal" class="modal hidden">
+                <div class="modal-content modal-sm">
+                    <div class="modal-header">
+                        <h3 id="health-edit-title">补打卡</h3>
+                        <button class="btn-close" onclick="closeHealthEditModal()"><i class="fas fa-times"></i></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="health-edit-content">
+                            <p id="health-edit-date" style="margin-bottom: 16px; color: #666;"></p>
+                            <div class="health-edit-toggles">
+                                <div class="health-edit-item">
+                                    <label class="health-toggle-label">
+                                        <input type="checkbox" id="edit-water" class="health-toggle-checkbox">
+                                        <span class="health-toggle-custom">
+                                            <i class="fas fa-glass-water"></i>
+                                            <span>喝水</span>
+                                        </span>
+                                    </label>
+                                </div>
+                                <div class="health-edit-item">
+                                    <label class="health-toggle-label">
+                                        <input type="checkbox" id="edit-toilet" class="health-toggle-checkbox">
+                                        <span class="health-toggle-custom">
+                                            <i class="fas fa-restroom"></i>
+                                            <span>如厕</span>
+                                        </span>
+                                    </label>
+                                </div>
+                                <div class="health-edit-item">
+                                    <label class="health-toggle-label">
+                                        <input type="checkbox" id="edit-exercise" class="health-toggle-checkbox">
+                                        <span class="health-toggle-custom">
+                                            <i class="fas fa-person-running"></i>
+                                            <span>运动</span>
+                                        </span>
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="health-edit-actions">
+                                <button class="btn-secondary" onclick="closeHealthEditModal()">取消</button>
+                                <button class="btn-primary" onclick="saveHealthEdit()">保存</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 模块三：放假倒计时 (放在上面比较显眼) -->
+            <section class="card holiday-card">
+                <div class="card-header">
+                    <h2>放假倒计时</h2>
+                </div>
+                <div class="card-body holiday-content">
+                    <div class="countdown-text">
+                        距离 <span id="holiday-name" class="highlight">劳动节</span> 假还有
+                    </div>
+                    <div class="countdown-number" id="holiday-days">--</div>
+                    <div class="countdown-unit">天</div>
+                    <div class="holiday-date" id="holiday-date-str">2026-05-01</div>
+                </div>
+            </section>
+
+            <!-- 模块四：今日单词 -->
+            <section class="card word-card">
+                <div class="card-header">
+                    <h2>今日单词</h2>
+                    <button class="btn-icon-neu" onclick="showVocabBook()" title="生词本"><i class="fas fa-book"></i></button>
+                </div>
+                <div class="card-body word-content" id="daily-word-view">
+                    <div class="word-spelling" id="word-spelling">Loading...</div>
+                    <div class="word-phonetic" id="word-phonetic">/ ... /</div>
+                    <div class="word-meaning" id="word-meaning">正在加载单词...</div>
+                    <div class="word-actions">
+                        <button class="btn-icon" onclick="playWordAudio()"><i class="fas fa-volume-high"></i></button>
+                        <button class="btn-icon" onclick="refreshWord()" title="换一个"><i class="fas fa-rotate"></i></button>
+                        <button class="btn-primary btn-sm" onclick="addToVocab()"><i class="fas fa-plus"></i> 加入生词本</button>
+                    </div>
+                </div>
+                <div class="word-footer">
+                    <button class="btn-text-word" onclick="showVocabImportModal()">导入词库</button>
+                </div>
+            </section>
+
+            <!-- 生词本弹窗 -->
+            <div id="vocab-modal" class="modal hidden">
+                <div class="modal-content">
+                    <div class="modal-header" id="vocab-modal-header">
+                        <h3>我的生词本</h3>
+                        <button class="btn-close" onclick="closeVocabModal()"><i class="fas fa-times"></i></button>
+                    </div>
+                    <div class="modal-body" id="vocab-modal-body">
+                        <ul class="vocab-list" id="vocab-list">
+                            <!-- 动态生成 -->
+                        </ul>
+                    </div>
+                    <!-- 默写复习悬浮按钮 -->
+                    <div class="quiz-float-btn" id="quiz-start-btn">
+                        <button class="btn-primary btn-quiz" onclick="startQuiz()">
+                            <i class="fas fa-pen"></i> 默写复习
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 词库导入弹窗 -->
+            <div id="vocab-import-modal" class="modal hidden">
+                <div class="modal-content" style="max-width: 700px; height: 450px;">
+                    <div class="modal-header">
+                        <h3>导入词库</h3>
+                        <button class="btn-close" onclick="closeVocabImportModal()"><i class="fas fa-times"></i></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="vocab-import-grid">
+                            <div class="vocab-import-card" data-library="middle-school" onclick="toggleVocabLibrary(this)">
+                                <div class="vocab-import-name">初中词汇</div>
+                                <div class="vocab-import-count">3,223 词</div>
+                            </div>
+                            <div class="vocab-import-card" data-library="high-school" onclick="toggleVocabLibrary(this)">
+                                <div class="vocab-import-name">高中词汇</div>
+                                <div class="vocab-import-count">6,008 词</div>
+                            </div>
+                            <div class="vocab-import-card" data-library="cet4" onclick="toggleVocabLibrary(this)">
+                                <div class="vocab-import-name">四级词汇</div>
+                                <div class="vocab-import-count">7,508 词</div>
+                            </div>
+                            <div class="vocab-import-card" data-library="cet6" onclick="toggleVocabLibrary(this)">
+                                <div class="vocab-import-name">六级词汇</div>
+                                <div class="vocab-import-count">5,651 词</div>
+                            </div>
+                            <div class="vocab-import-card" data-library="graduate" onclick="toggleVocabLibrary(this)">
+                                <div class="vocab-import-name">考研词汇</div>
+                                <div class="vocab-import-count">9,602 词</div>
+                            </div>
+                            <div class="vocab-import-card" data-library="toefl" onclick="toggleVocabLibrary(this)">
+                                <div class="vocab-import-name">托福词汇</div>
+                                <div class="vocab-import-count">13,477 词</div>
+                            </div>
+                            <div class="vocab-import-card" data-library="sat" onclick="toggleVocabLibrary(this)">
+                                <div class="vocab-import-name">SAT词汇</div>
+                                <div class="vocab-import-count">8,887 词</div>
+                            </div>
+                        </div>
+                        <div class="vocab-import-actions">
+                            <button class="btn-primary" onclick="importSelectedVocabLibraries()">导入选中的词库</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 模块二：待办清单 -->
+            <section class="card todo-card">
+                <div class="card-header">
+                    <h2>待办清单</h2>
+                    <div class="todo-stats">
+                        <span class="stat-item">待办 <b id="todo-pending">0</b></span>
+                        <span class="stat-item">完成 <b id="todo-completed">0</b></span>
+                    </div>
+                </div>
+                <div class="card-body todo-body">
+                    <div class="todo-input-group">
+                        <input type="text" id="new-todo-input" placeholder="添加新任务 (Enter)" onkeypress="handleTodoInput(event)">
+                        <input type="date" id="new-todo-date" class="date-picker-sm">
+                        <button class="btn-add" onclick="addTodo()"><i class="fas fa-plus"></i></button>
+                    </div>
+                    <div class="todo-list-container" id="todo-list-container">
+                        <!-- 动态生成按日期分组的列表 -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- 模块五：心情日记 -->
+            <section class="card mood-card">
+                <div class="card-header">
+                    <h2>心情日记</h2>
+                    <button class="btn-icon-neu" onclick="showMoodStats()" title="统计"><i class="fas fa-chart-pie"></i></button>
+                </div>
+                <div class="card-body mood-body">
+                    <div class="mood-input-area">
+                        <div class="mood-selector">
+                            <label><input type="radio" name="mood" value="happy" checked> <span class="mood-icon-wrapper happy"><i class="fas fa-face-laugh-beam mood-icon"></i></span></label>
+                            <label><input type="radio" name="mood" value="normal"> <span class="mood-icon-wrapper normal"><i class="fas fa-face-meh mood-icon"></i></span></label>
+                            <label><input type="radio" name="mood" value="sad"> <span class="mood-icon-wrapper sad"><i class="fas fa-face-frown mood-icon"></i></span></label>
+                            <label><input type="radio" name="mood" value="angry"> <span class="mood-icon-wrapper angry"><i class="fas fa-face-angry mood-icon"></i></span></label>
+                            <label><input type="radio" name="mood" value="tired"> <span class="mood-icon-wrapper tired"><i class="fas fa-face-tired mood-icon"></i></span></label>
+                        </div>
+                        <div class="mood-text-group">
+                            <input type="text" id="mood-note" placeholder="今天心情怎么样？" onkeypress="handleMoodInput(event)">
+                            <button class="btn-add" onclick="saveMood()"><i class="fas fa-plus"></i></button>
+                        </div>
+                    </div>
+                    
+                    <!-- 仅展示今日心情或最近心情 -->
+                    <div class="mood-list-container" id="mood-recent-list">
+                        <!-- 动态生成 -->
+                    </div>
+                </div>
+            </section>
+                <!-- 模块六：记账 -->
+            <div class="accounting-news-wrapper">
+                <section class="card accounting-card">
+                    <div class="card-header accounting-header">
+                        <h2 class="accounting-title">记账</h2>
+                        <button class="accounting-stats-btn" onclick="showAccountingStats()" title="统计">
+                            <i data-lucide="trending-up"></i>
+                            <span>统计</span>
+                        </button>
+                    </div>
+                    <div class="card-body accounting-body">
+                        <!-- 快速记账区域 -->
+                        <div class="accounting-quick-area">
+                            <!-- 标签行 -->
+                            <div class="quick-input-label">
+                                <span class="label-title">快速记账</span>
+                                <span class="label-hint">输入如：午餐35</span>
+                            </div>
+                            <!-- 输入框行 -->
+                            <div class="quick-input-row">
+                                <div class="quick-input-field">
+                                    <i data-lucide="sparkles" class="input-icon"></i>
+                                    <input type="text" id="accounting-quick-input"
+                                           placeholder="输入如：午餐35 或 地铁充值100"
+                                           onkeypress="handleAccountingQuickInput(event)">
+                                </div>
+                                <button class="quick-add-btn" onclick="addQuickAccounting()">
+                                    <i data-lucide="send"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- 通用记账区域 -->
+                        <div class="accounting-manual-area">
+                            <!-- 标签 -->
+                            <div class="manual-input-label">
+                                <span class="label-title">通用记账</span>
+                            </div>
+                            <!-- 收支切换和分类 -->
+                            <div class="accounting-top-container">
+                                <div class="toggle-row">
+                                    <div class="type-toggle-container">
+                                        <button class="type-toggle-btn expense active" data-type="expense" onclick="switchAccountingType('expense')">
+                                            <i data-lucide="minus"></i>
+                                            <span>支出</span>
+                                        </button>
+                                        <button class="type-toggle-btn income" data-type="income" onclick="switchAccountingType('income')">
+                                            <i data-lucide="plus"></i>
+                                            <span>收入</span>
+                                        </button>
+                                    </div>
+                                    <div class="divider"></div>
+                                    <div class="category-side">
+                                        <div class="category-row" id="accounting-categories">
+                                            <!-- 动态生成分类按钮 -->
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 金额和备注输入 -->
+                            <div class="accounting-detail-inputs">
+                                <div class="input-group">
+                                    <span class="input-prefix">¥</span>
+                                    <input type="number" id="accounting-amount-input"
+                                           placeholder="金额"
+                                           step="0.01"
+                                           onkeypress="handleAccountingAmountInput(event)">
+                                </div>
+                                <input type="text" id="accounting-note-input"
+                                       placeholder="备注（选填）"
+                                       onkeypress="handleAccountingNoteInput(event)">
+                                <button class="btn-add" onclick="addManualAccounting()">
+                                    <i class="fas fa-check"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- 当日收支统计 -->
+                        <div class="summary-simple">
+                            <div class="summary-item income">
+                                <span class="summary-label">今日收入</span>
+                                <span class="summary-value" id="today-income">¥0.00</span>
+                            </div>
+                        </div>
+
+                        <!-- 最近记录列表 -->
+                        <div class="accounting-records">
+                            <div class="records-header">
+                                <span>最近记录</span>
+                            </div>
+                                <p class="empty-hint">暂无记录</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                <!-- 模块七：热点新闻 -->
+                <section class="card news-card">
+                    <div class="card-header">
+                        <h2>热点新闻</h2>
+                        <button class="btn-icon-neu" onclick="refreshNews()" title="刷新"><i class="fas fa-rotate"></i></button>
+                    </div>
+                    <div class="card-body news-body">
+                        <!-- 新闻分类标签 -->
+                        <div class="news-tabs">
+                            <button class="news-tab active" data-category="tech" onclick="switchNewsCategory('tech')">
+                                <i class="fas fa-microchip"></i> 科技
+                            </button>
+                            <button class="news-tab" data-category="finance" onclick="switchNewsCategory('finance')">
+                                <i class="fas fa-chart-line"></i> 财经
+                            </button>
+                            <button class="news-tab" data-category="general" onclick="switchNewsCategory('general')">
+                                <i class="fas fa-globe"></i> 综合
+                            </button>
+                        </div>
+                        <div class="news-loading" id="news-loading">
+                            <i class="fas fa-spinner fa-spin"></i> 加载中...
+                        </div>
+                        <div class="news-content hidden" id="news-content">
+                            <ul class="news-list" id="news-list">
+                                <!-- 动态生成当前选中分类的新闻 -->
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+            </div>
+            </div>
+
+
+            <!-- 心情统计弹窗 -->
+            <div id="mood-modal" class="modal hidden">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3>心情日记统计</h3>
+                        <div class="view-switch">
+                            <button class="btn-icon active" id="modal-view-timeline" onclick="switchMoodModalView('timeline')"><i class="fas fa-list"></i> <span>列表</span></button>
+                            <button class="btn-icon" id="modal-view-calendar" onclick="switchMoodModalView('calendar')"><i class="fas fa-calendar-days"></i> <span>日历</span></button>
+                        </div>
+                        <button class="btn-close" onclick="closeMoodModal()"><i class="fas fa-times"></i></button>
+                    </div>
+                    <div class="modal-body">
+                        <!-- 时间轴视图 -->
+                        <div class="mood-list-container full-height" id="modal-mood-timeline">
+                            <ul class="mood-list" id="modal-mood-list">
+                                <!-- 动态生成 -->
+                            </ul>
+                        </div>
+
+                        <!-- 日历视图 -->
+                        <div class="mood-calendar-container hidden full-height" id="modal-mood-calendar">
+                            <div class="calendar-header-controls">
+                                <button onclick="changeMoodMonth(-1)"><i class="fas fa-chevron-left"></i></button>
+                                <span id="mood-calendar-month">2026年2月</span>
+                                <button onclick="changeMoodMonth(1)"><i class="fas fa-chevron-right"></i></button>
+                            </div>
+                            <div class="calendar-grid" id="modal-calendar-grid">
+                                <!-- 动态生成 -->
+                            </div>
+                            <div class="mood-day-detail" id="mood-day-detail">
+                                <div class="detail-placeholder">点击日期查看当日心情</div>
+                                <ul class="mood-list" id="mood-day-list"></ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+
+        <!-- 数据管理与页尾 -->
+        <footer class="footer-with-actions">
+            <div class="data-actions">
+                <button class="btn-data" onclick="exportData()" title="导出所有数据到JSON文件">
+                    <i class="fas fa-download"></i> 导出数据
+                </button>
+                <button class="btn-data" onclick="document.getElementById('import-file-input').click()" title="从JSON文件导入数据">
+                    <i class="fas fa-upload"></i> 导入数据
+                </button>
+                <input type="file" id="import-file-input" accept=".json" style="display: none;" onchange="importData(event)">
+            </div>
+            <div class="footer-text">
+                <p>© 2026 My Workplace - Stay Healthy, Stay Productive.</p>
+            </div>
+        </footer>
+    </div>
+
+    <!-- 记账确认弹窗 -->
+    <div id="accounting-confirm-modal" class="modal hidden">
+        <div class="modal-content modal-sm">
+            <div class="modal-header">
+                <h3>确认记账</h3>
+                <button class="btn-close" onclick="closeConfirmModal()"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="confirm-info">
+                    <div class="info-row">
+                        <span class="info-label">类型</span>
+                        <span class="info-value" id="confirm-type">支出</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">分类</span>
+                        <span class="info-value" id="confirm-category">餐饮</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">金额</span>
+                        <span class="info-value highlight" id="confirm-amount">¥35.00</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">备注</span>
+                        <span class="info-value" id="confirm-note">午餐</span>
+                    </div>
+                </div>
+                <div class="confirm-actions">
+                    <button class="btn-secondary" onclick="closeConfirmModal()">取消</button>
+                    <button class="btn-primary" onclick="confirmAccounting()">确认</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 记账统计弹窗 -->
+    <div id="accounting-stats-modal" class="modal hidden">
+        <div class="modal-content modal-lg">
+            <div class="modal-header">
+                <h3>记账统计</h3>
+                <div class="stats-tabs">
+                    <button class="stats-period-btn active" data-period="day" onclick="switchStatsPeriod('day')">日</button>
+                    <button class="stats-period-btn" data-period="month" onclick="switchStatsPeriod('month')">月</button>
+                    <button class="stats-period-btn" data-period="year" onclick="switchStatsPeriod('year')">年</button>
+                </div>
+                <button class="btn-close" onclick="closeAccountingStats()"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="stats-overview">
+                    <div class="stat-card balance">
+                        <span class="stat-label">结余</span>
+                        <span class="stat-value" id="stats-balance">¥0.00</span>
+                    </div>
+                    <div class="stat-card income">
+                        <span class="stat-label">收入</span>
+                        <span class="stat-value" id="stats-total-income">¥0.00</span>
+                    </div>
+                    <div class="stat-card expense">
+                        <span class="stat-label">支出</span>
+                        <span class="stat-value" id="stats-total-expense">¥0.00</span>
+                    </div>
+                </div>
+                
+                <div class="stats-content">
+                    <!-- 图表可视化区域 -->
+                    <div class="stats-section">
+                        <h4>收支分析</h4>
+                        <div class="stats-charts">
+                            <div class="chart-container">
+                                <canvas id="expense-pie-chart"></canvas>
+                                <div class="chart-legend" id="pie-chart-legend"></div>
+                            </div>
+                            <div class="chart-container">
+                                <canvas id="income-expense-bar-chart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="stats-section">
+                        <h4>分类统计</h4>
+                        <div class="stats-category-list" id="stats-category-list">
+                            <!-- 动态生成 -->
+                        </div>
+                    </div>
+
+                    <div class="stats-section">
+                        <h4>详细记录</h4>
+                        <div class="stats-records-list" id="stats-records-list">
+                            <!-- 动态生成 -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 自定义提示组件 -->
+    <div id="toast" class="toast hidden">
+        <div class="toast-content">
+            <i class="fas fa-info-circle toast-icon"></i>
+            <span class="toast-message" id="toast-message"></span>
+        </div>
+    </div>
+
+    <!-- Loading遮罩 -->
+    <div id="loading-overlay" class="loading-overlay hidden">
+        <div class="loading-spinner">
+            <i class="fas fa-spinner fa-spin"></i>
+            <span id="loading-text" class="loading-text">处理中...</span>
+        </div>
+    </div>
+
+    <!-- 自定义确认对话框 -->
+    <div id="confirm-dialog" class="modal hidden">
+        <div class="modal-content modal-sm">
+            <div class="modal-header">
+                <h3>确认</h3>
+                <button class="btn-close" onclick="closeConfirmDialog(false)"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body">
+                <p class="confirm-message" id="confirm-dialog-message"></p>
+                <div class="confirm-actions">
+                    <button class="btn-secondary" onclick="closeConfirmDialog(false)">取消</button>
+                    <button class="btn-primary" id="confirm-ok-btn">确定</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 自定义确认弹窗 -->
+    <div id="confirm-modal" class="modal hidden">
+        <div class="modal-content modal-confirm">
+            <div class="modal-header">
+                <h3 id="confirm-title">确认操作</h3>
+                <p id="confirm-message"></p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="closeConfirmModal(false)">取消</button>
+                <button class="btn-primary" onclick="closeConfirmModal(true)">确认</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chart.js 图表库 -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="script.js"></script>
+    <script>lucide.createIcons();</script>
+</body>
+</html>

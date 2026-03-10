@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>函数测试</title>
+</head>
+<body>
+    <h1>JavaScript函数测试</h1>
+    <div id="results"></div>
+
+    <script src="script.js?v=1773027951"></script>
+    <script>
+        const results = document.getElementById('results');
+
+        function testFunction(name) {
+            const exists = typeof window[name] === 'function';
+            return `<div>${name}: ${exists ? '✓ 存在' : '✗ 不存在'}</div>`;
+        }
+
+        // 等待一下再检查，确保脚本加载完成
+        setTimeout(() => {
+            results.innerHTML = `
+                <h2>记账相关函数：</h2>
+                ${testFunction('editAccountingRecord')}
+                ${testFunction('deleteAccountingRecord')}
+                ${testFunction('renderRecentRecords')}
+                ${testFunction('renderAccountingCategories')}
+                ${testFunction('addManualAccounting')}
+                ${testFunction('addQuickAccounting')}
+                ${testFunction('updateAccountingSummary')}
+
+                <h2>测试编辑按钮：</h2>
+                <button onclick="testEdit()">测试editAccountingRecord</button>
+
+                <h2>全局变量：</h2>
+                <div>accountingData: ${typeof accountingData !== 'undefined' ? '✓ 存在' : '✗ 不存在'}</div>
+                <div>categoryIcons: ${typeof categoryIcons !== 'undefined' ? '✓ 存在' : '✗ 不存在'}</div>
+            `;
+        }, 100);
+
+        function testEdit() {
+            if (typeof editAccountingRecord === 'function') {
+                alert('✓ editAccountingRecord 函数存在！');
+            } else {
+                alert('✗ editAccountingRecord 函数不存在！');
+            }
+        }
+    </script>
+</body>
+</html>

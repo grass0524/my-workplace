@@ -20,7 +20,7 @@ if (localStorage.getItem('newsData') && !JSON.parse(localStorage.getItem('newsDa
     console.log('已清除旧版本新闻缓存');
 }
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     initDate();
     initHealth();
     initTodos();
@@ -28,8 +28,8 @@ document.addEventListener('DOMContentLoaded', () => {
     initMood();
     initQuote();
     initAccounting();
-    setTimeout(initNews, 1000);;
-    setTimeout(initWord, 1500);;
+    await initNews();
+    await initWord();
 });
 function initDate() {
     const options = { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' };
@@ -3800,3 +3800,173 @@ window.debugIncomeCategory = forceFixIncomeCategoryBackground;
 window.fixIncomeCategory = forceFixIncomeCategoryBackground;
 
 console.log('Debug function loaded! Call window.fixIncomeCategory() in console to test');
+
+
+// ==================== 假期日历功能 ====================
+
+// 补充完整的假期数据（用于日历显示）
+const holidayDetails = {
+    '2026-01-01': { name: '元旦假期', range: '2026-01-01 至 2026-01-03' },
+    '2026-01-02': { name: '元旦假期', range: '2026-01-01 至 2026-01-03' },
+    '2026-01-03': { name: '元旦假期', range: '2026-01-01 至 2026-01-03' },
+    '2026-02-15': { name: '春节假期', range: '2026-02-15 至 2026-02-21' },
+    '2026-02-16': { name: '春节假期', range: '2026-02-15 至 2026-02-21' },
+    '2026-02-17': { name: '春节假期', range: '2026-02-15 至 2026-02-21' },
+    '2026-02-18': { name: '春节假期', range: '2026-02-15 至 2026-02-21' },
+    '2026-02-19': { name: '春节假期', range: '2026-02-15 至 2026-02-21' },
+    '2026-02-20': { name: '春节假期', range: '2026-02-15 至 2026-02-21' },
+    '2026-02-21': { name: '春节假期', range: '2026-02-15 至 2026-02-21' },
+    '2026-04-04': { name: '清明节假期', range: '2026-04-04 至 2026-04-06' },
+    '2026-04-05': { name: '清明节假期', range: '2026-04-04 至 2026-04-06' },
+    '2026-04-06': { name: '清明节假期', range: '2026-04-04 至 2026-04-06' },
+    '2026-05-01': { name: '劳动节假期', range: '2026-05-01 至 2026-05-05' },
+    '2026-05-02': { name: '劳动节假期', range: '2026-05-01 至 2026-05-05' },
+    '2026-05-03': { name: '劳动节假期', range: '2026-05-01 至 2026-05-05' },
+    '2026-05-04': { name: '劳动节假期', range: '2026-05-01 至 2026-05-05' },
+    '2026-05-05': { name: '劳动节假期', range: '2026-05-01 至 2026-05-05' },
+    '2026-06-19': { name: '端午节假期', range: '2026-06-19 至 2026-06-21' },
+    '2026-06-20': { name: '端午节假期', range: '2026-06-19 至 2026-06-21' },
+    '2026-06-21': { name: '端午节假期', range: '2026-06-19 至 2026-06-21' },
+    '2026-09-25': { name: '中秋节假期', range: '2026-09-25 至 2026-09-27' },
+    '2026-09-26': { name: '中秋节假期', range: '2026-09-25 至 2026-09-27' },
+    '2026-09-27': { name: '中秋节假期', range: '2026-09-25 至 2026-09-27' },
+    '2026-10-01': { name: '国庆节假期', range: '2026-10-01 至 2026-10-07' },
+    '2026-10-02': { name: '国庆节假期', range: '2026-10-01 至 2026-10-07' },
+    '2026-10-03': { name: '国庆节假期', range: '2026-10-01 至 2026-10-07' },
+    '2026-10-04': { name: '国庆节假期', range: '2026-10-01 至 2026-10-07' },
+    '2026-10-05': { name: '国庆节假期', range: '2026-10-01 至 2026-10-07' },
+    '2026-10-06': { name: '国庆节假期', range: '2026-10-01 至 2026-10-07' },
+    '2026-10-07': { name: '国庆节假期', range: '2026-10-01 至 2026-10-07' }
+};
+
+// 补班日期（2026年）
+const makeupDays = {
+    '2026-01-04': '元旦补班',
+    '2026-02-14': '春节补班',
+    '2026-02-22': '春节补班',
+    '2026-04-12': '清明补班',
+    '2026-05-09': '五一补班',
+    '2026-09-27': '中秋补班',
+    '2026-10-10': '国庆补班'
+};
+
+// 当前显示的月份
+let currentCalendarDate = new Date();
+
+// 显示假期日历
+function showHolidayCalendar() {
+    const modal = document.getElementById('holiday-calendar-modal');
+    if (modal) {
+        modal.classList.add('active');
+        currentCalendarDate = new Date();
+        renderHolidayCalendar();
+    }
+}
+
+// 关闭假期日历
+function closeHolidayCalendar() {
+    const modal = document.getElementById('holiday-calendar-modal');
+    if (modal) {
+        modal.classList.remove('active');
+    }
+}
+
+// 切换月份
+function changeHolidayMonth(delta) {
+    currentCalendarDate.setMonth(currentCalendarDate.getMonth() + delta);
+    renderHolidayCalendar();
+}
+
+// 渲染假期日历
+function renderHolidayCalendar() {
+    const grid = document.getElementById('holiday-calendar-grid');
+    const monthYear = document.getElementById('calendar-month-year');
+    
+    if (!grid || !monthYear) return;
+    
+    const year = currentCalendarDate.getFullYear();
+    const month = currentCalendarDate.getMonth();
+    
+    monthYear.textContent = `${year}年${month + 1}月`;
+    
+    const firstDay = new Date(year, month, 1);
+    const lastDay = new Date(year, month + 1, 0);
+    const daysInMonth = lastDay.getDate();
+    const startDayOfWeek = firstDay.getDay();
+    
+    let html = '<div class="calendar-weekdays">';
+    const weekdays = ['日', '一', '二', '三', '四', '五', '六'];
+    weekdays.forEach(day => {
+        html += `<div class="calendar-weekday">${day}</div>`;
+    });
+    html += '</div><div class="calendar-days">';
+    
+    for (let i = 0; i < startDayOfWeek; i++) {
+        html += '<div class="calendar-day empty"></div>';
+    }
+    
+    for (let day = 1; day <= daysInMonth; day++) {
+        const date = new Date(year, month, day);
+        const dateStr = formatDateToString(date);
+        const isHoliday = holidayDetails[dateStr];
+        const isMakeup = makeupDays[dateStr];
+        const isWeekend = date.getDay() === 0 || date.getDay() === 6;
+        
+        let dayClass = 'calendar-day';
+        let dayContent = day;
+        let label = '';
+        
+        if (isHoliday) {
+            dayClass += ' holiday';
+            label = '<span class="day-label">假</span>';
+        } else if (isMakeup) {
+            dayClass += ' makeup';
+            label = '<span class="day-label">班</span>';
+        } else if (isWeekend) {
+            dayClass += ' weekend';
+        }
+        
+        html += `<div class="${dayClass}" onclick="showHolidayDetail('${dateStr}')">
+            ${dayContent}${label}
+        </div>`;
+    }
+    
+    html += '</div>';
+    grid.innerHTML = html;
+}
+
+// 显示日期详情
+function showHolidayDetail(dateStr) {
+    const detail = document.getElementById('calendar-detail');
+    if (!detail) return;
+    
+    const date = new Date(dateStr);
+    const weekday = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'][date.getDay()];
+    const isHoliday = holidayDetails[dateStr];
+    const isMakeup = makeupDays[dateStr];
+    const isWeekend = date.getDay() === 0 || date.getDay() === 6;
+    
+    let content = `<strong>${dateStr}</strong> ${weekday}`;
+    
+    if (isHoliday) {
+        content += `<br><span style="color: var(--success-color);">🎉 ${isHoliday.name}</span>`;
+        content += `<br>假期范围：${isHoliday.range}`;
+    } else if (isMakeup) {
+        content += `<br><span style="color: var(--warning-color);">💼 ${isMakeup}</span>`;
+        content += `<br>需要上班`;
+    } else if (isWeekend) {
+        content += `<br>🌟 正常休息`;
+    } else {
+        content += `<br>💻 正常上班`;
+    }
+    
+    detail.innerHTML = content;
+}
+
+// 格式化日期为字符串
+function formatDateToString(date) {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+}

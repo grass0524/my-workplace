@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>记录样式测试</title>
+    <link rel="stylesheet" href="style.css?v=1773024140">
+    <style>
+        body {
+            padding: 20px;
+            background: #f5f5f5;
+            font-family: Arial, sans-serif;
+        }
+        .test-wrapper {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+        }
+        h2 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        .css-info {
+            background: #f0f0f0;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-wrapper">
+        <h2>记录样式测试（如果显示正常，说明CSS加载成功）</h2>
+
+        <div class="css-info">
+            <strong>期望效果：</strong>横向卡片，左侧图标+文字，右侧金额+时间<br>
+            <strong>CSS版本：</strong>style.css?v=1773024140
+        </div>
+
+        <!-- 模拟实际的HTML结构 -->
+        <div class="accounting-records" id="accounting-records-list">
+            <div class="accounting-record expense">
+                <div class="accounting-record-left">
+                    <div class="accounting-record-icon-wrapper">
+                        <i data-lucide="utensils"></i>
+                    </div>
+                    <div class="accounting-record-content">
+                        <div class="accounting-record-category">餐饮</div>
+                        <div class="accounting-record-note">午餐</div>
+                    </div>
+                </div>
+                <div class="accounting-record-right">
+                    <div class="accounting-record-amount-time">
+                        <span class="accounting-record-amount expense">-¥35.00</span>
+                        <div class="accounting-record-time">3月9日 12:30</div>
+                    </div>
+                    <button class="accounting-record-edit">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="accounting-record-delete">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="accounting-record income">
+                <div class="accounting-record-left">
+                    <div class="accounting-record-icon-wrapper">
+                        <i data-lucide="briefcase"></i>
+                    </div>
+                    <div class="accounting-record-content">
+                        <div class="accounting-record-category">工资</div>
+                        <div class="accounting-record-note">3月工资</div>
+                    </div>
+                </div>
+                <div class="accounting-record-right">
+                    <div class="accounting-record-amount-time">
+                        <span class="accounting-record-amount income">+¥15000.00</span>
+                        <div class="accounting-record-time">3月1日 09:00</div>
+                    </div>
+                    <button class="accounting-record-edit">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="accounting-record-delete">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="accounting-record expense">
+                <div class="accounting-record-left">
+                    <div class="accounting-record-icon-wrapper">
+                        <i data-lucide="car"></i>
+                    </div>
+                    <div class="accounting-record-content">
+                        <div class="accounting-record-category">交通</div>
+                        <div class="accounting-record-note">地铁</div>
+                    </div>
+                </div>
+                <div class="accounting-record-right">
+                    <div class="accounting-record-amount-time">
+                        <span class="accounting-record-amount expense">-¥5.00</span>
+                        <div class="accounting-record-time">3月9日 08:30</div>
+                    </div>
+                    <button class="accounting-record-edit">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="accounting-record-delete">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div id="debug-info" style="margin-top: 20px; font-size: 12px; color: #666;"></div>
+    </div>
+
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        lucide.createIcons();
+
+        // 调试信息
+        const record = document.querySelector('.accounting-record');
+        const debugInfo = document.getElementById('debug-info');
+
+        if (record) {
+            const styles = window.getComputedStyle(record);
+            debugInfo.innerHTML = `
+                <strong>实际应用的CSS：</strong><br>
+                display: ${styles.display}<br>
+                justify-content: ${styles.justifyContent}<br>
+                align-items: ${styles.alignItems}<br>
+                height: ${styles.height}<br>
+                background: ${styles.background}<br>
+                border-radius: ${styles.borderRadius}<br>
+                flex-direction: ${styles.flexDirection}
+            `;
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>测试CSS加载</title>
+    <link rel="stylesheet" href="style.css?v=1773019629">
+    <style>
+        body {
+            padding: 20px;
+            background: #f0f0f0;
+        }
+        .test-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+        }
+        .info {
+            background: #e8f4f8;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>CSS加载测试</h1>
+
+        <div class="info">
+            <p><strong>如果看到这个记录是横向卡片布局（左侧图标+文字，右侧金额），说明CSS加载成功</strong></p>
+            <p><strong>如果看到的是竖排文字列表，说明CSS没有加载</strong></p>
+        </div>
+
+        <h2>测试记录：</h2>
+        <div id="test-records">
+            <!-- 测试记录将在这里显示 -->
+        </div>
+
+        <h2>样式检查：</h2>
+        <div id="style-check"></div>
+    </div>
+
+    <script>
+        // 创建测试记录
+        const testRecords = [
+            { id: 1, type: 'expense', category: '餐饮', note: '午餐', amount: 35.50, date: new Date() },
+            { id: 2, type: 'income', category: '工资', note: '3月工资', amount: 15000, date: new Date() },
+            { id: 3, type: 'expense', category: '交通', note: '地铁', amount: 5, date: new Date() }
+        ];
+
+        // 渲染测试记录
+        const container = document.getElementById('test-records');
+        container.innerHTML = testRecords.map(record => {
+            const recordDate = new Date(record.date);
+            const timeStr = recordDate.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
+            const dateStr = recordDate.toLocaleDateString('zh-CN', { month: 'short', day: 'numeric' });
+
+            return '<div class="accounting-record ' + record.type + '">' +
+                '<div class="accounting-record-left">' +
+                '<div class="accounting-record-icon-wrapper">' +
+                '<i data-lucide="circle"></i>' +
+                '</div>' +
+                '<div class="accounting-record-content">' +
+                '<div class="accounting-record-category">' + record.category + '</div>' +
+                '<div class="accounting-record-note">' + record.note + '</div>' +
+                '</div>' +
+                '</div>' +
+                '<div class="accounting-record-right">' +
+                '<div class="accounting-record-amount-time">' +
+                '<span class="accounting-record-amount ' + record.type + '">' +
+                (record.type === 'income' ? '+' : '-') + '¥' + record.amount.toFixed(2) +
+                '</span>' +
+                '<div class="accounting-record-time">' + dateStr + ' ' + timeStr + '</div>' +
+                '</div>' +
+                '</div>' +
+                '</div>';
+        }).join('');
+
+        // 检查样式
+        const testElement = document.querySelector('.accounting-record');
+        const styles = window.getComputedStyle(testElement);
+
+        const styleInfo = `
+            <ul>
+                <li>display: ${styles.display}</li>
+                <li>justify-content: ${styles.justifyContent}</li>
+                <li>align-items: ${styles.alignItems}</li>
+                <li>height: ${styles.height}</li>
+                <li>background: ${styles.background}</li>
+                <li>border-radius: ${styles.borderRadius}</li>
+            </ul>
+        `;
+
+        document.getElementById('style-check').innerHTML = styleInfo;
+    </script>
+</body>
+</html>

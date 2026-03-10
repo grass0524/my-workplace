@@ -28,8 +28,8 @@ document.addEventListener('DOMContentLoaded', () => {
     initMood();
     initQuote();
     initAccounting();
-    setTimeout(initNews, 1000);;
-    setTimeout(initWord, 1500);;
+    setTimeout(initNews, 1000); // 延迟1秒加载，避免阻塞页面
+    setTimeout(initWord, 1500); // 延迟1.5秒加载，避免阻塞页面
 });
 function initDate() {
     const options = { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' };
@@ -3751,7 +3751,7 @@ const observer = new MutationObserver(() => {
 });
 
 // 开始观察整个document
-observer.observe(document.body, {
+// observer.observe(document.body, {
     childList: true,
     subtree: true
 });
@@ -3764,7 +3764,7 @@ if (document.readyState === 'loading') {
 }
 
 // 定时检查（每100ms）
-setInterval(ensureIncomeCategoryGreenBackground, 100);
+// setInterval(ensureIncomeCategoryGreenBackground, 100); // 临时禁用，提升性能
 
 // 强制修复收入分类背景色 - 调试版本
 function forceFixIncomeCategoryBackground() {

@@ -20,7 +20,7 @@ if (localStorage.getItem('newsData') && !JSON.parse(localStorage.getItem('newsDa
     console.log('已清除旧版本新闻缓存');
 }
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     initDate();
     initHealth();
     initTodos();
@@ -28,8 +28,8 @@ document.addEventListener('DOMContentLoaded', () => {
     initMood();
     initQuote();
     initAccounting();
-    setTimeout(initNews, 1000);;
-    setTimeout(initWord, 1500);;
+    await initNews();
+    await initWord();
 });
 function initDate() {
     const options = { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' };

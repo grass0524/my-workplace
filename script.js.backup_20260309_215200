@@ -1,26 +1,5 @@
 // 1. 初始化
-// 聚合数据今日头条API配置
-const JUHE_API_KEY = '03d1da64823d24414d7b6bab4b8390a2'; // 聚合数据API密钥
-const JUHE_BASE_URL = 'http://v.juhe.cn/toutiao';
-
-const CORS_PROXY = 'https://api.codetabs.com/v1/proxy?quest=';
-
-// 新闻类型映射（前端分类 → 聚合数据API type参数）
-const NEWS_TYPE_MAP = {
-    'tech': 'keji',
-    'finance': 'caijing',
-    'general': 'guonei',
-    'international': 'guoji'
-};
-
-
-// 自动清除旧版本新闻缓存
-if (localStorage.getItem('newsData') && !JSON.parse(localStorage.getItem('newsData')).version) {
-    localStorage.removeItem('newsData');
-    console.log('已清除旧版本新闻缓存');
-}
-
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     initDate();
     initHealth();
     initTodos();
@@ -28,8 +7,8 @@ document.addEventListener('DOMContentLoaded', () => {
     initMood();
     initQuote();
     initAccounting();
-    setTimeout(initNews, 1000);;
-    setTimeout(initWord, 1500);;
+    await initNews();
+    await initWord();
 });
 function initDate() {
     const options = { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' };
@@ -2400,16 +2379,7 @@ function selectAccountingType(type) {
     document.querySelectorAll('.type-toggle-btn').forEach(btn => {
         btn.classList.toggle('active', btn.dataset.type === type);
     });
-
-    // 切换收入模式类到容器
-    const accountingContainer = document.querySelector('.accounting-top-container');
-    if (accountingContainer) {
-        if (type === 'income') {
-            accountingContainer.classList.add('income-mode');
-        } else {
-            accountingContainer.classList.remove('income-mode');
-        }
-    }    
+    
     // 渲染分类按钮
     renderAccountingCategories(type);
     
@@ -2810,7 +2780,6 @@ let newsData = {
     tech: [],
     finance: [],
     general: [],
-    international: [],
     lastFetch: null
 };
 
@@ -2873,15 +2842,15 @@ async function fetchAndRenderNews() {
         
         // 尝试从缓存加载
         const hasCache = await loadNewsData();
-        if (hasCache && newsData[currentNewsCategory] && newsData[currentNewsCategory].length > 0) {
+        if (hasCache && newsData.tech.length > 0) {
             renderCurrentNewsList();
             loadingEl.classList.add('hidden');
             contentEl.classList.remove('hidden');
             return;
         }
         
-        // 只加载当前分类的新闻
-        newsData[currentNewsCategory] = await fetchAllNews(currentNewsCategory);
+        // 获取最新新闻
+        await fetchAllNews();
         renderCurrentNewsList();
         saveNewsData();
         
@@ -2897,72 +2866,13 @@ async function fetchAndRenderNews() {
 }
 
 // 获取所有新闻
-// 获取指定分类的新闻
-async function fetchAllNews(category = 'tech') {
-    // 如果没有配置API Key，使用模拟数据
-    if (!JUHE_API_KEY) {
-        console.warn('未配置聚合数据API Key，使用模拟数据');
-        return generateMockNews(category, 8);
-    }
-
-    try {
-        // 获取对应的type参数
-        const newsType = NEWS_TYPE_MAP[category] || 'keji';
-        
-        // 使用聚合数据今日头条API获取新闻（通过CORS代理）
-        const apiUrl = `${JUHE_BASE_URL}/index?key=${JUHE_API_KEY}&type=${newsType}`;
-        const proxyUrl = `${CORS_PROXY}${encodeURIComponent(apiUrl)}`;
-        const response = await fetch(proxyUrl);
-        const data = await response.json();
-
-        if (data.error_code === 0 && data.result && data.result.data) {
-            const articles = data.result.data;
-            
-            // 调试：打印第一条数据结构
-            console.log(`API返回数据示例 (${category}, type=${newsType}):`, articles[0]);
-            
-            const newsList = articles.slice(0, 8).map(item => ({
-                title: item.title || '无标题',
-                source: item.author_name || item.source || '聚合数据',
-                url: item.url,
-                time: formatNewsTime(item.date || item.ctime || item.pubdate || new Date().toISOString()),
-                date: item.date || item.ctime || item.pubdate || new Date().toISOString()
-            }));
-            
-            // 调试：查看原始date和处理后的time
-            console.log(`时间处理示例 (${category}):`, {
-                原始date: articles[0].date,
-                显示time: newsList[0].time
-            });
-
-            console.log(`新闻数据获取成功（聚合数据API - ${category}, type=${newsType})`);
-            return newsList;
-        } else {
-            console.warn('聚合数据API返回错误，使用模拟数据:', data);
-            return generateMockNews(category, 8);
-        }
-    } catch (error) {
-        console.error('获取新闻失败，使用模拟数据:', error);
-        // 失败时使用模拟数据
-        return generateMockNews(category, 8);
-    }
-}
-
-// 格式化新闻时间
-function formatNewsTime(timestamp) {
-    // 去掉时区标识Z，避免时区转换
-    const localTimestamp = timestamp ? timestamp.replace('Z', '').replace('z', '') : new Date().toISOString();
-    
-    const now = new Date();
-    const newsTime = new Date(localTimestamp);
-    const diff = Math.floor((now - newsTime) / 1000 / 60); // 分钟
-    
-    // 调试日志
-    console.log('formatNewsTime - 原始:', timestamp, '处理后:', localTimestamp, 'diff:', diff);
-    
-    if (diff < 60) return `${diff}分钟前`;
-    if (diff < 1440) return `${Math.floor(diff / 60)}小时前`;
-    return `${Math.floor(diff / 1440)}天前`;
+async function fetchAllNews() {
+    // 科技新闻
+    newsData.tech = generateMockNews('tech', 7);
+    // 财经新闻
+    newsData.finance = generateMockNews('finance', 7);
+    // 综合新闻
+    newsData.general = generateMockNews('general', 7);
 }
 
 // 生成模拟新闻数据
@@ -2973,30 +2883,21 @@ function generateMockNews(category, count) {
             { title: '国产芯片获得重大进展，性能提升50%', source: '36氪' },
             { title: '新能源汽车销量创新高，智能驾驶成新焦点', source: '第一财经' },
             { title: '5G网络覆盖率突破90%，6G研发启动', source: '通信世界' },
-            { title: '云计算市场规模持续扩大，企业数字化转型加速', source: 'TechWeb' },
-            { title: '量子计算实验取得重大突破，计算速度提升千倍', source: '量子科技' },
-            { title: '元宇宙概念持续升温，虚拟现实应用加速落地', source: 'VR产业网' },
-            { title: '区块链技术在金融领域应用加速，数字货币监管完善', source: '区块链日报' }
+            { title: '云计算市场规模持续扩大，企业数字化转型加速', source: 'TechWeb' }
         ],
         finance: [
             { title: '央行降准释放流动性，市场反应积极', source: '财联社' },
             { title: 'A股三大指数集体上涨，成交额破万亿', source: '东方财富' },
             { title: '人民币汇率保持稳定，外汇储备充足', source: '新浪财经' },
             { title: '房地产市场迎来政策利好，多地出台新措施', source: '证券时报' },
-            { title: '数字人民币试点扩容，应用场景不断丰富', source: '金融界' },
-            { title: '债券市场持续活跃，绿色债券发行量创新高', source: '中国证券报' },
-            { title: '保险行业数字化转型加快，智能投保成趋势', source: '保观' },
-            { title: '私募基金规模持续增长，量化投资策略受追捧', source: '私募排排网' }
+            { title: '数字人民币试点扩容，应用场景不断丰富', source: '金融界' }
         ],
         general: [
             { title: '全国两会召开，多项民生政策引关注', source: '人民日报' },
             { title: '教育改革深化，职业教育迎来新发展', source: '新华网' },
             { title: '医疗卫生体系建设提速，基层医疗服务改善', source: '健康报' },
             { title: '生态文明建设取得新成效，绿色发展理念深入人心', source: '光明日报' },
-            { title: '文化事业繁荣发展，优秀作品不断涌现', source: '中国文化报' },
-            { title: '体育事业发展迅速，全民健身活动广泛开展', source: '体育总局' },
-            { title: '科技创新推动产业升级，新兴业态不断涌现', source: '经济日报' },
-            { title: '国际合作不断深化，共建一带一路倡议取得新进展', source: '新华社' }
+            { title: '文化事业繁荣发展，优秀作品不断涌现', source: '中国文化报' }
         ]
     };
     
@@ -3012,7 +2913,7 @@ function generateMockNews(category, count) {
 }
 
 // 切换新闻分类
-async function switchNewsCategory(category) {
+function switchNewsCategory(category) {
     currentNewsCategory = category;
     
     // 更新标签状态
@@ -3020,30 +2921,8 @@ async function switchNewsCategory(category) {
         tab.classList.toggle('active', tab.dataset.category === category);
     });
     
-    // 显示加载状态
-    const loadingEl = document.getElementById('news-loading');
-    const contentEl = document.getElementById('news-content');
-    loadingEl.classList.remove('hidden');
-    contentEl.classList.add('hidden');
-    
-    try {
-        // 如果该分类还没加载过，则获取数据
-        if (!newsData[category] || newsData[category].length === 0) {
-            newsData[category] = await fetchAllNews(category);
-            saveNewsData();
-        }
-        
-        // 重新渲染新闻列表
-        renderCurrentNewsList();
-        
-        loadingEl.classList.add('hidden');
-        contentEl.classList.remove('hidden');
-    } catch (error) {
-        console.error('切换新闻分类失败:', error);
-        loadingEl.innerHTML = '<i class="fas fa-exclamation-circle"></i> 加载失败，点击刷新重试';
-        loadingEl.onclick = () => switchNewsCategory(category);
-        loadingEl.style.cursor = 'pointer';
-    }
+    // 重新渲染新闻列表
+    renderCurrentNewsList();
 }
 
 // 渲染当前选中分类的新闻列表
@@ -3056,8 +2935,8 @@ function renderCurrentNewsList() {
         return;
     }
     
-    container.innerHTML = newsList.slice(0, 8).map((item, index) => 
-        '<li class="news-item" onclick="openNewsLink(' + index + ')">' +
+    container.innerHTML = newsList.slice(0, 7).map(item => 
+        '<li class="news-item" onclick="openNewsLink(\'' + item.title + '\')">' +
         '<div class="news-item-title">' + item.title + '</div>' +
         '<div class="news-item-meta">' +
         '<span class="news-item-source">' + item.source + '</span>' +
@@ -3068,18 +2947,10 @@ function renderCurrentNewsList() {
 }
 
 // 打开新闻链接（在新标签页）
-function openNewsLink(index) {
-    const newsList = newsData[currentNewsCategory] || [];
-    const item = newsList[index];
-    
-    if (item && item.url) {
-        // 使用API返回的真实URL
-        window.open(item.url, '_blank');
-    } else {
-        // 如果没有URL，跳转到搜索页面
-        const searchUrl = 'https://www.baidu.com/s?wd=' + encodeURIComponent(item.title);
-        window.open(searchUrl, '_blank');
-    }
+function openNewsLink(title) {
+    // 由于是模拟数据，这里跳转到搜索页面
+    const searchUrl = 'https://www.baidu.com/s?wd=' + encodeURIComponent(title);
+    window.open(searchUrl, '_blank');
 }
 
 // 刷新新闻

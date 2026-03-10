@@ -9,7 +9,7 @@
     <title>My Workplace</title>
 <link rel="stylesheet" href="style.css?v=1773110782">
     <!-- 引入 Font Awesome 图标库 (CDN) -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" media="print" onload="this.media='all'">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- 引入 Lucide 图标库 (pencil设计使用) -->
     <script src="https://unpkg.com/lucide@latest"></script>
 <style>
@@ -1529,9 +1529,12 @@ input[type="number"] {
             </div>
 
             <!-- 模块三：放假倒计时 (放在上面比较显眼) -->
-            <section class="card holiday-card">
+            <section class="card holiday-card" onclick="showHolidayCalendar()" style="cursor: pointer;">
                 <div class="card-header">
                     <h2>放假倒计时</h2>
+                    <button class="btn-icon-neu" onclick="event.stopPropagation(); showHolidayCalendar()" title="查看日历">
+                        <i class="fas fa-calendar-days"></i>
+                    </button>
                 </div>
                 <div class="card-body holiday-content">
                     <div class="countdown-text">
@@ -2000,7 +2003,7 @@ input[type="number"] {
     </div>
 
     <!-- Chart.js 图表库 -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <script>
     // 强制清除新闻缓存以显示7条新闻
     if (localStorage.getItem('newsData')) {
@@ -2012,7 +2015,7 @@ input[type="number"] {
     }
     </script>
     
-<script src="script.js?v=1773111001"></script>
+<script src="script.js?v=1773110777"></script>
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
@@ -2087,5 +2090,42 @@ function testQuickAccounting() {
     </div>
 </div>
 
+
+    <!-- 假期日历模态框 -->
+    <div id="holiday-calendar-modal" class="modal" onclick="if(event.target === this) closeHolidayCalendar()">
+        <div class="modal-content modal-lg">
+            <div class="modal-header">
+                <h3><i class="fas fa-calendar-days"></i> 2026年假期日历</h3>
+                <button class="btn-close" onclick="closeHolidayCalendar()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="calendar-controls">
+                    <button class="btn-icon" onclick="changeHolidayMonth(-1)">
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                    <h4 id="calendar-month-year">2026年3月</h4>
+                    <button class="btn-icon" onclick="changeHolidayMonth(1)">
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+                </div>
+                <div class="calendar-grid" id="holiday-calendar-grid">
+                    <!-- 日历将通过JavaScript动态生成 -->
+                </div>
+                <div class="calendar-legend">
+                    <span class="legend-item">
+                        <span class="legend-color legend-holiday"></span> 法定假期
+                    </span>
+                    <span class="legend-item">
+                        <span class="legend-color legend-makeup"></span> 调休补班
+                    </span>
+                </div>
+                <div class="calendar-detail" id="calendar-detail">
+                    点击日期查看详情
+                </div>
+            </div>
+        </div>
+    </div>
 </body>
 </html>

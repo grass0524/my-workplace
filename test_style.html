@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="style.css?v=1772886700">
+</head>
+<body>
+    <div class="accounting-records" id="test-container">
+        <div class="accounting-record expense">
+            <div class="accounting-record-left">
+                <div class="accounting-record-icon-wrapper">
+                    <i data-lucide="utensils"></i>
+                </div>
+                <div class="accounting-record-content">
+                    <div class="accounting-record-category">餐饮</div>
+                    <div class="accounting-record-note">午餐</div>
+                </div>
+            </div>
+            <div class="accounting-record-right">
+                <div class="accounting-record-amount-time">
+                    <span class="accounting-record-amount expense">-¥35.00</span>
+                    <div class="accounting-record-time">3月7日 12:30</div>
+                </div>
+                <button class="accounting-record-edit"><i class="fas fa-edit"></i></button>
+                <button class="accounting-record-delete"><i class="fas fa-trash"></i></button>
+            </div>
+        </div>
+    </div>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"></script>
+    <script>
+        lucide.createIcons();
+        console.log('CSS和图标应该已加载');
+    </script>
+</body>
+</html>

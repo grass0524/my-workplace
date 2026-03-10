@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>最小化测试</title>
+    <style>
+        /* 内联CSS，排除加载问题 */
+        .accounting-records .accounting-record {
+            display: flex !important;
+            justify-content: space-between !important;
+            align-items: center !important;
+            height: 64px !important;
+            padding: 14px !important;
+            margin-bottom: 12px !important;
+            background: #e0e5ec !important;
+            border-radius: 12px !important;
+            box-shadow: 4px 4px 8px #a3b1c6, -4px -4px 8px #ffffff !important;
+        }
+        .accounting-records .accounting-record-left {
+            flex: 1 !important;
+            display: flex !important;
+            align-items: center !important;
+            gap: 12px !important;
+        }
+        .accounting-records .accounting-record-icon-wrapper {
+            width: 40px !important;
+            height: 40px !important;
+            background: #e0e5ec !important;
+            border-radius: 10px !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            flex-shrink: 0 !important;
+        }
+        .accounting-records .accounting-record-content {
+            display: flex !important;
+            flex-direction: column !important;
+        }
+        .accounting-records .accounting-record-right {
+            display: flex !important;
+            align-items: center !important;
+            gap: 12px !important;
+        }
+        .accounting-records .accounting-record-amount {
+            font-size: 16px !important;
+            font-weight: bold !important;
+        }
+        .accounting-records .accounting-record-amount.expense {
+            color: #e74c3c !important;
+        }
+        .accounting-records .accounting-record-amount.income {
+            color: #27ae60 !important;
+        }
+        body {
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-info {
+            margin-bottom: 20px;
+            padding: 10px;
+            background: white;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-info">
+        <h2>最小化CSS测试</h2>
+        <p>如果这个页面显示正常（横向卡片），说明问题是外部CSS文件加载失败</p>
+    </div>
+
+    <div class="accounting-records">
+        <div class="accounting-record expense">
+            <div class="accounting-record-left">
+                <div class="accounting-record-icon-wrapper">
+                    🍽️
+                </div>
+                <div class="accounting-record-content">
+                    <div class="accounting-record-category">餐饮</div>
+                    <div class="accounting-record-note">午餐</div>
+                </div>
+            </div>
+            <div class="accounting-record-right">
+                <div class="accounting-record-amount expense">-¥35.00</div>
+                <div class="accounting-record-time">12:30</div>
+            </div>
+        </div>
+
+        <div class="accounting-record income">
+            <div class="accounting-record-left">
+                <div class="accounting-record-icon-wrapper">
+                    💼
+                </div>
+                <div class="accounting-record-content">
+                    <div class="accounting-record-category">工资</div>
+                    <div class="accounting-record-note">3月工资</div>
+                </div>
+            </div>
+            <div class="accounting-record-right">
+                <div class="accounting-record-amount income">+¥15000.00</div>
+                <div class="accounting-record-time">09:00</div>
+            </div>
+        </div>
+    </div>
+
+    <div style="margin-top: 20px; padding: 10px; background: white; border-radius: 5px;">
+        <h3>调试信息</h3>
+        <div id="debug"></div>
+    </div>
+
+    <script>
+        const record = document.querySelector('.accounting-record');
+        const debug = document.getElementById('debug');
+
+        if (record) {
+            const styles = window.getComputedStyle(record);
+            debug.innerHTML = `
+                <p><strong>display:</strong> ${styles.display}</p>
+                <p><strong>justify-content:</strong> ${styles.justifyContent}</p>
+                <p><strong>align-items:</strong> ${styles.alignItems}</p>
+                <p><strong>height:</strong> ${styles.height}</p>
+                <p><strong>background:</strong> ${styles.background}</p>
+                <p><strong>border-radius:</strong> ${styles.borderRadius}</p>
+            `;
+        }
+    </script>
+</body>
+</html>

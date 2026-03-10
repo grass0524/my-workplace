@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>测试记账统计</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .test-btn { padding: 10px 20px; margin: 10px; cursor: pointer; }
+        #test-output { margin-top: 20px; padding: 10px; border: 1px solid #ccc; }
+    </style>
+</head>
+<body>
+    <h1>记账统计功能测试</h1>
+    <button class="test-btn" onclick="testAll()">运行所有测试</button>
+    <button class="test-btn" onclick="showAccountingStats()">打开统计弹窗</button>
+    <div id="test-output"></div>
+
+    <!-- 从主页面复制必要的元素 -->
+    <div id="accounting-stats-modal" class="modal hidden" style="display: none;">
+        <div style="background: white; padding: 20px; max-width: 800px; margin: 0 auto;">
+            <h3>记账统计</h3>
+            <div class="stats-overview">
+                <div class="stat-card">
+                    <span>结余</span>
+                    <span id="stats-balance">¥0.00</span>
+                </div>
+            </div>
+            <div class="stats-content">
+                <div class="stats-section">
+                    <h4>收支分析</h4>
+                    <div class="stats-charts">
+                        <div class="chart-container">
+                            <canvas id="expense-pie-chart"></canvas>
+                            <div class="chart-legend" id="pie-chart-legend"></div>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="income-expense-bar-chart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    
+    <script>
+        // 模拟数据
+        let accountingData = {
+            records: [
+                { id: 1, type: 'expense', category: '餐饮', amount: 35, note: '午餐', date: new Date().toISOString() },
+                { id: 2, type: 'expense', category: '交通', amount: 20, note: '地铁', date: new Date().toISOString() },
+                { id: 3, type: 'income', category: '工资', amount: 5000, note: '月薪', date: new Date().toISOString() }
+            ]
+        };
+
+        // 测试函数
+        function testAll() {
+            const output = document.getElementById('test-output');
+            let results = [];
+            
+            results.push('✓ Chart.js: ' + typeof Chart);
+            results.push('✓ showAccountingStats: ' + typeof showAccountingStats);
+            results.push('✓ accountingData: ' + JSON.stringify(accountingData));
+            results.push('✓ modal元素: ' + (document.getElementById('accounting-stats-modal') ? '存在' : '不存在'));
+            results.push('✓ 饼图canvas: ' + (document.getElementById('expense-pie-chart') ? '存在' : '不存在'));
+            
+            output.innerHTML = '<h4>测试结果：</h4><pre>' + results.join('\n') + '</pre>';
+        }
+
+        // 在页面加载时自动运行测试
+        window.addEventListener('load', function() {
+            console.log('测试页面加载完成');
+            testAll();
+        });
+    </script>
+    
+    <!-- 加载主脚本 -->
+    <script src="script.js"></script>
+</body>
+</html>

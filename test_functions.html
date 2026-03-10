@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>测试函数</title>
+</head>
+<body>
+    <h1>JavaScript函数测试</h1>
+    <div id="results"></div>
+
+    <script src="script.js?v=1773019773"></script>
+    <script>
+        const results = document.getElementById('results');
+
+        function checkFunction(name) {
+            const exists = typeof window[name] === 'function';
+            return `<div>${name}: ${exists ? '✓ 存在' : '✗ 不存在'}</div>`;
+        }
+
+        results.innerHTML = `
+            <h2>快速记账函数：</h2>
+            ${checkFunction('parseQuickAccountingInput')}
+            ${checkFunction('handleAccountingQuickInput')}
+            ${checkFunction('addQuickAccounting')}
+            ${checkFunction('showQuickAccountingModal')}
+            ${checkFunction('closeQuickAccountingModal')}
+            ${checkFunction('selectQuickConfirmType')}
+            ${checkFunction('confirmQuickAccounting')}
+            ${checkFunction('showNotification')}
+
+            <h2>记录渲染函数：</h2>
+            ${checkFunction('renderRecentRecords')}
+            ${checkFunction('renderAccountingCategories')}
+            ${checkFunction('editAccountingRecord')}
+            ${checkFunction('deleteAccountingRecord')}
+
+            <h2>数据管理函数：</h2>
+            ${checkFunction('saveAccountingData')}
+            ${checkFunction('loadAccountingData')}
+            ${checkFunction('updateAccountingSummary')}
+
+            <h2>测试快速记账解析：</h2>
+            <pre>${JSON.stringify(parseQuickAccountingInput('午餐35'), null, 2)}</pre>
+        `;
+    </script>
+</body>
+</html>

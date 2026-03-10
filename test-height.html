@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>测试高度固定</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* 调试样式 - 用红色边框标记卡片 */
+        section.todo-card {
+            outline: 3px solid red !important;
+        }
+        section.word-card {
+            outline: 3px solid blue !important;
+        }
+        section.mood-card {
+            outline: 3px solid green !important;
+        }
+        .debug-info {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 12px;
+            z-index: 9999;
+        }
+    </style>
+</head>
+<body>
+    <div class="debug-info" id="debug-info">
+        正在检测高度...
+    </div>
+    
+    <div class="container">
+        <header class="header">
+            <h1>高度测试页面</h1>
+        </header>
+        
+        <main class="dashboard-grid">
+            <!-- 待办清单 -->
+            <section class="card todo-card">
+                <div class="card-header">
+                    <h2>待办清单</h2>
+                </div>
+                <div class="card-body todo-body">
+                    <div class="todo-input-group">
+                        <input type="text" placeholder="添加任务">
+                        <button class="btn-add"><i class="fas fa-plus"></i></button>
+                    </div>
+                    <div class="todo-list-container" id="todo-list-container">
+                        <!-- 大量测试内容 -->
+                    </div>
+                </div>
+            </section>
+            
+            <!-- 今日单词 -->
+            <section class="card word-card">
+                <div class="card-header">
+                    <h2>今日单词</h2>
+                </div>
+                <div class="card-body word-content" id="word-content">
+                    <!-- 大量测试内容 -->
+                </div>
+            </section>
+            
+            <!-- 心情日记 -->
+            <section class="card mood-card">
+                <div class="card-header">
+                    <h2>心情日记</h2>
+                </div>
+                <div class="card-body mood-body">
+                    <div class="mood-input-area">
+                        <input type="text" placeholder="今天心情怎么样？">
+                    </div>
+                    <div class="mood-list-container" id="mood-list-container">
+                        <!-- 大量测试内容 -->
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+    
+    <script>
+        // 添加大量测试内容
+        const todoContainer = document.getElementById('todo-list-container');
+        const wordContent = document.getElementById('word-content');
+        const moodContainer = document.getElementById('mood-list-container');
+        
+        for(let i = 0; i < 30; i++) {
+            // 待办清单
+            const todoItem = document.createElement('div');
+            todoItem.className = 'todo-item';
+            todoItem.style.padding = '12px';
+            todoItem.style.borderBottom = '1px solid #eee';
+            todoItem.textContent = `测试待办任务 ${i + 1}`;
+            todoContainer.appendChild(todoItem);
+            
+            // 今日单词
+            const wordItem = document.createElement('div');
+            wordItem.style.padding = '10px';
+            wordItem.style.borderBottom = '1px solid #eee';
+            wordItem.textContent = `测试单词内容 ${i + 1}`;
+            wordContent.appendChild(wordItem);
+            
+            // 心情日记
+            const moodItem = document.createElement('div');
+            moodItem.style.padding = '10px';
+            moodItem.style.borderBottom = '1px solid #eee';
+            moodItem.textContent = `测试心情记录 ${i + 1}`;
+            moodContainer.appendChild(moodItem);
+        }
+        
+        // 实时检测高度
+        function checkHeight() {
+            const todoCard = document.querySelector('.todo-card');
+            const wordCard = document.querySelector('.word-card');
+            const moodCard = document.querySelector('.mood-card');
+            
+            const debugInfo = document.getElementById('debug-info');
+            debugInfo.innerHTML = `
+                <strong>高度检测：</strong><br>
+                待办清单: ${todoCard.offsetHeight}px (应该600px)<br>
+                今日单词: ${wordCard.offsetHeight}px (应该400px)<br>
+                心情日记: ${moodCard.offsetHeight}px (应该400px)
+            `;
+        }
+        
+        setTimeout(checkHeight, 100);
+        setInterval(checkHeight, 1000);
+    </script>
+</body>
+</html>

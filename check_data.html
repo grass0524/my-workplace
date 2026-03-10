@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>检查数据</title>
+    <style>
+        body { font-family: Arial; padding: 20px; }
+        pre { background: #f5f5f5; padding: 10px; border-radius: 5px; overflow-x: auto; }
+        .section { margin: 20px 0; border: 1px solid #ddd; padding: 15px; border-radius: 5px; }
+        h2 { color: #333; }
+    </style>
+</head>
+<body>
+    <h1>记账数据检查</h1>
+
+    <div class="section">
+        <h2>1. localStorage 内容</h2>
+        <pre id="localStorage-content"></pre>
+    </div>
+
+    <div class="section">
+        <h2>2. accountingData 对象</h2>
+        <pre id="accounting-data"></pre>
+    </div>
+
+    <div class="section">
+        <h2>3. 分类数据</h2>
+        <pre id="categories-data"></pre>
+    </div>
+
+    <div class="section">
+        <h2>4. 最近记录</h2>
+        <pre id="records-data"></pre>
+    </div>
+
+    <script>
+        // 检查localStorage
+        const localStorageContent = {};
+        for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            localStorageContent[key] = localStorage.getItem(key);
+        }
+        document.getElementById('localStorage-content').textContent = JSON.stringify(localStorageContent, null, 2);
+
+        // 检查accountingData
+        try {
+            const accountingDataStr = localStorage.getItem('accountingData');
+            if (accountingDataStr) {
+                const accountingData = JSON.parse(accountingDataStr);
+                document.getElementById('accounting-data').textContent = JSON.stringify(accountingData, null, 2);
+
+                // 分类
+                document.getElementById('categories-data').textContent =
+                    '支出分类: ' + JSON.stringify(accountingData.expenseCategories, null, 2) + '\n\n' +
+                    '收入分类: ' + JSON.stringify(accountingData.incomeCategories, null, 2);
+
+                // 记录
+                document.getElementById('records-data').textContent =
+                    '记录数量: ' + accountingData.records.length + '\n' +
+                    JSON.stringify(accountingData.records.slice(0, 5), null, 2);
+            } else {
+                document.getElementById('accounting-data').textContent = '没有找到 accountingData';
+                document.getElementById('categories-data').textContent = '无数据';
+                document.getElementById('records-data').textContent = '无数据';
+            }
+        } catch (e) {
+            document.getElementById('accounting-data').textContent = '解析错误: ' + e.message;
+        }
+
+        // 检查script.js加载
+        console.log('测试页面加载完成');
+    </script>
+</body>
+</html>

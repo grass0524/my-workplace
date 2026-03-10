@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>调试记录样式</title>
+    <link rel="stylesheet" href="style.css?v=1773020292">
+    <style>
+        body {
+            padding: 20px;
+            background: #f0f0f0;
+            font-family: Arial, sans-serif;
+        }
+        .test-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+        }
+        .debug-info {
+            background: #f0f0f0;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+        .debug-info div {
+            margin: 5px 0;
+        }
+        .success { color: green; font-weight: bold; }
+        .error { color: red; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>记录样式调试</h1>
+
+        <div class="debug-info">
+            <h3>CSS检查结果：</h3>
+            <div id="css-check"></div>
+        </div>
+
+        <h2>测试记录（应该显示为横向卡片）：</h2>
+        <div id="test-records">
+            <div class="accounting-record expense">
+                <div class="accounting-record-left">
+                    <div class="accounting-record-icon-wrapper">
+                        <i data-lucide="utensils"></i>
+                    </div>
+                    <div class="accounting-record-content">
+                        <div class="accounting-record-category">餐饮</div>
+                        <div class="accounting-record-note">午餐</div>
+                    </div>
+                </div>
+                <div class="accounting-record-right">
+                    <div class="accounting-record-amount-time">
+                        <span class="accounting-record-amount expense">-¥35.00</span>
+                        <div class="accounting-record-time">3月9日 12:30</div>
+                    </div>
+                    <button class="accounting-record-edit">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="accounting-record-delete">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="accounting-record income">
+                <div class="accounting-record-left">
+                    <div class="accounting-record-icon-wrapper">
+                        <i data-lucide="briefcase"></i>
+                    </div>
+                    <div class="accounting-record-content">
+                        <div class="accounting-record-category">工资</div>
+                        <div class="accounting-record-note">3月工资</div>
+                    </div>
+                </div>
+                <div class="accounting-record-right">
+                    <div class="accounting-record-amount-time">
+                        <span class="accounting-record-amount income">+¥15000.00</span>
+                        <div class="accounting-record-time">3月1日 09:00</div>
+                    </div>
+                    <button class="accounting-record-edit">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="accounting-record-delete">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        lucide.createIcons();
+
+        // 检查CSS是否加载
+        const testElement = document.querySelector('.accounting-record');
+        const cssCheck = document.getElementById('css-check');
+
+        if (testElement) {
+            const styles = window.getComputedStyle(testElement);
+
+            const checks = [
+                { name: 'display', expected: 'flex', actual: styles.display },
+                { name: 'justify-content', expected: 'space-between', actual: styles.justifyContent },
+                { name: 'align-items', expected: 'center', actual: styles.alignItems },
+                { name: 'height', expected: '64px', actual: styles.height },
+                { name: 'background', expected: 'rgb(224, 229, 236)', actual: styles.background },
+                { name: 'border-radius', expected: '12px', actual: styles.borderRadius }
+            ];
+
+            let html = '';
+            checks.forEach(check => {
+                const passed = check.actual.includes(check.expected);
+                html += `<div class="${passed ? 'success' : 'error'}">
+                    ${check.name}: ${check.actual} ${passed ? '✓' : '✗ (期望: ' + check.expected + ')'}
+                </div>`;
+            });
+
+            cssCheck.innerHTML = html;
+        } else {
+            cssCheck.innerHTML = '<div class="error">找不到.accounting-record元素</div>';
+        }
+    </script>
+</body>
+</html>
