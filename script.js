@@ -3834,6 +3834,7 @@ function changeHolidayMonth(d){
     RHCal();
 }
 function RHCal(){
+    console.log('[DEBUG] RHCal called');
     const g=document.getElementById('holiday-calendar');
     const l=document.getElementById('holiday-calendar-month');
     if(!g)return;
@@ -3844,29 +3845,67 @@ function RHCal(){
     const ld=new Date(y,mo+1,0);
     const sd=fd.getDay();
     const days=ld.getDate();
-    let html='<div class="calendar-weekdays">';
-    ['日','一','二','三','四','五','六'].forEach(wd=>html+='<div class="calendar-weekday">'+wd+'</div>');
-    html+='</div><div class="calendar-days">';
-    for(let i=0;i<sd;i++)html+='<div class="holiday-day empty"></div>';
+    
+    g.innerHTML='';
+    
+    // 生成空白格子
+    for(let i=0;i<sd;i++){
+        const div=document.createElement('div');
+        div.className='holiday-day empty';
+        div.style.cssText='width: 90px; height: 65px; display: flex; flex-direction: column; justify-content: center; align-items: center; border-radius: 10px; font-size: 12px; background: transparent; box-shadow: none; cursor: default;';
+        g.appendChild(div);
+    }
+    
+    // 生成日期格子
     for(let d=1;d<=days;d++){
         const ds=y+'-'+String(mo+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
         const hd=HD2026[ds];
         const md=MD2026[ds];
         const iw=new Date(y,mo,d).getDay()===0||new Date(y,mo,d).getDay()===6;
-        let cls='holiday-day',label='';
+        
+        const div=document.createElement('div');
+        let cls='holiday-day';
         if(hd){
             cls+=' holiday';
-            label='<span class="holiday-day-label">假</span>';
         }else if(md){
             cls+=' makeup';
-            label='<span class="holiday-day-label">班</span>';
         }else if(iw){
             cls+=' weekend';
         }
-        html+=`<div class="${cls}" onclick="showHInfo('${ds}')">${d}${label}</div>`;
+        div.className=cls;
+        
+        // 基础样式
+        let styles='width: 90px; height: 65px; display: flex; flex-direction: column; justify-content: center; align-items: center; border-radius: 10px; font-size: 12px; cursor: pointer; position: relative; background: var(--bg-color); padding: 4px; box-shadow: var(--neu-shadow-sm); transition: all 0.3s ease;';
+        
+        // 假期/补班背景色
+        if(hd){
+            styles+=' background: rgba(72, 187, 120, 0.2);';
+        }else if(md){
+            styles+=' background: rgba(236, 201, 75, 0.2);';
+        }
+        
+        div.style.cssText=styles;
+        
+        // 日期数字
+        const numSpan=document.createElement('span');
+        numSpan.className='holiday-day-num';
+        numSpan.style.cssText='font-weight: bold; z-index: 1; position: relative;';
+        numSpan.textContent=d;
+        div.appendChild(numSpan);
+        
+        // 假期/补班标签
+        if(hd||md){
+            const label=document.createElement('span');
+            label.className='holiday-day-label';
+            label.style.cssText='font-size: 9px; padding: 2px 4px; border-radius: 3px; margin-top: 2px; font-weight: 600; z-index: 1; position: relative;';
+            label.style.background=hd ? 'rgba(72, 187, 120, 0.3)' : 'rgba(236, 201, 75, 0.3)';
+            label.textContent=hd?'假':'班';
+            div.appendChild(label);
+        }
+        
+        div.onclick=function(){showHInfo(ds)};
+        g.appendChild(div);
     }
-    html+='</div>';
-    g.innerHTML=html;
 }
 function showHInfo(ds){
     const d=new Date(ds);
@@ -3874,15 +3913,24 @@ function showHInfo(ds){
     const hd=HD2026[ds];
     const md=MD2026[ds];
     const iw=d.getDay()===0||d.getDay()===6;
-    let msg=`${ds} ${wd}`;
+    
+    const infoDiv=document.getElementById('holiday-day-info');
+    if(!infoDiv)return;
+    
+    let html=`<div class="info-date">${ds} ${wd}</div>`;
+    html+='<div class="info-content">';
+    
     if(hd){
-        msg+=`\n${hd.n}\n${hd.r}`;
+        html+=`<div class="info-holiday">${hd.n}</div>`;
+        html+=`<div>放假时间：${hd.r}</div>`;
     }else if(md){
-        msg+=`\n${md}\n需要上班`;
+        html+=`<div class="info-makeup">${md}</div>`;
     }else if(iw){
-        msg+='\n正常休息';
+        html+=`<div class="info-weekend">正常休息</div>`;
     }else{
-        msg+='\n正常上班';
+        html+=`<div class="info-workday">正常上班</div>`;
     }
-    alert(msg);
+    
+    html+='</div>';
+    infoDiv.innerHTML=html;
 }

@@ -7,7 +7,7 @@
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
     <title>My Workplace</title>
-<link rel="stylesheet" href="style.css?v=1773110782">
+<link rel="stylesheet" href="style.css?v=1773112029">
     <!-- 引入 Font Awesome 图标库 (CDN) -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" media="print" onload="this.media='all'">
     <!-- 引入 Lucide 图标库 (pencil设计使用) -->
@@ -1476,6 +1476,9 @@ input[type="number"] {
                             <span class="dot partial"></span> 部分完成
                             <span class="dot none"></span> 未打卡
                         </div>
+                        <div class="holiday-day-info" id="holiday-day-info">
+                            <div class="info-placeholder">点击日期查看详细信息</div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -1542,10 +1545,13 @@ input[type="number"] {
                             <span id="holiday-calendar-month">2026年3月</span>
                             <button onclick="changeHolidayMonth(1)"><i class="fas fa-chevron-right"></i></button>
                         </div>
-                        <div class="holiday-calendar-grid" id="holiday-calendar"></div>
+                        <div class="holiday-calendar-grid" id="holiday-calendar" style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px;"></div>
                         <div class="legend">
                             <span class="dot holiday"></span> 法定假期
                             <span class="dot makeup"></span> 调休补班
+                        </div>
+                        <div class="holiday-day-info" id="holiday-day-info">
+                            <div class="info-placeholder">点击日期查看详细信息</div>
                         </div>
                     </div>
                 </div>
@@ -2022,7 +2028,7 @@ input[type="number"] {
     </div>
 
     <!-- Chart.js 图表库 -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js" defer></script>
+    <script src="https://unpkg.com/chart.js@4.4.0/dist/chart.umd.min.js" defer></script>
     <script>
     // 强制清除新闻缓存以显示7条新闻
     if (localStorage.getItem('newsData')) {
@@ -2034,7 +2040,7 @@ input[type="number"] {
     }
     </script>
     
-<script src="script.js?v=1773112012"></script>
+<script src="script.js?v=1773112030"></script>
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">

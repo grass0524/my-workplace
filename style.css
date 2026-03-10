@@ -5905,3 +5905,87 @@ section.holiday-card {
 #holiday-calendar-modal .modal-content {
     max-width: 1000px;
 }
+
+/* 放假日历样式 */
+.holiday-weekdays {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.holiday-weekday {
+    text-align: center;
+    font-weight: 600;
+    color: var(--text-light);
+    font-size: 12px;
+    padding: 8px 4px;
+}
+
+.holiday-days {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 10px;
+}
+
+/* 强制放假日历样式 - 使用更高优先级 */
+#holiday-calendar .holiday-weekdays {
+    display: grid !important;
+    grid-template-columns: repeat(7, 1fr) !important;
+    gap: 10px !important;
+    margin-bottom: 10px !important;
+}
+
+#holiday-calendar .holiday-days {
+    display: grid !important;
+    grid-template-columns: repeat(7, 1fr) !important;
+    gap: 10px !important;
+}
+
+/* 放假日历详细信息区域 */
+.holiday-day-info {
+    margin-top: 20px;
+    padding: 15px;
+    background: var(--bg-color);
+    border-radius: 10px;
+    box-shadow: var(--neu-shadow-sm);
+    min-height: 80px;
+}
+
+.holiday-day-info .info-placeholder {
+    text-align: center;
+    color: var(--text-light);
+    font-size: 14px;
+    padding: 20px;
+}
+
+.holiday-day-info .info-date {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 10px;
+    color: var(--text-primary);
+}
+
+.holiday-day-info .info-content {
+    font-size: 14px;
+    color: var(--text-secondary);
+    line-height: 1.6;
+}
+
+.holiday-day-info .info-holiday {
+    color: #48bb78;
+    font-weight: 600;
+}
+
+.holiday-day-info .info-makeup {
+    color: #ecb94b;
+    font-weight: 600;
+}
+
+.holiday-day-info .info-weekend {
+    color: var(--text-light);
+}
+
+.holiday-day-info .info-workday {
+    color: var(--text-secondary);
+}
