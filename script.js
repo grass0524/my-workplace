@@ -1,7 +1,17 @@
 // 1. 初始化
-// TianAPI配置（需要注册获取：https://www.tianapi.com/）
-const TIANAPI_KEY = 'e2a78b6891a96a3fdfeffe9f5274a6bd'; // 请在 https://www.tianapi.com/ 注册后获取API Key
-const TIANAPI_BASE_URL = 'https://apis.tianapi.com';
+// 聚合数据今日头条API配置
+const JUHE_API_KEY = '03d1da64823d24414d7b6bab4b8390a2'; // 聚合数据API密钥
+const JUHE_BASE_URL = 'http://v.juhe.cn/toutiao';
+
+const CORS_PROXY = 'https://corsproxy.io/?';
+
+// 新闻类型映射（前端分类 → 聚合数据API type参数）
+const NEWS_TYPE_MAP = {
+    'tech': 'keji',
+    'finance': 'caijing',
+    'general': 'guonei',
+    'international': 'guoji'
+};
 
 
 // 自动清除旧版本新闻缓存
@@ -2800,6 +2810,7 @@ let newsData = {
     tech: [],
     finance: [],
     general: [],
+    international: [],
     lastFetch: null
 };
 
@@ -2862,15 +2873,15 @@ async function fetchAndRenderNews() {
         
         // 尝试从缓存加载
         const hasCache = await loadNewsData();
-        if (hasCache && newsData.tech.length > 0) {
+        if (hasCache && newsData[currentNewsCategory] && newsData[currentNewsCategory].length > 0) {
             renderCurrentNewsList();
             loadingEl.classList.add('hidden');
             contentEl.classList.remove('hidden');
             return;
         }
         
-        // 获取最新新闻
-        await fetchAllNews();
+        // 只加载当前分类的新闻
+        newsData[currentNewsCategory] = await fetchAllNews(currentNewsCategory);
         renderCurrentNewsList();
         saveNewsData();
         
@@ -2886,65 +2897,48 @@ async function fetchAndRenderNews() {
 }
 
 // 获取所有新闻
-async function fetchAllNews() {
+// 获取指定分类的新闻
+async function fetchAllNews(category = 'tech') {
     // 如果没有配置API Key，使用模拟数据
-    if (!TIANAPI_KEY) {
-        console.warn('未配置TianAPI Key，使用模拟数据。请在 https://www.tianapi.com/ 注册获取');
-        newsData.tech = generateMockNews('tech', 8);
-        newsData.finance = generateMockNews('finance', 8);
-        newsData.general = generateMockNews('general', 8);
-        return;
+    if (!JUHE_API_KEY) {
+        console.warn('未配置聚合数据API Key，使用模拟数据');
+        return generateMockNews(category, 8);
     }
 
     try {
-        // 并行请求三个分类的新闻
-        const [techRes, financeRes, generalRes] = await Promise.all([
-            fetch(`${TIANAPI_BASE_URL}/technews/index?key=${TIANAPI_KEY}&num=8`),
-            fetch(`${TIANAPI_BASE_URL}/caijing/index?key=${TIANAPI_KEY}&num=8`),
-            fetch(`${TIANAPI_BASE_URL}/generalnews/index?key=${TIANAPI_KEY}&num=8`)
-        ]);
+        // 获取对应的type参数
+        const newsType = NEWS_TYPE_MAP[category] || 'keji';
+        
+        // 使用聚合数据今日头条API获取新闻（通过CORS代理）
+        const apiUrl = `${JUHE_BASE_URL}/index?key=${JUHE_API_KEY}&type=${newsType}`;
+        const proxyUrl = `${CORS_PROXY}${encodeURIComponent(apiUrl)}`;
+        const response = await fetch(proxyUrl);
+        const data = await response.json();
 
-        const [techData, financeData, generalData] = await Promise.all([
-            techRes.json(),
-            financeRes.json(),
-            generalRes.json()
-        ]);
-
-        // 检查响应状态
-        if (techData.code === 200 && techData.result) {
-            newsData.tech = techData.result.newslist.map(item => ({
-                title: item.title,
-                source: item.source,
-                time: formatNewsTime(item.ctime),
-                date: item.ctime
+        if (data.error_code === 0 && data.result && data.result.data) {
+            const articles = data.result.data;
+            
+            // 调试：打印第一条数据结构
+            console.log(`API返回数据示例 (${category}, type=${newsType}):`, articles[0]);
+            
+            const newsList = articles.slice(0, 8).map(item => ({
+                title: item.title || '无标题',
+                source: item.author_name || item.source || '聚合数据',
+                url: item.url,
+                time: formatNewsTime(item.ctime || item.pubdate || new Date().toISOString()),
+                date: item.ctime || item.pubdate || new Date().toISOString()
             }));
-        }
 
-        if (financeData.code === 200 && financeData.result) {
-            newsData.finance = financeData.result.newslist.map(item => ({
-                title: item.title,
-                source: item.source,
-                time: formatNewsTime(item.ctime),
-                date: item.ctime
-            }));
+            console.log(`新闻数据获取成功（聚合数据API - ${category}, type=${newsType})`);
+            return newsList;
+        } else {
+            console.warn('聚合数据API返回错误，使用模拟数据:', data);
+            return generateMockNews(category, 8);
         }
-
-        if (generalData.code === 200 && generalData.result) {
-            newsData.general = generalData.result.newslist.map(item => ({
-                title: item.title,
-                source: item.source,
-                time: formatNewsTime(item.ctime),
-                date: item.ctime
-            }));
-        }
-
-        console.log('新闻数据获取成功');
     } catch (error) {
         console.error('获取新闻失败，使用模拟数据:', error);
         // 失败时使用模拟数据
-        newsData.tech = generateMockNews('tech', 8);
-        newsData.finance = generateMockNews('finance', 8);
-        newsData.general = generateMockNews('general', 8);
+        return generateMockNews(category, 8);
     }
 }
 
@@ -3006,7 +3000,7 @@ function generateMockNews(category, count) {
 }
 
 // 切换新闻分类
-function switchNewsCategory(category) {
+async function switchNewsCategory(category) {
     currentNewsCategory = category;
     
     // 更新标签状态
@@ -3014,8 +3008,30 @@ function switchNewsCategory(category) {
         tab.classList.toggle('active', tab.dataset.category === category);
     });
     
-    // 重新渲染新闻列表
-    renderCurrentNewsList();
+    // 显示加载状态
+    const loadingEl = document.getElementById('news-loading');
+    const contentEl = document.getElementById('news-content');
+    loadingEl.classList.remove('hidden');
+    contentEl.classList.add('hidden');
+    
+    try {
+        // 如果该分类还没加载过，则获取数据
+        if (!newsData[category] || newsData[category].length === 0) {
+            newsData[category] = await fetchAllNews(category);
+            saveNewsData();
+        }
+        
+        // 重新渲染新闻列表
+        renderCurrentNewsList();
+        
+        loadingEl.classList.add('hidden');
+        contentEl.classList.remove('hidden');
+    } catch (error) {
+        console.error('切换新闻分类失败:', error);
+        loadingEl.innerHTML = '<i class="fas fa-exclamation-circle"></i> 加载失败，点击刷新重试';
+        loadingEl.onclick = () => switchNewsCategory(category);
+        loadingEl.style.cursor = 'pointer';
+    }
 }
 
 // 渲染当前选中分类的新闻列表
@@ -3028,8 +3044,8 @@ function renderCurrentNewsList() {
         return;
     }
     
-    container.innerHTML = newsList.slice(0, 8).map(item => 
-        '<li class="news-item" onclick="openNewsLink(\'' + item.title + '\')">' +
+    container.innerHTML = newsList.slice(0, 8).map((item, index) => 
+        '<li class="news-item" onclick="openNewsLink(' + index + ')">' +
         '<div class="news-item-title">' + item.title + '</div>' +
         '<div class="news-item-meta">' +
         '<span class="news-item-source">' + item.source + '</span>' +
@@ -3040,10 +3056,18 @@ function renderCurrentNewsList() {
 }
 
 // 打开新闻链接（在新标签页）
-function openNewsLink(title) {
-    // 由于是模拟数据，这里跳转到搜索页面
-    const searchUrl = 'https://www.baidu.com/s?wd=' + encodeURIComponent(title);
-    window.open(searchUrl, '_blank');
+function openNewsLink(index) {
+    const newsList = newsData[currentNewsCategory] || [];
+    const item = newsList[index];
+    
+    if (item && item.url) {
+        // 使用API返回的真实URL
+        window.open(item.url, '_blank');
+    } else {
+        // 如果没有URL，跳转到搜索页面
+        const searchUrl = 'https://www.baidu.com/s?wd=' + encodeURIComponent(item.title);
+        window.open(searchUrl, '_blank');
+    }
 }
 
 // 刷新新闻
