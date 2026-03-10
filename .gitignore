@@ -1,1 +1,21 @@
-.vercel
+# 备份文件
+*.backup*
+*.bak*
+*.backup
+*.bak
+
+# 测试文件
+test_*.html
+check_data.html
+debug_*.html
+simple_test.html
+
+# 临时文件
+*.MILESTONE_*
+*.CURRENT_WORKING_VERSION_BACKUP
+
+# 文档
+DESIGN_WORKFLOW.md
+HOLIDAY_CALENDAR_README.md
+START_SERVER.md
+TIANAPI_SETUP.md
