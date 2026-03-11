@@ -74,6 +74,7 @@ input[type="number"] {
 /* 记录头部样式 */
 .records-header {
     padding: 0;
+    z-index: 2;
     margin-bottom: -10px;
     border-bottom: none !important;
     display: flex;
@@ -111,6 +112,7 @@ input[type="number"] {
     border-radius: 16px;
     box-shadow: 6px 6px 12px #a3b1c6, -6px -6px 12px #ffffff;
     padding: 0;
+    z-index: 2;
 }
 .quick-accounting-modal-content .modal-header {
     display: flex;
@@ -392,6 +394,7 @@ input[type="number"] {
     box-shadow: 4px 4px 8px #a3b1c6, -4px -4px 8px #ffffff;
     transition: all 0.3s ease;
     padding: 0;
+    z-index: 2;
 }
 
 .accounting-card .accounting-stats-btn:hover {
@@ -422,6 +425,7 @@ input[type="number"] {
 /* 快速记账区域 */
 .accounting-quick-area {
     padding: 0;
+    z-index: 2;
     background: transparent;
     border-radius: 0;
     box-shadow: none;
@@ -495,6 +499,7 @@ input[type="number"] {
     width: 56px;
     height: 56px;
     padding: 0;
+    z-index: 2;
     border: none;
     border-radius: 14px;
     background: #6b7fff;
@@ -831,6 +836,7 @@ input[type="number"] {
     width: 45px;
     height: 45px;
     padding: 0;
+    z-index: 2;
     border: none;
     border-radius: 14px;
     background: #6b7fff;
@@ -876,6 +882,7 @@ input[type="number"] {
 /* 记录头部样式 */
 .records-header {
     padding: 0;
+    z-index: 2;
     margin-bottom: -10px;
     border-bottom: none !important;
     display: flex;
@@ -918,6 +925,7 @@ input[type="number"] {
     box-shadow: 12px 12px 24px var(--shadow-dark), -12px -12px 24px var(--shadow-light);
     border: 1px solid rgba(163, 177, 198, 0.3);
     padding: 0;
+    z-index: 2;
 }
 
 .quick-accounting-modal-content .modal-header {
@@ -1476,9 +1484,6 @@ input[type="number"] {
                             <span class="dot done"></span> 全部完成
                             <span class="dot partial"></span> 部分完成
                             <span class="dot none"></span> 未打卡
-                        </div>
-                        <div class="holiday-day-info" id="holiday-day-info">
-                            <div class="info-placeholder"></div>
                         </div>
                     </div>
                 </div>
@@ -2059,7 +2064,7 @@ function testQuickAccounting() {
 <!-- 快速记账确认弹窗 -->
 <div id="quick-accounting-modal" class="modal hidden">
     <div class="modal-overlay" onclick="closeQuickAccountingModal()"></div>
-    <div class="modal-content quick-accounting-modal-content">
+    <div class="modal-content quick-accounting-modal-content" onclick="event.stopPropagation()">
         <div class="modal-header">
             <h3>确认记账</h3>
             <button class="modal-close-btn" onclick="closeQuickAccountingModal()">

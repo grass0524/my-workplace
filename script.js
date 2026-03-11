@@ -2189,27 +2189,25 @@ const categoryKeywords = {
     '餐饮': ['午餐', '晚餐', '早餐', '奶茶', '咖啡', '外卖', '聚餐', '吃饭', '餐厅', '食堂', '小吃', '零食', '饮料'],
     '交通': ['打车', '滴滴', '地铁', '公交', '油费', '停车', '高速', '出租车', '单车', '共享'],
     '购物': ['买菜', '衣服', '淘宝', '京东', '拼多多', '日用品', '超市', '商场', '网购', '快递'],
-    '娱乐': ['电影', '游戏', 'KTV', '健身', '运动', '旅游', '票', '演出', '音乐', '视频'],
+    '投资': ['股票', '基金', '理财', '债券', '期货', '其他'],
     '居住': ['房租', '水电', '物业', '燃气', '宽带', '话费', '网费', '维修', '装修'],
-    '医疗': ['药', '医院', '看病', '体检', '疫苗', '药店'],
+    '娱乐': ['电影', '游戏', 'KTV', '健身', '运动', '旅游', '票', '演出', '音乐', '视频'],
     '教育': ['书', '课程', '培训', '学费', '学习'],
     '工资': ['工资', '薪水', '奖金', '提成', '兼职'],
     '理财': ['理财', '基金', '股票', '收益', '利息']
 };
+let currentAccountingType = 'expense';
 
 // 收入分类
 const incomeCategories = ['工资', '理财', '其他收入'];
 
 // 支出分类
-const expenseCategories = ['餐饮', '交通', '购物', '娱乐', '居住', '医疗', '教育', '其他'];
-
-// 当前选中的记账类型和分类
-let currentAccountingType = 'expense';
+const expenseCategories = ['餐饮', '交通', '购物', '娱乐', '居住', '投资', '教育', '其他'];
 
 // 分类图标映射
 const categoryIcons = {
     '餐饮': 'utensils', '交通': 'car', '购物': 'shopping-bag', '娱乐': 'gamepad-2',
-    '居住': 'home', '医疗': 'heart-pulse', '教育': 'book-open', '其他': 'more-horizontal',
+    '居住': 'home', '投资': 'trending-up', '教育': 'book-open', '其他': 'more-horizontal',
     '工资': 'briefcase', '理财': 'trending-up', '其他收入': 'plus-circle'
 };
 
@@ -3483,8 +3481,7 @@ function parseQuickAccountingInput(text) {
         if (categories.includes(cat)) {
             for (const keyword of keywords) {
                 if (detail.includes(keyword)) {
-                    category = cat;
-                    break;
+                    category = cat; break;
                 }
             }
             if (category) break;
@@ -3819,12 +3816,20 @@ const MD2026 = {'2026-01-04':'元旦补班','2026-02-14':'春节补班','2026-02
 let curHMonth = new Date();
 
 function openHolidayModal(){
+    console.log('[DEBUG] openHolidayModal called');
     const m=document.getElementById('holiday-calendar-modal');
     if(m){
+        console.log('[DEBUG] Modal found, opening...');
         m.classList.remove('hidden');
         m.classList.add('active');
         curHMonth=new Date();
         RHCal();
+        // 自动显示今天的放假信息
+        const today = new Date().toISOString().split('T')[0];
+        console.log('[DEBUG] Calling showHInfo for today:', today);
+        showHInfo(today);
+    } else {
+        console.log('[DEBUG] Modal not found!');
     }
 }
 function closeHolidayModal(){
@@ -3902,7 +3907,7 @@ function RHCal(){
         if(hd||md){
             const label=document.createElement('span');
             label.className='holiday-day-label';
-            label.style.cssText='font-size: 9px; padding: 2px 4px; border-radius: 3px; margin-top: 2px; font-weight: 600; z-index: 1; position: relative;';
+            label.style.cssText='font-size: 12px; padding: 2px 4px; border-radius: 3px; margin-top: 2px; font-weight: 600; z-index: 1; position: relative;';
             label.style.background=hd ? 'rgba(72, 187, 120, 0.3)' : 'rgba(236, 201, 75, 0.3)';
             label.textContent=hd?'假':'班';
             div.appendChild(label);
@@ -3913,6 +3918,7 @@ function RHCal(){
     }
 }
 function showHInfo(ds){
+    console.log('[DEBUG] showHInfo called for:', ds);
     const d=new Date(ds);
     const wd=['周日','周一','周二','周三','周四','周五','周六'][d.getDay()];
     const hd=HD2026[ds];
@@ -3920,6 +3926,7 @@ function showHInfo(ds){
     const iw=d.getDay()===0||d.getDay()===6;
     
     const infoDiv=document.getElementById('holiday-day-info');
+    console.log('[DEBUG] infoDiv found:', !!infoDiv);
     if(!infoDiv)return;
     
     let html=`<div class="info-date">${ds} ${wd}</div>`;
@@ -3931,11 +3938,12 @@ function showHInfo(ds){
     }else if(md){
         html+=`<div class="info-makeup">${md}</div>`;
     }else if(iw){
-        html+=`<div class="info-weekend">正常休息</div>`;
+        html+='<div class="info-weekend">正常休息</div>';
     }else{
-        html+=`<div class="info-workday">正常上班</div>`;
+        html+='<div class="info-workday">正常上班</div>';
     }
     
     html+='</div>';
+    console.log('[DEBUG] Setting innerHTML');
     infoDiv.innerHTML=html;
 }
