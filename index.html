@@ -2051,6 +2051,33 @@ const HD2026 = {
 const MD2026 = {'2026-01-04':'元旦补班','2026-02-14':'春节补班','2026-02-22':'春节补班','2026-04-12':'清明补班','2026-05-09':'五一补班','2026-09-27':'中秋补班','2026-10-10':'国庆补班'};
 let curHMonth = new Date();
 
+// 放假日历弹窗函数
+function openHolidayModal(){
+    const m=document.getElementById('holiday-calendar-modal');
+    if(m){
+        m.classList.remove('hidden');
+        m.classList.add('active');
+        if(typeof RHCal === 'function'){
+            RHCal();
+        }
+    }
+}
+function closeHolidayModal(){
+    const m=document.getElementById('holiday-calendar-modal');
+    if(m){
+        m.classList.add('hidden');
+        m.classList.remove('active');
+    }
+}
+function changeHolidayMonth(d){
+    if(typeof curHMonth !== 'undefined'){
+        curHMonth.setMonth(curHMonth.getMonth()+d);
+        if(typeof RHCal === 'function'){
+            RHCal();
+        }
+    }
+}
+
 // 渲染日历
 function RHCal(){
     const g=document.getElementById('holiday-calendar');
@@ -2164,7 +2191,7 @@ function showHInfo(ds){
 }
 </script>
 
-<script src="script.js?v=1773112106"></script>
+<script src="script.js?v=1773112107"></script>
 <script>
 // 测试函数
 function testQuickAccounting() {
