@@ -3939,4 +3939,3 @@ function showHInfo(ds){
     html+='</div>';
     infoDiv.innerHTML=html;
 }
-}
