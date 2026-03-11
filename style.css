@@ -1373,7 +1373,16 @@ input:checked + .mood-icon-wrapper {
     position: relative;
 }
 
-/* Quiz mode - wider modal */
+
+/* Modal overlay for quick accounting modal */
+.modal-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+}/* Quiz mode - wider modal */
 .modal-content.quiz-mode {
     width: 1000px !important;
     max-width: 1000px !important;

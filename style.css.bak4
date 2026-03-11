@@ -1373,7 +1373,16 @@ input:checked + .mood-icon-wrapper {
     position: relative;
 }
 
-/* Quiz mode - wider modal */
+
+/* Modal overlay for quick accounting modal */
+.modal-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+}/* Quiz mode - wider modal */
 .modal-content.quiz-mode {
     width: 1000px !important;
     max-width: 1000px !important;
@@ -1422,7 +1431,7 @@ input:checked + .mood-icon-wrapper {
 }
 
 .modal-confirm .modal-body {
-    padding: 20px 24px !important;
+    padding: 0 24px 20px 24px !important;
     text-align: center;
     min-height: auto !important;
     display: block !important;
@@ -1450,7 +1459,7 @@ input:checked + .mood-icon-wrapper {
 #confirm-message {
     color: #a3b1c6 !important;
     font-size: 15px !important;
-    min-height: 30px;
+    min-height: 40px;
     display: block !important;
 }
 
@@ -2582,8 +2591,8 @@ input:checked + .mood-icon-wrapper {
 .accounting-records {
     flex: 1;
     display: flex;
-    flex-direction: column;
-    overflow: hidden;
+    overflow-y: auto;
+    overflow-x: visible;
 }
 
 .records-header {
@@ -2658,7 +2667,6 @@ input:checked + .mood-icon-wrapper {
     font-size: 12px;
     color: var(--text-light);
     white-space: nowrap;
-    overflow: hidden;
     text-overflow: ellipsis;
 }
 
@@ -2937,7 +2945,6 @@ input:checked + .mood-icon-wrapper {
 .stats-record-item .record-note {
     color: var(--text-color);
     white-space: nowrap;
-    overflow: hidden;
     text-overflow: ellipsis;
 }
 
@@ -3145,7 +3152,6 @@ input:checked + .mood-icon-wrapper {
     flex: 1;
     display: flex;
     flex-direction: column;
-    overflow: hidden;
 }
 
 .records-header {
@@ -3202,7 +3208,6 @@ input:checked + .mood-icon-wrapper {
     font-size: 12px;
     color: var(--text-light);
     white-space: nowrap;
-    overflow: hidden;
     text-overflow: ellipsis;
 }
 
@@ -3522,11 +3527,11 @@ input:checked + .mood-icon-wrapper {
 
 .accounting-card,
 .news-card {
-    flex: 0 0 650px;
-    min-width: 650px;
-    max-width: 650px;
-    height: 836px;
-    overflow: hidden;
+    flex: 0 0 590px;
+    min-width: 590px;
+    max-width: 590px;
+    /* height: 836px; removed to allow auto height for news-card */
+    height: 950px;
 }
 
 /* 卡片标题区域 - 41px高度匹配设计 */
@@ -3587,14 +3592,17 @@ input:checked + .mood-icon-wrapper {
 
 .type-toggle-btn.active {
     box-shadow: var(--neu-shadow-in);
-    background: linear-gradient(135deg, #e74c3c, #c0392b);
+    background: #6b7bff;
     color: white;
 }
 
 .type-toggle-btn.active.income {
-    background: linear-gradient(135deg, #27ae60, #2ecc71);
+    background: #27ae60 !important;
 }
 
+.type-toggle-btn.active.expense {
+    background: #6b7bff !important;
+}
 .current-type-label {
     font-size: 20px;
     font-weight: 600;
@@ -3727,7 +3735,6 @@ input:checked + .mood-icon-wrapper {
     flex: 1;
     display: flex;
     flex-direction: column;
-    overflow: hidden;
     min-height: 0;
 }
 
@@ -3796,7 +3803,6 @@ input:checked + .mood-icon-wrapper {
     font-size: 13px;
     color: var(--text-light);
     white-space: nowrap;
-    overflow: hidden;
     text-overflow: ellipsis;
 }
 
@@ -3850,12 +3856,9 @@ input:checked + .mood-icon-wrapper {
     display: flex;
     flex-direction: column;
     height: calc(100% - 41px);
-    padding: 0 28px 28px 28px;
+    padding: 0 0 0 0;
     gap: 20px;
-    overflow: hidden;
 }
-
-/* 分类标签区域 - 40px高度 */
 .news-tabs {
     display: flex;
     gap: 10px;
@@ -3863,7 +3866,7 @@ input:checked + .mood-icon-wrapper {
     padding: 4px;
     background: var(--bg-color);
     border-radius: 12px;
-    box-shadow: var(--neu-shadow-in);
+    /*凹陷效果已移除*/
 }
 
 .news-tab {
@@ -3878,14 +3881,15 @@ input:checked + .mood-icon-wrapper {
     cursor: pointer;
     transition: all 0.3s ease;
     display: flex;
-    align-items: center;
+ align-items: center;
     justify-content: center;
     gap: 6px;
+    box-shadow: 2px 2px 4px var(--shadow-dark), -2px -2px 4px var(--shadow-light);
 }
 
 .news-tab:hover {
     background: var(--bg-color);
-    box-shadow: var(--neu-shadow-sm);
+    box-shadow: inset 2px 2px 4px var(--shadow-dark), inset -2px -2px 4px var(--shadow-light);
 }
 
 .news-tab.active {
@@ -3893,7 +3897,6 @@ input:checked + .mood-icon-wrapper {
     color: white;
     box-shadow: var(--neu-shadow-out);
 }
-
 .news-tab i {
     font-size: 14px;
 }
@@ -3923,7 +3926,6 @@ input:checked + .mood-icon-wrapper {
 /* 新闻列表 - 659px高度 */
 .news-content {
     flex: 1;
-    overflow: hidden;
     display: flex;
     flex-direction: column;
 }
@@ -3931,9 +3933,10 @@ input:checked + .mood-icon-wrapper {
 .news-list {
     list-style: none;
     overflow-y: auto;
-    padding: 4px;
+    overflow-x: visible;
+    padding: 16px 4px 4px 4px;
+    transform: translateY(-15px);
 }
-
 .news-list::-webkit-scrollbar {
     width: 4px;
 }
@@ -3958,7 +3961,6 @@ input:checked + .mood-icon-wrapper {
     transition: all 0.3s ease;
     border-left: 3px solid transparent;
 }
-
 .news-item:hover {
     box-shadow: var(--neu-shadow-out);
     transform: translateX(4px);
@@ -3974,7 +3976,6 @@ input:checked + .mood-icon-wrapper {
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
-    overflow: hidden;
 }
 
 .news-item-meta {
@@ -4022,7 +4023,7 @@ input:checked + .mood-icon-wrapper {
     .accounting-card,
     .news-card {
         width: 100%;
-        max-width: 650px;
+        max-width: 590px;
         min-width: auto;
     }
 }
@@ -4382,7 +4383,6 @@ input:checked + .mood-icon-wrapper {
 .accounting-records .record-note {
     font-size: 12px;
     color: var(--text-light);
-    overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
 }
@@ -4439,7 +4439,7 @@ input:checked + .mood-icon-wrapper {
 
 /* 确认弹窗样式 */
 #accounting-confirm-modal .confirm-info {
-    padding: 16px 0;
+    padding: 16px 0; margin-top: -20px;
 }
 
 #accounting-confirm-modal .info-row {
@@ -4480,69 +4480,69 @@ input:checked + .mood-icon-wrapper {
 /* ==================== 记账功能 - 新拟物风格 ==================== */
 
 /* 快速记账区域 */
-/*.accounting-quick-area {
-/*    padding: 16px;
-/*    background: var(--bg-color);
-/*    border-radius: var(--radius);
-/*    box-shadow: var(--neu-shadow-in);
-/*}
-/*
-/*.quick-input-wrapper {
-/*    display: flex;
-/*    gap: 12px;
-/*    align-items: center;
-/*}
-/*
-/*.quick-input-wrapper input {
-/*    flex: 1;
-/*    padding: 16px 20px;
-/*    border: none;
-/*    border-radius: var(--radius);
-/*    background: var(--bg-color);
-/*    color: var(--text-color);
-/*    font-size: 15px;
-/*    box-shadow: var(--neu-shadow-in);
-/*    transition: all 0.3s ease;
-/*}
-/*
-/*.quick-input-wrapper input:focus {
-/*    outline: none;
-/*    box-shadow: var(--neu-shadow-out), 0 0 0 3px rgba(107, 124, 255, 0.1);
-/*}
-/*
-/*.quick-input-wrapper input::placeholder {
-/*    color: var(--text-light);
-/*}
-/*
-/*.quick-input-wrapper .btn-add {
-/*    padding: 16px 24px;
-/*    border: none;
-/*    border-radius: var(--radius);
-/*    background: linear-gradient(145deg, #6b7cff, #5a6be0);
-/*    color: white;
-/*    font-size: 18px;
-/*    cursor: pointer;
-/*    transition: all 0.3s ease;
-/*    box-shadow: 6px 6px 12px rgba(107, 124, 255, 0.3),
-/*                -6px -6px 12px rgba(255, 255, 255, 0.8);
-/*    display: flex;
-/*    align-items: center;
-/*    justify-content: center;
-/*}
-/*
-/*.quick-input-wrapper .btn-add:hover {
-/*    box-shadow: 8px 8px 16px rgba(107, 124, 255, 0.4),
-/*                -8px -8px 16px rgba(255, 255, 255, 0.9);
-/*    transform: translateY(-2px);
-/*}
-/*
-/*.quick-input-wrapper .btn-add:active {
-/*    box-shadow: inset 3px 3px 6px rgba(0, 0, 0, 0.2),
-/*                inset -3px -3px 6px rgba(255, 255, 255, 0.1);
-/*    transform: translateY(0);
-/*}
-/*
-/*/* 通用记账区域 */
+.accounting-quick-area {
+    padding: 16px;
+    background: var(--bg-color);
+    border-radius: var(--radius);
+    box-shadow: var(--neu-shadow-in);
+}
+
+.quick-input-wrapper {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+.quick-input-wrapper input {
+    flex: 1;
+    padding: 16px 20px;
+    border: none;
+    border-radius: var(--radius);
+    background: var(--bg-color);
+    color: var(--text-color);
+    font-size: 15px;
+    box-shadow: var(--neu-shadow-in);
+    transition: all 0.3s ease;
+}
+
+.quick-input-wrapper input:focus {
+    outline: none;
+    box-shadow: var(--neu-shadow-out), 0 0 0 3px rgba(107, 124, 255, 0.1);
+}
+
+.quick-input-wrapper input::placeholder {
+    color: var(--text-light);
+}
+
+.quick-input-wrapper .btn-add {
+    padding: 16px 24px;
+    border: none;
+    border-radius: var(--radius);
+    background: linear-gradient(145deg, #6b7cff, #5a6be0);
+    color: white;
+    font-size: 18px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 6px 6px 12px rgba(107, 124, 255, 0.3),
+                -6px -6px 12px rgba(255, 255, 255, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.quick-input-wrapper .btn-add:hover {
+    box-shadow: 8px 8px 16px rgba(107, 124, 255, 0.4),
+                -8px -8px 16px rgba(255, 255, 255, 0.9);
+    transform: translateY(-2px);
+}
+
+.quick-input-wrapper .btn-add:active {
+    box-shadow: inset 3px 3px 6px rgba(0, 0, 0, 0.2),
+                inset -3px -3px 6px rgba(255, 255, 255, 0.1);
+    transform: translateY(0);
+}
+
+/* 通用记账区域 */
 .accounting-manual-area {
     display: flex;
     flex-direction: column;
@@ -4673,8 +4673,8 @@ input:checked + .mood-icon-wrapper {
     border: none;
     background: transparent;
     color: var(--text-color);
-    font-size: 18px;
-    font-weight: 600;
+    font-size: 14px;
+    font-weight: 400;
 }
 
 .accounting-detail-inputs input[type="number"]:focus {
@@ -4791,7 +4791,6 @@ input:checked + .mood-icon-wrapper {
     flex: 1;
     display: flex;
     flex-direction: column;
-    overflow: hidden;
     min-height: 250px;
     padding: 16px;
     background: var(--bg-color);
@@ -4872,7 +4871,6 @@ input:checked + .mood-icon-wrapper {
 .accounting-records .record-note {
     font-size: 13px;
     color: var(--text-light);
-    overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
 }
@@ -5056,7 +5054,6 @@ input:checked + .mood-icon-wrapper {
 .todo-body {
     height: 100%;
     max-height: 600px;
-    overflow: hidden;
 }
 
 .todo-input-group {
@@ -5104,7 +5101,6 @@ input:checked + .mood-icon-wrapper {
 .mood-body {
     height: 100%;
     max-height: 400px;
-    overflow: hidden;
 }
 
 .mood-input-area {
@@ -5124,7 +5120,6 @@ input:checked + .mood-icon-wrapper {
 .word-card .card-body,
 .mood-card .card-body {
     flex: 1;
-    overflow: hidden;
     display: flex;
     flex-direction: column;
     padding: 0;
@@ -5221,16 +5216,16 @@ input:checked + .mood-icon-wrapper {
 
 /* 强制健康打卡卡片固定高度 */
 .health-card {
-    height: 320px !important;
-    max-height: 320px !important;
-    min-height: 320px !important;
+    height: 200px !important;
+    max-height: 200px !important;
+    min-height: 200px !important;
 }
 
 /* 强制放假倒计时卡片固定高度 */
 .holiday-card {
-    height: 320px !important;
-    max-height: 320px !important;
-    min-height: 320px !important;
+    height: 200px !important;
+    max-height: 200px !important;
+    min-height: 200px !important;
 }
 
 /* 确保滚动容器正确工作 */
@@ -5255,6 +5250,88 @@ input:checked + .mood-icon-wrapper {
 /* ==================== 最终强制规则 - 确保生效 ==================== */
 
 /* 待办清单 */
+section.todo-card {
+    height: 600px !important;
+    max-height: 600px !important;
+    min-height: 600px !important;
+}
+
+section.todo-card > .card-body {
+    height: calc(600px - 80px) !important;
+    max-height: calc(600px - 80px) !important;
+    overflow: hidden !important;
+    flex: none !important;
+}
+
+section.todo-card .todo-list-container {
+    height: 480px !important;
+    max-height: 480px !important;
+    overflow-y: auto !important;
+    flex: none !important;
+}
+
+/* 今日单词 */
+section.word-card {
+    height: 400px !important;
+    max-height: 400px !important;
+    min-height: 400px !important;
+}
+
+section.word-card > .card-body {
+    height: calc(400px - 80px) !important;
+    max-height: calc(400px - 80px) !important;
+    overflow: hidden !important;
+    flex: none !important;
+}
+
+section.word-card .word-content {
+    height: 300px !important;
+    max-height: 300px !important;
+    overflow-y: auto !important;
+    flex: none !important;
+}
+
+/* 心情日记 */
+section.mood-card {
+    height: 400px !important;
+    max-height: 400px !important;
+    min-height: 400px !important;
+}
+
+section.mood-card > .card-body {
+    height: calc(400px - 80px) !important;
+    max-height: calc(400px - 80px) !important;
+    overflow: hidden !important;
+    flex: none !important;
+}
+
+section.mood-card .mood-list-container {
+    height: 260px !important;
+    max-height: 260px !important;
+    overflow-y: auto !important;
+    flex: none !important;
+}
+
+/* 健康打卡 */
+section.health-card {
+    height: 200px !important;
+    max-height: 200px !important;
+    min-height: 200px !important;
+}
+
+/* 放假倒计时 */
+section.holiday-card {
+    height: 200px !important;
+    max-height: 200px !important;
+    min-height: 200px !important;
+}
+
+/* ==================== Grid布局已固定，确保内容不溢出 ==================== */
+
+/* Grid行高已设置为：200px 400px auto */
+/* 待办清单跨两行：200px + 400px = 600px */
+/* 今日单词在第2行：400px */
+/* 心情日记在第2行：400px */
 
 /* 确保卡片不会超出Grid行高 */
 section.todo-card {
@@ -5318,201 +5395,706 @@ section.holiday-card {
     display: none !important;
 }
 
-/* ==================== 最新高度设置 ==================== */
-
-/* Grid布局行高：320px 400px auto */
-/* 第1行 (320px)：健康打卡、放假倒计时、待办清单上半部分 */
-/* 第2行 (400px)：今日单词、心情日记、待办清单下半部分 */
-/* 待办清单总高度：320px + 400px = 720px */
-/* 今日单词高度：400px */
-/* 心情日记高度：400px */
-
-/* ==================== 快速记账输入框 - 增强新拟物风格 ==================== */
-
-.accounting-quick-area {
-    padding: 16px;
-    background: var(--bg-color);
-    border-radius: 16px;
-    box-shadow: var(--neu-shadow-out);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.quick-input-wrapper {
+/* ==================== 最近记录样式 ==================== */
+.accounting-records .accounting-record {
     display: flex;
-    gap: 12px;
+    justify-content: space-between;
     align-items: center;
-}
-
-.quick-input-wrapper input {
-    flex: 1;
-    padding: 14px 20px;
-    border: none;
+    height: 64px;
+    padding: 14px;
+    margin-bottom: 12px;
+    background: #e0e5ec;
     border-radius: 12px;
-    background: var(--bg-color);
-    color: var(--text-color);
-    font-size: 15px;
-    box-shadow: var(--neu-shadow-in);
+    box-shadow: 4px 4px 8px #a3b1c6, -4px -4px 8px #ffffff;
     transition: all 0.3s ease;
-    font-weight: 400;
-    letter-spacing: 0.3px;
 }
 
-.quick-input-wrapper input:focus {
-    outline: none;
-    box-shadow: var(--neu-shadow-in), 0 0 0 3px rgba(99, 102, 241, 0.1);
-    transform: scale(1.01);
+.accounting-records .accounting-record:hover {
+    box-shadow: 12px 12px 24px var(--shadow-dark), -12px -12px 24px var(--shadow-light);
+    transform: translateY(-1px);
 }
 
-.quick-input-wrapper input::placeholder {
-    color: var(--text-light);
-    opacity: 0.7;
-    font-weight: 300;
+.accounting-records .accounting-record-left {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 12px;
 }
 
-.quick-input-wrapper .btn-add {
-    width: 52px;
-    height: 52px;
-    padding: 0;
-    border: none;
-    border-radius: 12px;
-    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
-    color: white;
-    font-size: 20px;
-    cursor: pointer;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 6px 6px 12px rgba(99, 102, 241, 0.3), 
-                -6px -6px 12px rgba(255, 255, 255, 0.8);
+.accounting-records .accounting-record-icon-wrapper {
+    width: 40px;
+    height: 40px;
+    background: #e0e5ec;
+    border-radius: 10px;
     display: flex;
     align-items: center;
     justify-content: center;
-    position: relative;
-    overflow: hidden;
+    flex-shrink: 0;
+    box-shadow: 2px 2px 4px #a3b1c6, -2px -2px 4px #ffffff;
 }
 
-.quick-input-wrapper .btn-add::before {
+.accounting-records .accounting-record-icon-wrapper i {
+    width: 18px;
+    height: 18px;
+}
+
+.accounting-records .accounting-record.expense .accounting-record-icon-wrapper i {
+    color: #e74c3c;
+}
+
+.accounting-records .accounting-record.income .accounting-record-icon-wrapper i {
+    color: #27ae60;
+}
+
+.accounting-records .accounting-record-content {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.accounting-records .accounting-record-category {
+    color: #4a5568;
+    font-weight: 500;
+    font-size: 14px;
+}
+
+.accounting-records .accounting-record-note {
+    color: #718096;
+    font-size: 13px;
+}
+
+.accounting-records .accounting-record-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    position: relative;
+}
+
+.accounting-records .accounting-record-amount-time {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 2px;
+    transition: all 0.3s ease;
+}
+
+.accounting-records .accounting-record-amount {
+    font-size: 16px;
+    font-weight: 700;
+}
+
+.accounting-record-amount.expense {
+    color: #e74c3c;
+}
+
+.accounting-record-amount.income {
+    color: #27ae60;
+}
+
+.accounting-records .accounting-record-time {
+    font-size: 11px;
+    color: #a0aec0;
+    font-weight: 400;
+}
+
+.accounting-records .accounting-record:hover .accounting-record-amount-time {
+    transform: translateX(-80px);
+}
+
+.accounting-records .accounting-record-edit {
+    position: absolute;
+    right: 50px;
+    top: 50%;
+    transform: translateY(-50%);
+    opacity: 0;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    border: none;
+    border-radius: 8px;
+    background: #e0e5ec;
+    box-shadow: 2px 2px 4px #a3b1c6, -2px -2px 4px #ffffff;
+    color: #6b7fff;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+}
+
+.accounting-records .accounting-record-delete {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    opacity: 0;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    border: none;
+    border-radius: 8px;
+    background: #e0e5ec;
+    box-shadow: 2px 2px 4px #a3b1c6, -2px -2px 4px #ffffff;
+    color: #e74c3c;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+}
+
+.accounting-records .accounting-record:hover .accounting-record-edit,
+.accounting-records .accounting-record:hover .accounting-record-delete {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.accounting-record-edit:hover {
+    box-shadow: inset 3px 3px 6px #a3b1c6, inset -3px -3px 6px #ffffff;
+}
+
+.accounting-record-delete:hover {
+    box-shadow: inset 3px 3px 6px #a3b1c6, inset -3px -3px 6px #ffffff;
+}
+
+.accounting-records .accounting-record-edit i {
+    font-size: 14px;
+}
+
+.accounting-records .accounting-record-delete i {
+    font-size: 14px;
+}
+}
+
+/* 修改金额输入框字体大小，使其与备注框一致 */
+#accounting-amount-input {
+    font-size: 15px !important;
+    font-weight: 400 !important;
+}
+
+.accounting-detail-inputs input[type="number"]#accounting-amount-input {
+    font-size: 15px !important;
+    font-weight: 400 !important;
+}
+
+/* 确认记账弹窗内容上移20px */
+#accounting-confirm-modal .modal-body {
+    padding-top: 0 !important;
+}
+
+/* 修改news-body的左右padding，让列表阴影不被遮挡 */
+.news-body {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+}
+
+/* 隐藏新闻加载状态 */
+.news-loading {
+    display: none !important;
+}
+
+/* 增加tab和列表之间的间距 */
+.news-content {
+    margin-top: 20px !important;
+}
+
+/* 确保列表左右阴影不被裁剪 */
+.news-list {
+    overflow-x: visible !important;
+}
+
+.accounting-records {
+    overflow-x: visible !important;
+}
+
+/* 强制移除news-body的左右padding（简写属性覆盖） */
+.news-body {
+    padding: 0 0 0 0 !important;
+}
+
+/* 修复滚动容器裁剪左右阴影的问题 */
+.news-list {
+    overflow-x: visible !important;
+    overflow-y: auto !important;
+}
+
+.news-content {
+    overflow-x: visible !important;
+}
+
+/* 给记账记录列表添加负margin，让阴影能完全显示 */
+.accounting-records {
+    margin-left: -8px !important;
+    margin-right: -8px !important;
+}
+
+/* 给每条记录添加margin来补偿，确保边框宽度和通用记账一致 */
+.accounting-records .accounting-record {
+    margin: 0 8px 12px 8px !important;
+}
+
+/* 增大负margin到32px，让阴影完全显示 */
+
+/* 增大负margin到32px，让阴影完全显示 */
+.accounting-records {
+    margin-left: -32px !important;
+    margin-right: -32px !important;
+}
+
+/* 确保记账记录每条的宽度保持518px，和通用记账一致 */
+.accounting-records .accounting-record {
+    width: 518px !important;
+    max-width: 518px !important;
+    box-sizing: border-box !important;
+    margin: 0 32px 12px 32px !important;
+}
+
+/* 确保记账记录和通用记账模块左对齐 */
+.accounting-records .accounting-record {
+    margin-left: 0 !important;
+    margin-right: auto !important;
+}
+
+/* 确保记账记录和通用记账模块左对齐，保持底部间距 */
+
+/* 记账列表样式：左右负margin让阴影显示，整体向右移动30px */
+.accounting-records {
+    margin-left: -32px !important;
+    margin-right: -32px !important;
+    padding: 0 !important;
+}
+
+.accounting-records .accounting-record {
+    width: 518px !important;
+    max-width: 518px !important;
+    box-sizing: border-box !important;
+    margin-left: 62px !important;
+    margin-right: 0 !important;
+    margin-bottom: 12px !important;
+}
+
+/* 将记账记录列表居中排列 */
+.accounting-records {
+    justify-content: center !important;
+    align-items: center !important;
+}
+
+.accounting-records .accounting-record {
+    margin-left: auto !important;
+    margin-right: auto !important;
+}
+
+/* 热点新闻列表样式：左右负margin让阴影显示，列表居中展示 */
+.news-list {
+    margin-left: -32px !important;
+    margin-right: -32px !important;
+    padding: 16px 4px 4px 4px !important;
+    display: flex !important;
+    transform: translateY(-15px) !important;
+    flex-direction: column !important;
+
+
+/* 热点新闻列表样式：左右负margin让阴影显示，列表居中展示，宽度518px */
+.news-list {
+    margin-left: -32px !important;
+    margin-right: -32px !important;
+    padding: 16px 4px 4px 4px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+    align-items: center !important;
+    transform: translateY(-15px) !important;
+}
+.news-item {
+    width: 518px !important;
+    max-width: 518px !important;
+    min-width: 518px !important;
+    box-sizing: border-box !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+}
+
+/* 给新闻列表添加上下负margin让阴影显示 */
+.news-list {
+    margin-top: -32px !important;
+    margin-bottom: -32px !important;
+}
+
+/* 移除news-content的margin-top，让news-list的负margin生效 */
+.news-content {
+    margin-top: 0 !important;
+}
+
+/* 给news-body添加负margin和padding，让内部列表的上方阴影显示 */
+.news-body {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+}
+
+/* 确保news-body和card-body没有overflow裁剪 */
+.news-body, .card-body {
+    overflow: visible !important;
+}
+
+/* 确保news-card也没有overflow裁剪 */
+.news-card {
+    overflow: visible !important;
+}
+
+/* 减少card-header的底部margin，给新闻列表上方阴影留出空间 */
+.news-card .card-header {
+    margin-bottom: 0 !important;
+}
+
+/* 去掉news-card的固定高度，改为自适应 */
+.news-card {
+    height: auto !important;
+    min-height: auto !important;
+}
+
+/* 设置news-list最多显示8条新闻 */
+.news-list {
+    max-height: none !important;
+    overflow: visible !important;
+}
+
+/* 快速记账提交按钮右对齐 */
+
+/* 快速记账提交按钮右对齐 */
+
+/* 快速记账和最近记录样式调整 */
+.quick-input-row {
+    display: flex !important;
+    gap: 0 !important;
+}
+
+.quick-input-field {
+    flex: 1 !important;
+}
+
+.quick-add-btn {
+    margin-left: auto !important;
+}
+
+.records-header {
+    border: none !important;
+    border-bottom: none !important;
+}
+
+/* ==================== 收支按钮样式修复 ==================== */
+
+/* 支出按钮未激活状态：紫色icon和文字 */
+.type-toggle-btn.expense:not(.active) {
+    color: #6b7fff !important;
+}
+
+/* 收入按钮未激活状态：绿色icon和文字 */
+.type-toggle-btn.income:not(.active) {
+    color: #27ae60 !important;
+}
+
+/* 收入按钮激活状态：绿色背景+白色文字/icon */
+.type-toggle-btn.income.active {
+    background: #27ae60 !important;
+    color: #ffffff !important;
+    box-shadow: var(--neu-shadow-in) !important;
+}
+
+/* 收入分类选中效果：绿色背景+白色文字/icon */
+.category-item.selected[data-category="income"] {
+    background: #27ae60 !important;
+    color: #ffffff !important;
+}
+
+.category-item.selected[data-category="income"] .category-icon {
+    color: #ffffff !important;
+}
+
+/* 放假日历 - 使用健康打卡样式 */
+.holiday-calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 10px;
+    margin: 0 0 20px 0;
+    padding: 0 4px;
+}
+
+.holiday-day {
+    aspect-ratio: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    border-radius: 10px;
+    font-size: 12px;
+    cursor: pointer;
+    position: relative;
+    background: var(--bg-color);
+    padding: 4px;
+    box-shadow: var(--neu-shadow-sm);
+    transition: all 0.3s ease;
+}
+
+.holiday-day:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--neu-shadow-out);
+}
+
+.holiday-day.empty {
+    background: transparent;
+    box-shadow: none;
+    cursor: default;
+}
+
+.holiday-day.holiday {
+    background: var(--bg-color);
+    position: relative;
+}
+
+.holiday-day.holiday::before {
     content: '';
     position: absolute;
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0%, transparent 100%);
-    opacity: 0;
-    transition: opacity 0.3s ease;
+    background: rgba(72, 187, 120, 0.2);
+    border-radius: 10px;
+    pointer-events: none;
 }
 
-.quick-input-wrapper .btn-add:hover {
-    transform: translateY(-2px);
-    box-shadow: 8px 8px 16px rgba(99, 102, 241, 0.4), 
-                -8px -8px 16px rgba(255, 255, 255, 0.9);
-}
-
-.quick-input-wrapper .btn-add:hover::before {
-    opacity: 1;
-}
-
-.quick-input-wrapper .btn-add:active {
-    transform: translateY(0);
-    box-shadow: inset 4px 4px 8px rgba(99, 102, 241, 0.4),
-                inset -4px -4px 8px rgba(255, 255, 255, 0.3);
-}
-
-.quick-input-wrapper .btn-add i {
+.holiday-day.makeup {
+    background: var(--bg-color);
     position: relative;
-    z-index: 1;
-    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.2));
 }
 
-/* ==================== 快速记账 - 强制新拟物样式 ==================== */
-
-/* 使用更高优先级选择器确保生效 */
-.accounting-card .accounting-quick-area {
-    padding: 16px !important;
-    background: var(--bg-color) !important;
-    border-radius: 16px !important;
-    box-shadow: var(--neu-shadow-out) !important;
-    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+.holiday-day.makeup::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(236, 201, 75, 0.2);
+    border-radius: 10px;
+    pointer-events: none;
 }
 
-.accounting-card .quick-input-wrapper {
-    display: flex !important;
-    gap: 12px !important;
-    align-items: center !important;
+.holiday-day.weekend {
+    color: var(--text-light);
 }
 
-.accounting-card .quick-input-wrapper input {
-    flex: 1 !important;
-    padding: 14px 20px !important;
-    border: none !important;
-    border-radius: 12px !important;
-    background: var(--bg-color) !important;
-    color: var(--text-color) !important;
+.holiday-day-num {
+    font-weight: bold;
+}
+
+.holiday-day-label {
+    font-size: 12px;
+    padding: 2px 4px;
+    border-radius: 3px;
+    background: rgba(72, 187, 120, 0.3);
+    margin-top: 2px;
+    font-weight: 600;
+}
+
+.holiday-day.makeup .holiday-day-label {
+    background: rgba(236, 201, 75, 0.3);
+}
+
+.legend .dot.holiday {
+    background: rgba(72, 187, 120, 0.2);
+}
+
+.legend .dot.makeup {
+    background: rgba(236, 201, 75, 0.2);
+}
+
+#holiday-calendar-modal .modal-content {
+    max-width: 1000px;
+}
+
+/* 放假日历样式 */
+.holiday-weekdays {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.holiday-weekday {
+    text-align: center;
+    font-weight: 600;
+    color: var(--text-light);
+    font-size: 12px;
+    padding: 8px 4px;
+}
+
+.holiday-days {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 10px;
+}
+
+/* 强制放假日历样式 - 使用更高优先级 */
+#holiday-calendar .holiday-weekdays {
+    display: grid !important;
+    grid-template-columns: repeat(7, 1fr) !important;
+    gap: 10px !important;
+    margin-bottom: 10px !important;
+}
+
+#holiday-calendar .holiday-days {
+    display: grid !important;
+    grid-template-columns: repeat(7, 1fr) !important;
+    gap: 10px !important;
+}
+
+/* 放假日历详细信息区域 */
+.holiday-day-info {
+    margin-top: 20px;
+    padding: 15px;
+    background: var(--bg-color);
+    border-radius: 10px;
+    box-shadow: var(--neu-shadow-sm);
+    min-height: 80px;
+}
+
+.holiday-day-info .info-placeholder {
+    text-align: center;
+    color: var(--text-light);
+    font-size: 14px;
+    padding: 20px;
+}
+
+.holiday-day-info .info-date {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 10px;
+    color: var(--text-primary);
+}
+
+.holiday-day-info .info-content {
+    font-size: 14px;
+    color: var(--text-secondary);
+    line-height: 1.6;
+}
+
+.holiday-day-info .info-holiday {
+    color: #48bb78;
+    font-weight: 600;
+}
+
+.holiday-day-info .info-makeup {
+    color: #ecb94b;
+    font-weight: 600;
+}
+
+.holiday-day-info .info-weekend {
+    color: var(--text-light);
+}
+
+.holiday-day-info .info-workday {
+    color: var(--text-secondary);
+}
+
+/* 放假日历详细信息 */
+#holiday-calendar-modal .holiday-day-info {
+    margin-top: 20px;
+    padding: 20px;
+    background: linear-gradient(135deg, rgba(72, 187, 120, 0.05) 0%, rgba(236, 201, 75, 0.05) 100%);
+    border-radius: 12px;
+    border: 2px solid rgba(163, 177, 198, 0.15);
+    box-shadow: var(--neu-shadow-in);
+    min-height: 80px;
+}
+
+#holiday-calendar-modal .holiday-day-info .info-placeholder {
+    display: none;
+}
+
+#holiday-calendar-modal .holiday-day-info .info-date {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 12px;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+#holiday-calendar-modal .holiday-day-info .info-date::before {
+    content: '📅';
+    font-size: 20px;
+}
+
+#holiday-calendar-modal .holiday-day-info .info-content {
+    font-size: 15px;
+    color: var(--text-secondary);
+    line-height: 1.8;
+}
+
+#holiday-calendar-modal .holiday-day-info .info-holiday {
+    color: #48bb78;
+    font-weight: 700;
+    font-size: 18px;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+#holiday-calendar-modal .holiday-day-info .info-holiday::before {
+    content: '🎉';
+    font-size: 20px;
+}
+
+#holiday-calendar-modal .holiday-day-info .info-makeup {
+    color: #ecb94b;
+    font-weight: 700;
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+#holiday-calendar-modal .holiday-day-info .info-makeup::before {
+    content: '📝';
+    font-size: 20px;
+}
+
+#holiday-calendar-modal .holiday-day-info .info-weekend {
+    color: var(--text-light);
+    font-style: italic;
+}
+
+#holiday-calendar-modal .holiday-day-info .info-workday {
+    color: var(--text-secondary);
+}
+
+/* 调整放假日历弹窗高度 */
+#holiday-calendar-modal .modal-content {
+    height: calc(80% - 200px) !important;
+}
+
+
+/* 确认弹窗消息样式 */
+#confirm-modal #confirm-message {
+    text-align: center !important;
+    padding: 40px 20px 40px 20px !important;
+    min-height: 40px !important;
     font-size: 15px !important;
-    box-shadow: var(--neu-shadow-in) !important;
-    transition: all 0.3s ease !important;
-    font-weight: 400 !important;
-    letter-spacing: 0.3px !important;
+    color: var(--text-secondary) !important;
+    line-height: 1.6 !important;
+    margin: 0 !important;
 }
 
-.accounting-card .quick-input-wrapper input:focus {
-    outline: none !important;
-    box-shadow: var(--neu-shadow-in), 0 0 0 3px rgba(99, 102, 241, 0.1) !important;
-    transform: scale(1.01) !important;
-}
-
-.accounting-card .quick-input-wrapper input::placeholder {
-    color: var(--text-light) !important;
-    opacity: 0.7 !important;
-    font-weight: 300 !important;
-}
-
-.accounting-card .quick-input-wrapper .btn-add {
-    width: 52px !important;
-    height: 52px !important;
-    padding: 0 !important;
+/* 去掉确认弹窗的分割线 */
+#confirm-modal .modal-header {
     border: none !important;
-    border-radius: 12px !important;
-    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%) !important;
-    color: white !important;
-    font-size: 20px !important;
-    cursor: pointer !important;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
-    box-shadow: 6px 6px 12px rgba(99, 102, 241, 0.3), -6px -6px 12px rgba(255, 255, 255, 0.8) !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    position: relative !important;
-    overflow: hidden !important;
 }
 
-.accounting-card .quick-input-wrapper .btn-add::before {
-    content: '' !important;
-    position: absolute !important;
-    top: 0 !important;
-    left: 0 !important;
-    right: 0 !important;
-    bottom: 0 !important;
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0%, transparent 100%) !important;
-    opacity: 0 !important;
-    transition: opacity 0.3s ease !important;
-}
-
-.accounting-card .quick-input-wrapper .btn-add:hover {
-    transform: translateY(-2px) !important;
-    box-shadow: 8px 8px 16px rgba(99, 102, 241, 0.4), -8px -8px 16px rgba(255, 255, 255, 0.9) !important;
-}
-
-.accounting-card .quick-input-wrapper .btn-add:hover::before {
-    opacity: 1 !important;
-}
-
-.accounting-card .quick-input-wrapper .btn-add:active {
-    transform: translateY(0) !important;
-    box-shadow: inset 4px 4px 8px rgba(99, 102, 241, 0.4), inset -4px -4px 8px rgba(255, 255, 255, 0.3) !important;
-}
-
-.accounting-card .quick-input-wrapper .btn-add i {
-    position: relative !important;
-    z-index: 1 !important;
-    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.2)) !important;
+#confirm-modal .modal-footer {
+    border: none !important;
 }
