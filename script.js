@@ -3590,15 +3590,17 @@ function showQuickAccountingModal(data) {
             btnSpan.textContent = '确认添加';
         }
     }
-    
     modal.classList.remove('hidden');
     modal.setAttribute('tabindex', '0');
     modal.focus();
     
+    // 添加键盘事件监听 - 支持Enter提交
+    modal.removeEventListener('keydown', handleEnterKeyForQuickAccounting);
+    modal.addEventListener('keydown', handleEnterKeyForQuickAccounting);
+    
     if (typeof lucide !== 'undefined') {
         lucide.createIcons();
     }
-}
 
 // 关闭快速记账确认弹窗
 function closeQuickAccountingModal() {
@@ -3933,4 +3935,5 @@ function showHInfo(ds){
     
     html+='</div>';
     infoDiv.innerHTML=html;
+}
 }
