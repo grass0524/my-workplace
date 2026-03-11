@@ -2570,22 +2570,24 @@ function renderRecentRecords() {
     }
 }
 function deleteAccountingRecord(id) {
-    if (!confirm('确定要删除这条记录吗？')) {
-        return;
-    }
-    
-    // 从数据中删除
-    const index = accountingData.records.findIndex(r => r.id === id);
-    if (index !== -1) {
-        accountingData.records.splice(index, 1);
-        saveAccountingData();
-        
-        // 更新UI
-        updateAccountingSummary();
-        renderRecentRecords();
-        
-        showToast('删除成功！');
-    }
+    showConfirmModal(
+        '确认删除',
+        '确定要删除这条记账记录吗？',
+        () => {
+            // 从数据中删除
+            const index = accountingData.records.findIndex(r => r.id === id);
+            if (index !== -1) {
+                accountingData.records.splice(index, 1);
+                saveAccountingData();
+                
+                // 更新UI
+                updateAccountingSummary();
+                renderRecentRecords();
+                
+                showToast('删除成功！');
+            }
+        }
+    );
 }
 
 function editAccountingRecord(id) {
