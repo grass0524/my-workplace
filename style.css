@@ -1450,7 +1450,7 @@ input:checked + .mood-icon-wrapper {
 #confirm-message {
     color: #a3b1c6 !important;
     font-size: 15px !important;
-    min-height: 30px;
+    min-height: 40px;
     display: block !important;
 }
 
@@ -5882,7 +5882,7 @@ section.holiday-card {
 }
 
 .holiday-day-label {
-    font-size: 9px;
+    font-size: 12px;
     padding: 2px 4px;
     border-radius: 3px;
     background: rgba(72, 187, 120, 0.3);

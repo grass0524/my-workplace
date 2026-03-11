@@ -1550,6 +1550,9 @@ input[type="number"] {
                         <div class="holiday-day-info" id="holiday-day-info">
                             <div class="info-placeholder"></div>
                         </div>
+                        <div class="month-holiday-summary" id="month-holiday-summary" style="margin-top: 20px; padding: 15px; background: var(--bg-color); border-radius: 12px; box-shadow: var(--neu-shadow-sm);">
+                            <!-- 当月假期情况将在这里显示 -->
+                        </div>
                     </div>
                 </div>
             </div>
@@ -2157,6 +2160,9 @@ function RHCal(){
         };
         g.appendChild(div);
     }
+
+    if(typeof showMonthHolidaySummary === 'function'){ showMonthHolidaySummary(); }
+
 }
 
 // 显示日期详情
@@ -2186,6 +2192,86 @@ function showHInfo(ds){
     
     html+='</div>';
     infoDiv.innerHTML=html;
+}
+
+// 显示当月假期情况
+function showMonthHolidaySummary(){
+    const y=curHMonth.getFullYear();
+    const mo=curHMonth.getMonth();
+    const fd=new Date(y,mo,1);
+    const ld=new Date(y,mo+1,0);
+    const days=ld.getDate();
+
+    // 收集当月的假期和补班信息
+    const holidaysThisMonth={};
+    const makeupDaysThisMonth=[];
+
+    for(let d=1;d<=days;d++){
+        const ds=y+'-'+String(mo+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
+        const hd=HD2026[ds];
+        const md=MD2026[ds];
+
+        if(hd){
+            // 按假期名称分组
+            if(!holidaysThisMonth[hd.n]){
+                holidaysThisMonth[hd.n]={
+                    name:hd.n,
+                    dates:[],
+                    range:hd.r
+                };
+            }
+            holidaysThisMonth[hd.n].dates.push(ds);
+        }
+        if(md){
+            makeupDaysThisMonth.push({date:ds,name:md});
+        }
+    }
+
+    const summaryDiv=document.getElementById('month-holiday-summary');
+    if(!summaryDiv)return;
+
+    const holidayNames=Object.keys(holidaysThisMonth);
+
+    if(holidayNames.length===0 && makeupDaysThisMonth.length===0){
+        // 没有假期和补班
+        summaryDiv.innerHTML='<div style="text-align:center;color:#718096;font-size:14px;padding:10px;">🎉 本月没有假期，给自己放松一下哦~</div>';
+    }else{
+        let html='';
+
+        // 显示假期信息
+        if(holidayNames.length>0){
+            holidayNames.forEach(hName=>{
+                const h=holidaysThisMonth[hName];
+                // 获取假期的开始和结束日期
+                const firstDate=h.dates[0];
+                const lastDate=h.dates[h.dates.length-1];
+                // 格式化日期显示
+                const firstStr=firstDate.substring(5).replace('-','月')+'日';
+                const lastStr=lastDate.substring(5).replace('-','月')+'日';
+                const dateRange=h.dates.length===1?firstStr:firstStr+'-'+lastStr;
+
+                html+='<div style="margin-bottom:8px;">';
+                html+='<span style="color:#27ae60;font-size:14px;">● </span>';
+                html+='<span style="color:#718096;font-size:14px;">'+h.name+'：</span>';
+                html+='<span style="color:#718096;font-size:14px;">'+dateRange+'</span>';
+                html+='</div>';
+            });
+        }
+
+        // 显示补班信息
+        if(makeupDaysThisMonth.length>0){
+            makeupDaysThisMonth.forEach(m=>{
+                const dateStr=m.date.substring(5).replace('-','月')+'日';
+                html+='<div style="margin-bottom:8px;">';
+                html+='<span style="color:#d69e2e;font-size:14px;">● </span>';
+                html+='<span style="color:#718096;font-size:14px;">'+m.name+'：</span>';
+                html+='<span style="color:#718096;font-size:14px;">'+dateStr+'</span>';
+                html+='</div>';
+            });
+        }
+
+        summaryDiv.innerHTML=html;
+    }
 }
 </script>
 }

@@ -7,9 +7,9 @@
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
     <title>My Workplace</title>
-<link rel="stylesheet" href="style.css?v=1772885195>
+<link rel="stylesheet" href="style.css?v=1773112062">
     <!-- 引入 Font Awesome 图标库 (CDN) -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" media="print" onload="this.media='all'">
     <!-- 引入 Lucide 图标库 (pencil设计使用) -->
     <script src="https://unpkg.com/lucide@latest"></script>
 <style>
@@ -74,6 +74,8 @@ input[type="number"] {
 /* 记录头部样式 */
 .records-header {
     padding: 0;
+    margin-bottom: -10px;
+    border-bottom: none !important;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -185,7 +187,7 @@ input[type="number"] {
 
 .type-toggle-group {
     display: flex;
-    gap: 6px;
+    gap: 10px;
 }
 
 .type-toggle-group .type-toggle-btn {
@@ -210,7 +212,7 @@ input[type="number"] {
 }
 
 .type-toggle-group .type-toggle-btn.expense {
-    color: #718096;
+    color: #6b7fff ;
 }
 
 .type-toggle-group .type-toggle-btn.expense.active {
@@ -220,7 +222,7 @@ input[type="number"] {
 }
 
 .type-toggle-group .type-toggle-btn.income {
-    color: #718096;
+    color: #27ae60;
 }
 
 .type-toggle-group .type-toggle-btn.income.active {
@@ -268,7 +270,7 @@ input[type="number"] {
 .confirm-amount-input .currency-symbol {
     font-size: 14px;
     font-weight: 600;
-    color: #6b7fff;
+    color: #6b7fff ;
 }
 
 .confirm-amount-input input {
@@ -340,6 +342,21 @@ input[type="number"] {
     box-shadow: inset 2px 2px 4px #a3b1c6, inset -2px -2px 4px #ffffff;
     transform: translateY(0);
 }
+
+    /* 快速记账样式调整 */
+    .quick-input-row {
+        display: flex !important;
+        gap: 20px !important;
+    }
+    .quick-input-field {
+        width: 450px !important;
+        max-width: 450px !important;
+        flex: none !important;
+    }
+    .quick-add-btn {
+        margin-left: auto !important;
+        margin-right: -10px !important;
+    }
 </style>
 <style>
 /* ==================== 记账模块 - 完整pencil设计样式 ==================== */
@@ -378,7 +395,7 @@ input[type="number"] {
 }
 
 .accounting-card .accounting-stats-btn:hover {
-    color: #6b7fff;
+    color: #6b7fff ;
     box-shadow: 6px 6px 12px #a3b1c6, -6px -6px 12px #ffffff;
     transform: translateY(-1px);
 }
@@ -397,7 +414,7 @@ input[type="number"] {
 }
 
 .accounting-card .accounting-stats-btn span {
-    color: #6b7fff;
+    color: #6b7fff ;
     font-size: 13px;
     font-weight: 600;
 }
@@ -443,6 +460,7 @@ input[type="number"] {
 
 .quick-input-field {
     flex: 1;
+    max-width: calc(100% - 30px);
     height: 56px;
     background: #e0e5ec;
     border-radius: 14px;
@@ -456,7 +474,7 @@ input[type="number"] {
 .quick-input-field .input-icon {
     width: 20px;
     height: 20px;
-    color: #6b7fff;
+    color: #6b7fff ;
     flex-shrink: 0;
 }
 
@@ -579,9 +597,12 @@ input[type="number"] {
 }
 
 /* 收入按钮的icon特殊处理 */
-.type-toggle-btn:not(.active) i,
-.type-toggle-btn:not(.active) svg {
-    color: #48bb78;
+}
+
+/* 支出按钮的icon特殊处理 - 紫色 */
+.type-toggle-btn.expense:not(.active) i,
+.type-toggle-btn.expense:not(.active) svg {
+    color: #6b7fff !important;
 }
 
 .type-toggle-btn i,
@@ -597,9 +618,9 @@ input[type="number"] {
 }
 
 /* 收入按钮的icon特殊处理 */
-.type-toggle-btn:not(.active) i,
-.type-toggle-btn:not(.active) svg {
-    color: #48bb78;
+.type-toggle-btn.income:not(.active) i,
+.type-toggle-btn.income:not(.active) svg {
+    color: #48bb78 !important;
 }
 
 .type-toggle-btn i,
@@ -754,7 +775,7 @@ input[type="number"] {
 .accounting-detail-inputs .input-prefix {
     position: absolute;
     left: 20px;
-    color: #6b7fff;
+    color: #6b7fff !important;
     font-size: 16px;
     font-weight: 600;
     z-index: 1;
@@ -855,6 +876,8 @@ input[type="number"] {
 /* 记录头部样式 */
 .records-header {
     padding: 0;
+    margin-bottom: -10px;
+    border-bottom: none !important;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -943,7 +966,7 @@ input[type="number"] {
 /* Modal Body */
 .quick-accounting-modal-content .modal-body {
     flex: 1;
-    padding: 30px 20px;
+    padding: 10px 20px 30px 20px;
     display: flex;
     flex-direction: column;
     gap: 20px !important;
@@ -980,7 +1003,7 @@ input[type="number"] {
 
 .type-toggle-group {
     display: flex;
-    gap: 4px !important;
+    gap: 10px !important;
 }
 
 .type-toggle-group .type-toggle-btn {
@@ -988,6 +1011,7 @@ input[type="number"] {
     align-items: center;
     gap: 3px;
     height: 35px;
+    width: 90px;
     padding: 4px 10px !important;
     border: none;
     background: #e0e5ec;
@@ -1006,7 +1030,7 @@ input[type="number"] {
 }
 
 .type-toggle-group .type-toggle-btn.expense {
-    color: #718096;
+    color: #6b7fff !important;
 }
 
 .type-toggle-group .type-toggle-btn.expense.active {
@@ -1016,7 +1040,7 @@ input[type="number"] {
 }
 
 .type-toggle-group .type-toggle-btn.income {
-    color: #718096;
+    color: #27ae60;
 }
 
 .type-toggle-group .type-toggle-btn.income.active {
@@ -1067,7 +1091,7 @@ input[type="number"] {
 .confirm-amount-input .currency-symbol {
     font-size: 13px;
     font-weight: 600;
-    color: #6b7fff;
+    color: #6b7fff !important;
 }
 
 .confirm-amount-input input {
@@ -1130,11 +1154,261 @@ input[type="number"] {
 }
 
 
+
+    /* 快速记账样式调整 */
+    .quick-input-row {
+        display: flex !important;
+        gap: 20px !important;
+    }
+    .quick-input-field {
+        width: 450px !important;
+        max-width: 450px !important;
+        flex: none !important;
+    }
+    .quick-add-btn {
+        margin-left: auto !important;
+        margin-right: -10px !important;
+    }
 </style>
-</head>
-<body>
+<style>
+/* 记录样式紧急修复 */
+.accounting-records .accounting-record {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    height: 64px !important;
+    padding: 14px !important;
+    margin-bottom: 12px !important;
+    background: #e0e5ec !important;
+    border-radius: 12px !important;
+    box-shadow: 4px 4px 8px #a3b1c6, -4px -4px 8px #ffffff !important;
+    transition: all 0.3s ease !important;
+    position: relative !important;
+}
+.accounting-records .accounting-record-left {
+    flex: 1 !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 12px !important;
+}
+.accounting-records .accounting-record-icon-wrapper {
+    width: 40px !important;
+    height: 40px !important;
+    background: #e0e5ec !important;
+    border-radius: 10px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    flex-shrink: 0 !important;
+    box-shadow: 2px 2px 4px #a3b1c6, -2px -2px 4px #ffffff !important;
+}
+.accounting-records .accounting-record-content {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 2px !important;
+}
+.accounting-records .accounting-record-category {
+    color: #4a5568 !important;
+    font-weight: 500 !important;
+    font-size: 14px !important;
+}
+.accounting-records .accounting-record-note {
+    color: #718096 !important;
+    font-size: 13px !important;
+}
+.accounting-records .accounting-record-right {
+    display: flex !important;
+    align-items: center !important;
+    gap: 12px !important;
+}
+.accounting-records .accounting-record-amount-time {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-end !important;
+    gap: 2px !important;
+}
+.accounting-records .accounting-record-amount {
+    font-size: 16px !important;
+    font-weight: 700 !important;
+}
+.accounting-records .accounting-record-amount.expense {
+    color: #e74c3c !important;
+}
+.accounting-records .accounting-record-amount.income {
+    color: #27ae60 !important;
+}
+.accounting-records .accounting-record-time {
+    font-size: 11px !important;
+    color: #a0aec0 !important;
+    font-weight: 400 !important;
+}
+.accounting-records .accounting-record-edit,
+.accounting-records .accounting-record-delete {
+    position: absolute !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    opacity: 0 !important;
+    width: 28px !important;
+    height: 28px !important;
+    padding: 0 !important;
+    border: none !important;
+    border-radius: 8px !important;
+    background: #e0e5ec !important;
+    box-shadow: 2px 2px 4px #a3b1c6, -2px -2px 4px #ffffff !important;
+    cursor: pointer !important;
+    transition: all 0.3s ease !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    pointer-events: none !important;
+}
+.accounting-records .accounting-record-edit {
+    right: 50px !important;
+    color: #6b7fff !important;
+}
+.accounting-records .accounting-record-delete {
+    right: 15px !important;
+    color: #e74c3c !important;
+}
+.accounting-records .accounting-record:hover .accounting-record-edit,
+.accounting-records .accounting-record:hover .accounting-record-delete {
+    opacity: 1 !important;
+    pointer-events: auto !important;
+}
+
+    /* 快速记账样式调整 */
+    .quick-input-row {
+        display: flex !important;
+        gap: 20px !important;
+    }
+    .quick-input-field {
+        width: 450px !important;
+        max-width: 450px !important;
+        flex: none !important;
+    }
+    .quick-add-btn {
+        margin-left: auto !important;
+        margin-right: -10px !important;
+    }
+</style>
+<style>
+/* 修复阴影被遮住和hover时按钮遮挡文字的问题 */
+.accounting-records {
+    overflow-y: auto !important;
+    overflow-x: visible !important;
+    padding: 8px 0 !important;
+}
+
+.accounting-records .accounting-record {
+    margin: 8px 4px !important;
+}
+
+.accounting-records .accounting-record-amount-time {
+    transition: transform 0.3s ease !important;
+}
+
+.accounting-records .accounting-record:hover .accounting-record-amount-time {
+    transform: translateX(-80px) !important;
+    margin-right: 0 !important;
+}
+
+    /* 快速记账样式调整 */
+    .quick-input-row {
+        display: flex !important;
+        gap: 20px !important;
+    }
+    .quick-input-field {
+        width: 450px !important;
+        max-width: 450px !important;
+        flex: none !important;
+    }
+    .quick-add-btn {
+        margin-left: auto !important;
+        margin-right: -10px !important;
+    }
+</style>
+    <style>
+    /* 减少记账记录之间的间距5px */
+    .accounting-records .accounting-record {
+        margin-bottom: 7px !important;
+    }
+    </style>
+    
+    <style>
+    /* 收支按钮样式强制修复 */
+    .type-toggle-btn.expense:not(.active) {
+        color: #6b7fff !important;
+    }
+    .type-toggle-btn.income:not(.active) {
+        color: #27ae60 !important;
+    }
+    .type-toggle-btn.income.active {
+        background: #27ae60 !important;
+        color: #ffffff !important;
+        box-shadow: var(--neu-shadow-out) !important;
+    }
+    </style>
+    <style>
+    /* 收支按钮样式强制修复 */
+    .type-toggle-btn.expense:not(.active) {
+        color: #6b7fff !important;
+    }
+    .type-toggle-btn.income:not(.active) {
+        color: #27ae60 !important;
+    }
+    .type-toggle-btn.income.active {
+        background: #27ae60 !important;
+        color: #ffffff !important;
+        box-shadow: var(--neu-shadow-out) !important;
+    }
+    </style>
+
     <div class="container">
         <!-- 头部 -->
+
+<style>
+/* 修复收支按钮icon颜色 */
+.type-toggle-btn.expense:not(.active) i,
+.type-toggle-btn.expense:not(.active) svg {
+    color: #6b7fff !important;
+}
+.type-toggle-btn.income:not(.active) i,
+.type-toggle-btn.income:not(.active) svg {
+    color: #48bb78 !important;
+}
+.type-toggle-group .type-toggle-btn.expense:not(.active) i,
+.type-toggle-group .type-toggle-btn.expense:not(.active) svg {
+    color: #6b7fff !important;
+}
+.type-toggle-group .type-toggle-btn.income:not(.active) i,
+.type-toggle-group .type-toggle-btn.income:not(.active) svg {
+    color: #48bb78 !important;
+}
+
+/* 激活状态下的icon和文字都是白色 */
+.type-toggle-group .type-toggle-btn.expense.active i,
+.type-toggle-group .type-toggle-btn.expense.active svg {
+    color: #ffffff !important;
+}
+.type-toggle-group .type-toggle-btn.income.active i,
+.type-toggle-group .type-toggle-btn.income.active svg {
+    color: #ffffff !important;
+}
+.type-toggle-group .type-toggle-btn.expense i,
+.type-toggle-group .type-toggle-btn.expense svg {
+    color: #6b7fff !important;
+}
+.type-toggle-group .type-toggle-btn.income i,
+.type-toggle-group .type-toggle-btn.income svg {
+    color: #48bb78 !important;
+}
+/* 激活状态下的文字都是白色 */
+.type-toggle-group .type-toggle-btn.expense.active span,
+.type-toggle-group .type-toggle-btn.income.active span {
+    color: #ffffff !important;
+}</style>
+</head>
+<body>
         <header class="header">
             <h1>My Workplace</h1>
             <div class="date-info" id="current-date"></div>
@@ -1203,6 +1477,9 @@ input[type="number"] {
                             <span class="dot partial"></span> 部分完成
                             <span class="dot none"></span> 未打卡
                         </div>
+                        <div class="holiday-day-info" id="holiday-day-info">
+                            <div class="info-placeholder"></div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -1255,8 +1532,29 @@ input[type="number"] {
                 </div>
             </div>
 
+
+            <!-- 放假日历 -->
+            <div id="holiday-calendar-modal" class="modal hidden">
+                <div class="modal-content modal-lg">
+                    <div class="modal-header">
+                        <h3>2026年假期日历</h3>
+                        <button class="btn-close" onclick="closeHolidayModal()"><i class="fas fa-times"></i></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="calendar-header-controls">
+                            <button onclick="changeHolidayMonth(-1)"><i class="fas fa-chevron-left"></i></button>
+                            <span id="holiday-calendar-month">2026年3月</span>
+                            <button onclick="changeHolidayMonth(1)"><i class="fas fa-chevron-right"></i></button>
+                        </div>
+                        <div class="holiday-calendar-grid" id="holiday-calendar" style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px;"></div>
+                        <div class="holiday-day-info" id="holiday-day-info">
+                            <div class="info-placeholder"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
             <!-- 模块三：放假倒计时 (放在上面比较显眼) -->
-            <section class="card holiday-card">
+            <section class="card holiday-card" onclick="openHolidayModal()" style="cursor: pointer;">
                 <div class="card-header">
                     <h2>放假倒计时</h2>
                 </div>
@@ -1430,7 +1728,7 @@ input[type="number"] {
                                            placeholder="输入如：午餐35 或 地铁充值100"
                                            onkeypress="handleAccountingQuickInput(event)">
                                 </div>
-                                <button class="quick-add-btn" onclick="addQuickAccounting()">
+                                <button class="quick-add-btn" onclick="addQuickAccounting()" style="transform: translateX(-20px) !important;">
                                     <i data-lucide="send"></i>
                                 </button>
                             </div>
@@ -1470,12 +1768,12 @@ input[type="number"] {
                                     <input type="number" id="accounting-amount-input"
                                            placeholder="金额"
                                            step="0.01"
-                                           onkeypress="handleAccountingAmountInput(event)">
+                                           onkeypress="handleAccountingDetailInput(event)">
                                 </div>
                                 <input type="text" id="accounting-note-input"
                                        placeholder="备注（选填）"
-                                       onkeypress="handleAccountingNoteInput(event)">
-                                <button class="btn-add" onclick="addManualAccounting()">
+                                       onkeypress="handleAccountingDetailInput(event)">
+                                <button class="btn-add" onclick="addAccountingRecord()">
                                     <i class="fas fa-check"></i>
                                 </button>
                             </div>
@@ -1507,7 +1805,10 @@ input[type="number"] {
                                 <i class="fas fa-chart-line"></i> 财经
                             </button>
                             <button class="news-tab" data-category="general" onclick="switchNewsCategory('general')">
-                                <i class="fas fa-globe"></i> 综合
+                                <i class="fas fa-globe-asia"></i> 国内
+                            </button>
+                            <button class="news-tab" data-category="international" onclick="switchNewsCategory('international')">
+                                <i class="fas fa-globe"></i> 国际
                             </button>
                         </div>
                         <div class="news-loading" id="news-loading">
@@ -1714,8 +2015,8 @@ input[type="number"] {
         <div class="modal-content modal-confirm">
             <div class="modal-header">
                 <h3 id="confirm-title">确认操作</h3>
-                <p id="confirm-message"></p>
             </div>
+            <p id="confirm-message"></p>
             <div class="modal-footer">
                 <button class="btn-secondary" onclick="closeConfirmModal(false)">取消</button>
                 <button class="btn-primary" onclick="closeConfirmModal(true)">确认</button>
@@ -1724,11 +2025,173 @@ input[type="number"] {
     </div>
 
     <!-- Chart.js 图表库 -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-    <script src="script.js?v=1772885189></script>
-<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-<meta http-equiv="Pragma" content="no-cache">
-<meta http-equiv="Expires" content="0">
+    <script src="https://unpkg.com/chart.js@4.4.0/dist/chart.umd.min.js" defer></script>
+    <script>
+    // 强制清除新闻缓存以显示7条新闻
+    if (localStorage.getItem('newsData')) {
+        const data = JSON.parse(localStorage.getItem('newsData'));
+        if (!data.version || data.version < 2 || (data.tech && data.tech.length < 8)) {
+            console.log('清除旧版本新闻缓存...');
+            localStorage.removeItem('newsData');
+        }
+    }
+    </script>
+    
+<script>
+// 2026年假期数据
+const HD2026 = {
+    '2026-01-01':{n:'元旦',r:'01-01至01-03'},'2026-01-02':{n:'元旦',r:'01-01至01-03'},'2026-01-03':{n:'元旦',r:'01-01至01-03'},
+    '2026-02-15':{n:'春节',r:'02-15至02-21'},'2026-02-16':{n:'春节',r:'02-15至02-21'},'2026-02-17':{n:'春节',r:'02-15至02-21'},'2026-02-18':{n:'春节',r:'02-15至02-21'},'2026-02-19':{n:'春节',r:'02-15至02-21'},'2026-02-20':{n:'春节',r:'02-15至02-21'},'2026-02-21':{n:'春节',r:'02-15至02-21'},
+    '2026-04-04':{n:'清明',r:'04-04至04-06'},'2026-04-05':{n:'清明',r:'04-04至04-06'},'2026-04-06':{n:'清明',r:'04-04至04-06'},
+    '2026-05-01':{n:'劳动节',r:'05-01至05-05'},'2026-05-02':{n:'劳动节',r:'05-01至05-05'},'2026-05-03':{n:'劳动节',r:'05-01至05-05'},'2026-05-04':{n:'劳动节',r:'05-01至05-05'},'2026-05-05':{n:'劳动节',r:'05-01至05-05'},
+    '2026-06-19':{n:'端午',r:'06-19至06-21'},'2026-06-20':{n:'端午',r:'06-19至06-21'},'2026-06-21':{n:'端午',r:'06-19至06-21'},
+    '2026-09-25':{n:'中秋',r:'09-25至09-27'},'2026-09-26':{n:'中秋',r:'09-25至09-27'},'2026-09-27':{n:'中秋',r:'09-25至09-27'},
+    '2026-10-01':{n:'国庆节',r:'10-01至10-07'},'2026-10-02':{n:'国庆节',r:'10-01至10-07'},'2026-10-03':{n:'国庆节',r:'10-01至10-07'},'2026-10-04':{n:'国庆节',r:'10-01至10-07'},'2026-10-05':{n:'国庆节',r:'10-01至10-07'},'2026-10-06':{n:'国庆节',r:'10-01至10-07'},'2026-10-07':{n:'国庆节',r:'10-01至10-07'}
+};
+const MD2026 = {'2026-01-04':'元旦补班','2026-02-14':'春节补班','2026-02-22':'春节补班','2026-04-12':'清明补班','2026-05-09':'五一补班','2026-09-27':'中秋补班','2026-10-10':'国庆补班'};
+let curHMonth = new Date();
+
+// 放假日历弹窗函数
+function openHolidayModal(){
+    const m=document.getElementById('holiday-calendar-modal');
+    if(m){
+        m.classList.remove('hidden');
+        m.classList.add('active');
+        if(typeof RHCal === 'function'){
+            RHCal();
+        }
+    }
+}
+function closeHolidayModal(){
+    const m=document.getElementById('holiday-calendar-modal');
+    if(m){
+        m.classList.add('hidden');
+        m.classList.remove('active');
+    }
+}
+function changeHolidayMonth(d){
+    if(typeof curHMonth !== 'undefined'){
+        curHMonth.setMonth(curHMonth.getMonth()+d);
+        if(typeof RHCal === 'function'){
+            RHCal();
+        }
+    }
+}
+
+// 渲染日历
+function RHCal(){
+    const g=document.getElementById('holiday-calendar');
+    const l=document.getElementById('holiday-calendar-month');
+    if(!g)return;
+    const y=curHMonth.getFullYear();
+    const mo=curHMonth.getMonth();
+    if(l)l.textContent=y+'年'+(mo+1)+'月';
+    const fd=new Date(y,mo,1);
+    const ld=new Date(y,mo+1,0);
+    const sd=fd.getDay();
+    const days=ld.getDate();
+    
+    g.innerHTML='';
+    
+    // 生成空白格子
+    for(let i=0;i<sd;i++){
+        const div=document.createElement('div');
+        div.className='holiday-day empty';
+        div.style.cssText='width: 90px; height: 65px; display: flex; flex-direction: column; justify-content: center; align-items: center; border-radius: 10px; font-size: 12px; background: transparent; box-shadow: none; cursor: default;';
+        g.appendChild(div);
+    }
+    
+    // 生成日期格子
+    for(let d=1;d<=days;d++){
+        const ds=y+'-'+String(mo+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
+        const hd=HD2026[ds];
+        const md=MD2026[ds];
+        const iw=new Date(y,mo,d).getDay()===0||new Date(y,mo,d).getDay()===6;
+        
+        const div=document.createElement('div');
+        let cls='holiday-day';
+        if(hd){
+            cls+=' holiday';
+        }else if(md){
+            cls+=' makeup';
+        }else if(iw){
+            cls+=' weekend';
+        }
+        div.className=cls;
+        
+        let styles='width: 90px; height: 65px; display: flex; flex-direction: column; justify-content: center; align-items: center; border-radius: 10px; font-size: 12px; cursor: pointer; position: relative; background: var(--bg-color); padding: 4px; box-shadow: var(--neu-shadow-sm); transition: all 0.3s ease;';
+        
+        if(hd){
+            styles+=' background: rgba(72, 187, 120, 0.2);';
+        }else if(md){
+            styles+=' background: rgba(236, 201, 75, 0.2);';
+        }
+        
+        div.style.cssText=styles;
+        
+        const numSpan=document.createElement('span');
+        numSpan.className='holiday-day-num';
+        numSpan.style.cssText='font-weight: bold; z-index: 1; position: relative;';
+        numSpan.textContent=d;
+        div.appendChild(numSpan);
+        
+        if(hd||md){
+            const label=document.createElement('span');
+            label.className='holiday-day-label';
+            label.style.cssText='font-size: 9px; padding: 2px 4px; border-radius: 3px; margin-top: 2px; font-weight: 600; z-index: 1; position: relative;';
+            label.style.background=hd ? 'rgba(72, 187, 120, 0.3)' : 'rgba(236, 201, 75, 0.3)';
+            label.textContent=hd?'假':'班';
+            div.appendChild(label);
+        }
+        
+        div.onclick=function(){
+            if(typeof showHInfo === 'function'){
+                showHInfo(ds);
+            } else {
+                const d=new Date(ds);
+                const wd=['周日','周一','周二','周三','周四','周五','周六'][d.getDay()];
+                const hd=HD2026[ds];
+                const md=MD2026[ds];
+                alert(ds+' '+wd+(hd ? '\n'+hd.n+'\n'+hd.r : md ? '\n'+md : iw ? '\n正常休息' : '\n正常上班'));
+            }
+        };
+        g.appendChild(div);
+    }
+}
+
+// 显示日期详情
+function showHInfo(ds){
+    const d=new Date(ds);
+    const wd=['周日','周一','周二','周三','周四','周五','周六'][d.getDay()];
+    const hd=HD2026[ds];
+    const md=MD2026[ds];
+    const iw=d.getDay()===0||d.getDay()===6;
+    
+    const infoDiv=document.getElementById('holiday-day-info');
+    if(!infoDiv)return;
+    
+    let html='<div class="info-date">'+ds+' '+wd+'</div>';
+    html+='<div class="info-content">';
+    
+    if(hd){
+        html+='<div class="info-holiday">'+hd.n+'</div>';
+        html+='<div>放假时间：'+hd.r+'</div>';
+    }else if(md){
+        html+='<div class="info-makeup">'+md+'</div>';
+    }else if(iw){
+        html+='<div class="info-weekend">正常休息</div>';
+    }else{
+        html+='<div class="info-workday">正常上班</div>';
+    }
+    
+    html+='</div>';
+    infoDiv.innerHTML=html;
+}
+</script>
+}
+</script>
+
+<script src="script.js?v=1773112107"></script>
 <script>
 // 测试函数
 function testQuickAccounting() {
