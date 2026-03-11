@@ -2037,8 +2037,36 @@ input[type="number"] {
     }
     </script>
     
+<script>
+// 放假日历功能
+function openHolidayModal(){
+    const m=document.getElementById('holiday-calendar-modal');
+    if(m){
+        m.classList.remove('hidden');
+        m.classList.add('active');
+        if(typeof RHCal === 'function'){
+            RHCal();
+        }
+    }
+}
+function closeHolidayModal(){
+    const m=document.getElementById('holiday-calendar-modal');
+    if(m){
+        m.classList.add('hidden');
+        m.classList.remove('active');
+    }
+}
+function changeHolidayMonth(d){
+    if(typeof curHMonth !== 'undefined'){
+        curHMonth.setMonth(curHMonth.getMonth()+d);
+        if(typeof RHCal === 'function'){
+            RHCal();
+        }
+    }
+}
+</script>
 
-<script src="script.js?v=1773112104"></script>
+<script src="script.js?v=1773112105"></script>
 <script>
 // 测试函数
 function testQuickAccounting() {
