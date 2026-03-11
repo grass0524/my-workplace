@@ -6068,3 +6068,13 @@ section.holiday-card {
 #holiday-calendar-modal .modal-content {
     height: calc(80% - 200px) !important;
 }
+
+/* 确认弹窗消息样式 */
+#confirm-modal #confirm-message {
+    text-align: center;
+    padding: 20px;
+    font-size: 15px;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    margin: 0;
+}
