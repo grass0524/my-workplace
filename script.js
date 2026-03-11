@@ -3603,6 +3603,7 @@ function showQuickAccountingModal(data) {
     if (typeof lucide !== 'undefined') {
         lucide.createIcons();
     }
+}
 
 // 关闭快速记账确认弹窗
 function closeQuickAccountingModal() {
