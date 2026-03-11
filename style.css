@@ -6072,12 +6072,12 @@ section.holiday-card {
 
 /* 确认弹窗消息样式 - 增加上下间距 */
 #confirm-modal #confirm-message {
-    text-align: center;
-    padding: 30px 20px 40px 20px;
-    font-size: 15px;
-    color: var(--text-secondary);
-    line-height: 1.6;
-    margin: 0;
+    text-align: center !important;
+    padding: 30px 20px 40px 20px !important;
+    font-size: 15px !important;
+    color: var(--text-secondary) !important;
+    line-height: 1.6 !important;
+    margin: 0 !important;
 }
 
 /* 去掉确认弹窗的分割线 */
