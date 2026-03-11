@@ -6078,3 +6078,12 @@ section.holiday-card {
     line-height: 1.6;
     margin: 0;
 }
+
+/* 去掉确认弹窗的分割线 */
+#confirm-modal .modal-header {
+    border: none !important;
+}
+
+#confirm-modal .modal-footer {
+    border: none !important;
+}
