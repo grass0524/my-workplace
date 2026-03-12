@@ -3824,10 +3824,7 @@ function openHolidayModal(){
         m.classList.add('active');
         curHMonth=new Date();
         RHCal();
-        // 自动显示今天的放假信息
-        const today = new Date().toISOString().split('T')[0];
-        console.log('[DEBUG] Calling showHInfo for today:', today);
-        showHInfo(today);
+//         // 自动显示今天的放假信息
     } else {
         console.log('[DEBUG] Modal not found!');
     }
@@ -3913,9 +3910,9 @@ function RHCal(){
             div.appendChild(label);
         }
         
-        div.onclick=function(){showHInfo(ds)};
         g.appendChild(div);
     }
+    showMonthHolidays();
 }
 function showHInfo(ds){
     console.log('[DEBUG] showHInfo called for:', ds);
@@ -3945,5 +3942,60 @@ function showHInfo(ds){
     
     html+='</div>';
     console.log('[DEBUG] Setting innerHTML');
+    infoDiv.innerHTML=html;
+}
+function showMonthHolidays(){
+    console.log('[DEBUG] showMonthHolidays called');
+    const y=curHMonth.getFullYear();
+    const mo=curHMonth.getMonth();
+    const ld=new Date(y,mo+1,0).getDate();
+    
+    // 收集当月所有假期（去重，按假期名称分组）
+    const holidays=new Map();
+    for(let d=1;d<=ld;d++){
+        const ds=y+'-'+String(mo+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
+        const hd=HD2026[ds];
+        if(hd && !holidays.has(hd.n)){
+            holidays.set(hd.n, hd.r);
+        }
+    }
+    
+    // 收集当月所有补班日期
+    const makeupDays=[];
+    for(let d=1;d<=ld;d++){
+        const ds=y+'-'+String(mo+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
+        const md=MD2026[ds];
+        if(md){
+            const monthDay = (mo+1)+'月'+d+'日';
+            makeupDays.push({date: monthDay, name: md});
+        }
+    }
+    
+    const infoDiv=document.getElementById('holiday-day-info');
+    if(!infoDiv)return;
+    
+    console.log('[DEBUG] Found holidays:', holidays.size, 'makeup days:', makeupDays.length);
+    
+    let html='';
+    if(holidays.size>0 || makeupDays.length>0){
+        html='<div style="margin-top:20px;">';
+        for(const [name, range] of holidays){
+            html+='<div style="padding:10px 12px;margin:3px 0;font-size:14px;color:#718096;">';
+            html+='<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#48bb78;margin-right:8px;"></span>';
+            html+='<span style="font-weight:700;color:#718096;">'+name+'</span>：'+range;
+            html+='</div>';
+        }
+        for(const md of makeupDays){
+            html+='<div style="padding:10px 12px;margin:3px 0;font-size:14px;color:#718096;">';
+            html+='<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#ecb94b;margin-right:8px;"></span>';
+            html+='<span style="font-weight:700;color:#718096;">'+md.name+'</span>：'+md.date;
+            html+='</div>';
+        }
+        html+='</div>';
+    }else{
+        html='<div style="font-size:14px;color:var(--text-light);padding:30px;text-align:center;margin-top:20px;">😢 本月无放假安排</div>';
+    }
+    
+    console.log('[DEBUG] Setting month holidays HTML');
     infoDiv.innerHTML=html;
 }
