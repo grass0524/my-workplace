@@ -374,14 +374,11 @@ input[type="number"] {
     padding: 6px 12px;
     border-radius: 8px;
     background: var(--card-bg);
-    box-shadow:
-        inset 3px 3px 6px var(--shadow-dark),
-        inset -3px -3px 6px var(--shadow-light);
     font-size: 13px;
-    color: var(--text-secondary);
+    color: #718096;
 }
 .sync-icon {
-    color: #48bb78;
+    color: #6b7fff;
 }
 .sync-status.syncing .sync-icon {
     animation: spin 1s linear infinite;
@@ -1519,7 +1516,7 @@ input[type="number"] {
                 <!-- 已登录状态 -->
                 <div class="auth-status-bar" id="auth-status-bar" style="display: none;">
                     <div class="sync-status" id="sync-status">
-                        <i class="fas fa-cloud sync-icon"></i>
+                        <i class="fas fa-check sync-icon"></i>
                         <span class="sync-text">已同步</span>
                     </div>
                     <div class="user-info">
@@ -2354,11 +2351,20 @@ function testQuickAccounting() {
             const syncText = syncStatus.querySelector('.sync-text');
             if (syncText) syncText.textContent = status;
 
+            const syncIcon = syncStatus.querySelector('.sync-icon');
+
             syncStatus.classList.remove('syncing', 'error');
             if (status === '同步中...') {
                 syncStatus.classList.add('syncing');
+                // 切换为转圈图标
+                syncIcon.className = 'fas fa-spinner fa-spin sync-icon';
             } else if (isError) {
                 syncStatus.classList.add('error');
+                // 切换为错误图标
+                syncIcon.className = 'fas fa-times sync-icon';
+            } else {
+                // 切换为成功勾选图标
+                syncIcon.className = 'fas fa-check sync-icon';
             }
         }
 
