@@ -80,8 +80,16 @@ class DataSync {
         }
 
         try {
-            // 从localStorage读取本地数据
-            const localData = JSON.parse(localStorage.getItem(config.localKey) || '{}');
+            // 从localStorage读取本地数据，根据数据类型使用正确的默认值
+            const defaultValues = {
+                'healthRecords': [],
+                'todos': [],
+                'accountingData': [],
+                'vocabLibrary': {},
+                'myVocab': {}
+            };
+            const defaultValue = JSON.stringify(defaultValues[config.localKey] || '{}');
+            const localData = JSON.parse(localStorage.getItem(config.localKey) || defaultValue);
 
             // 添加同步元数据
             const syncData = {
