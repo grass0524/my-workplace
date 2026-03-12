@@ -1,16 +1,36 @@
 // 1. 初始化
-document.addEventListener('DOMContentLoaded', async () => {
+// 聚合数据今日头条API配置
+const JUHE_API_KEY = '03d1da64823d24414d7b6bab4b8390a2'; // 聚合数据API密钥
+const JUHE_BASE_URL = 'http://v.juhe.cn/toutiao';
+
+const CORS_PROXY = 'https://api.codetabs.com/v1/proxy?quest=';
+
+// 新闻类型映射（前端分类 → 聚合数据API type参数）
+const NEWS_TYPE_MAP = {
+    'tech': 'keji',
+    'finance': 'caijing',
+    'general': 'guonei',
+    'international': 'guoji'
+};
+
+
+// 自动清除旧版本新闻缓存
+if (localStorage.getItem('newsData') && !JSON.parse(localStorage.getItem('newsData')).version) {
+    localStorage.removeItem('newsData');
+    console.log('已清除旧版本新闻缓存');
+}
+
+document.addEventListener('DOMContentLoaded', () => {
     initDate();
     initHealth();
     initTodos();
     initHoliday();
-    await initWord();
     initMood();
     initQuote();
     initAccounting();
-    await initNews();
+    setTimeout(initNews, 1000);;
+    setTimeout(initWord, 1500);;
 });
-
 function initDate() {
     const options = { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' };
     document.getElementById('current-date').textContent = new Date().toLocaleDateString('zh-CN', options);
@@ -2171,7 +2191,7 @@ const categoryKeywords = {
     '购物': ['买菜', '衣服', '淘宝', '京东', '拼多多', '日用品', '超市', '商场', '网购', '快递'],
     '娱乐': ['电影', '游戏', 'KTV', '健身', '运动', '旅游', '票', '演出', '音乐', '视频'],
     '居住': ['房租', '水电', '物业', '燃气', '宽带', '话费', '网费', '维修', '装修'],
-    '医疗': ['药', '医院', '看病', '体检', '疫苗', '药店'],
+    '投资': ['股票', '基金', '理财', '债券', '期货', '其他'],
     '教育': ['书', '课程', '培训', '学费', '学习'],
     '工资': ['工资', '薪水', '奖金', '提成', '兼职'],
     '理财': ['理财', '基金', '股票', '收益', '利息']
@@ -2181,7 +2201,7 @@ const categoryKeywords = {
 const incomeCategories = ['工资', '理财', '其他收入'];
 
 // 支出分类
-const expenseCategories = ['餐饮', '交通', '购物', '娱乐', '居住', '医疗', '教育', '其他'];
+const expenseCategories = ['餐饮', '交通', '购物', '娱乐', '居住', '投资', '教育', '其他'];
 
 // 当前选中的记账类型和分类
 let currentAccountingType = 'expense';
@@ -2377,15 +2397,24 @@ function selectAccountingType(type) {
     currentAccountingCategory = null;
     
     // 更新按钮状态
-    document.querySelectorAll('.category-type-btn').forEach(btn => {
+    document.querySelectorAll('.type-toggle-btn').forEach(btn => {
         btn.classList.toggle('active', btn.dataset.type === type);
     });
-    
+
+    // 切换收入模式类到容器
+    const accountingContainer = document.querySelector('.accounting-top-container');
+    if (accountingContainer) {
+        if (type === 'income') {
+            accountingContainer.classList.add('income-mode');
+        } else {
+            accountingContainer.classList.remove('income-mode');
+        }
+    }    
     // 渲染分类按钮
     renderAccountingCategories(type);
     
     // 重置输入框
-    const detailInput = document.getElementById('accounting-detail-input');
+    const detailInput = document.getElementById('accounting-amount-input');
     detailInput.placeholder = '选择分类后输入金额';
     detailInput.value = '';
     document.getElementById('accounting-note-input').value = '';
@@ -2398,11 +2427,16 @@ function renderAccountingCategories(type) {
     
     container.innerHTML = categories.map(cat => 
         '<button class="category-item' + (currentAccountingCategory === cat ? ' active' : '') + '" ' +
-        'onclick="selectAccountingCategory(\'' + cat + '\')">' + cat + '</button>'
+        'onclick="selectAccountingCategory(\'' + cat + '\')">' +
+        '<i data-lucide="' + (categoryIcons[cat] || 'circle') + '"></i>' +
+        '<span>' + cat + '</span>' +
+        '</button>'
     ).join('');
+    
+    if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
+    }
 }
-
-// 选择记账分类
 function selectAccountingCategory(category) {
     currentAccountingCategory = category;
     
@@ -2413,7 +2447,7 @@ function selectAccountingCategory(category) {
     
     // 更新输入框提示
     const placeholder = currentAccountingType === 'income' ? '输入收入金额' : '输入' + category + '金额';
-    const detailInput = document.getElementById('accounting-detail-input');
+    const detailInput = document.getElementById('accounting-amount-input');
     detailInput.placeholder = placeholder;
     detailInput.focus();
 }
@@ -2432,7 +2466,7 @@ function addAccountingRecord() {
         return;
     }
     
-    const amountInput = document.getElementById('accounting-detail-input');
+    const amountInput = document.getElementById('accounting-amount-input');
     const noteInput = document.getElementById('accounting-note-input');
     
     const amountStr = amountInput.value.trim();
@@ -2480,21 +2514,17 @@ function updateAccountingSummary() {
         new Date(r.date).toDateString() === today
     );
     
-    const todayIncome = todayRecords
-        .filter(r => r.type === 'income')
-        .reduce((sum, r) => sum + r.amount, 0);
-    
     const todayExpense = todayRecords
         .filter(r => r.type === 'expense')
         .reduce((sum, r) => sum + r.amount, 0);
     
-    document.getElementById('today-income').textContent = '¥' + todayIncome.toFixed(2);
-    document.getElementById('today-expense').textContent = '¥' + todayExpense.toFixed(2);
+    const todayExpenseEl = document.getElementById('today-expense-inline');
+    if (todayExpenseEl) {
+        todayExpenseEl.textContent = '¥' + todayExpense.toFixed(2);
+    }
 }
-
-// 渲染最近的记账记录
 function renderRecentRecords() {
-    const container = document.getElementById('accounting-recent-list');
+    const container = document.getElementById('accounting-records-list');
     const recentRecords = accountingData.records.slice(0, 5);
     
     if (recentRecords.length === 0) {
@@ -2502,27 +2532,64 @@ function renderRecentRecords() {
         return;
     }
     
-    container.innerHTML = recentRecords.map(record => 
-        '<div class="accounting-record">' +
-        '<div class="accounting-record-left">' +
-        '<div class="accounting-record-category">' + record.category + '</div>' +
-        '<div class="accounting-record-note">' + record.note + '</div>' +
-        '</div>' +
-        '<div class="accounting-record-right">' +
-        '<span class="accounting-record-amount ' + record.type + '">' +
-        (record.type === 'income' ? '+' : '-') + '¥' + record.amount.toFixed(2) +
-        '</span>' +
-        '<button class="accounting-record-delete" onclick="deleteAccountingRecord(' + record.id + ')">' +
-        '<i class="fas fa-trash"></i>' +
-        '</button>' +
-        '</div>' +
-        '</div>'
-    ).join('');
+    container.innerHTML = recentRecords.map(record => {
+        const recordDate = new Date(record.date);
+        const timeStr = recordDate.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
+        const dateStr = recordDate.toLocaleDateString('zh-CN', { month: 'short', day: 'numeric' });
+        const categoryIcon = categoryIcons[record.category] || 'circle';
+        
+        return '<div class="accounting-record ' + record.type + '">' +
+            '<div class="accounting-record-left">' +
+            '<div class="accounting-record-icon-wrapper">' +
+            '<i data-lucide="' + categoryIcon + '"></i>' +
+            '</div>' +
+            '<div class="accounting-record-content">' +
+            '<div class="accounting-record-category">' + record.category + '</div>' +
+            '<div class="accounting-record-note">' + record.note + '</div>' +
+            '</div>' +
+            '</div>' +
+            '<div class="accounting-record-right">' +
+            '<div class="accounting-record-amount-time">' +
+            '<span class="accounting-record-amount ' + record.type + '">' +
+            (record.type === 'income' ? '+' : '-') + '¥' + record.amount.toFixed(2) +
+            '</span>' +
+            '<div class="accounting-record-time">' + dateStr + ' ' + timeStr + '</div>' +
+            '</div>' +
+            '<button class="accounting-record-edit" onclick="editAccountingRecord(' + record.id + ')">' +
+            '<i class="fas fa-edit"></i>' +
+            '</button>' +
+            '<button class="accounting-record-delete" onclick="deleteAccountingRecord(' + record.id + ')">' +
+            '<i class="fas fa-trash"></i>' +
+            '</button>' +
+            '</div>' +
+            '</div>';
+    }).join('');
+    
+    if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
+    }
+}
+function deleteAccountingRecord(id) {
+    showConfirmModal(
+        '确认删除',
+        '确定要删除这条记账记录吗？',
+        () => {
+            // 从数据中删除
+            const index = accountingData.records.findIndex(r => r.id === id);
+            if (index !== -1) {
+                accountingData.records.splice(index, 1);
+                saveAccountingData();
+                
+                // 更新UI
+                updateAccountingSummary();
+                renderRecentRecords();
+                
+                showToast('删除成功！');
+            }
+        }
+    );
 }
 
-// 删除记账记录
-function deleteAccountingRecord(id) {
-// 编辑记账记录
 function editAccountingRecord(id) {
     const record = accountingData.records.find(r => r.id === id);
     if (!record) return;
@@ -2617,16 +2684,6 @@ function editAccountingRecord(id) {
     }
 }
 
-    showConfirm('确定要删除这条记录吗？').then(confirmed => {
-        if (confirmed) {
-            accountingData.records = accountingData.records.filter(r => r.id !== id);
-            saveAccountingData();
-            updateAccountingSummary();
-            renderRecentRecords();
-            showToast('删除成功');
-        }
-    });
-}
 
 // 显示记账统计弹窗
 let currentStatsPeriod = 'day';
@@ -2755,6 +2812,7 @@ let newsData = {
     tech: [],
     finance: [],
     general: [],
+    international: [],
     lastFetch: null
 };
 
@@ -2775,7 +2833,14 @@ async function loadNewsData() {
     const saved = localStorage.getItem('newsData');
     if (saved) {
         try {
-            newsData = JSON.parse(saved);
+            const parsed = JSON.parse(saved);
+            // 检查缓存版本，清除旧版本缓存
+            if (!parsed.version || parsed.version < 2) {
+                console.log('检测到旧版本新闻缓存，已清除');
+                localStorage.removeItem('newsData');
+                return false;
+            }
+            newsData = parsed;
             // 检查缓存是否过期
             if (newsData.lastFetch) {
                 const age = Date.now() - new Date(newsData.lastFetch).getTime();
@@ -2794,6 +2859,7 @@ async function loadNewsData() {
 // 保存新闻数据到缓存
 function saveNewsData() {
     newsData.lastFetch = new Date().toISOString();
+    newsData.version = 2; // 设置缓存版本
     localStorage.setItem('newsData', JSON.stringify(newsData));
 }
 
@@ -2809,15 +2875,15 @@ async function fetchAndRenderNews() {
         
         // 尝试从缓存加载
         const hasCache = await loadNewsData();
-        if (hasCache && newsData.tech.length > 0) {
+        if (hasCache && newsData[currentNewsCategory] && newsData[currentNewsCategory].length > 0) {
             renderCurrentNewsList();
             loadingEl.classList.add('hidden');
             contentEl.classList.remove('hidden');
             return;
         }
         
-        // 获取最新新闻
-        await fetchAllNews();
+        // 只加载当前分类的新闻
+        newsData[currentNewsCategory] = await fetchAllNews(currentNewsCategory);
         renderCurrentNewsList();
         saveNewsData();
         
@@ -2833,13 +2899,72 @@ async function fetchAndRenderNews() {
 }
 
 // 获取所有新闻
-async function fetchAllNews() {
-    // 科技新闻
-    newsData.tech = generateMockNews('tech', 5);
-    // 财经新闻
-    newsData.finance = generateMockNews('finance', 5);
-    // 综合新闻
-    newsData.general = generateMockNews('general', 5);
+// 获取指定分类的新闻
+async function fetchAllNews(category = 'tech') {
+    // 如果没有配置API Key，使用模拟数据
+    if (!JUHE_API_KEY) {
+        console.warn('未配置聚合数据API Key，使用模拟数据');
+        return generateMockNews(category, 8);
+    }
+
+    try {
+        // 获取对应的type参数
+        const newsType = NEWS_TYPE_MAP[category] || 'keji';
+        
+        // 使用聚合数据今日头条API获取新闻（通过CORS代理）
+        const apiUrl = `${JUHE_BASE_URL}/index?key=${JUHE_API_KEY}&type=${newsType}`;
+        const proxyUrl = `${CORS_PROXY}${encodeURIComponent(apiUrl)}`;
+        const response = await fetch(proxyUrl);
+        const data = await response.json();
+
+        if (data.error_code === 0 && data.result && data.result.data) {
+            const articles = data.result.data;
+            
+            // 调试：打印第一条数据结构
+            console.log(`API返回数据示例 (${category}, type=${newsType}):`, articles[0]);
+            
+            const newsList = articles.slice(0, 8).map(item => ({
+                title: item.title || '无标题',
+                source: item.author_name || item.source || '聚合数据',
+                url: item.url,
+                time: formatNewsTime(item.date || item.ctime || item.pubdate || new Date().toISOString()),
+                date: item.date || item.ctime || item.pubdate || new Date().toISOString()
+            }));
+            
+            // 调试：查看原始date和处理后的time
+            console.log(`时间处理示例 (${category}):`, {
+                原始date: articles[0].date,
+                显示time: newsList[0].time
+            });
+
+            console.log(`新闻数据获取成功（聚合数据API - ${category}, type=${newsType})`);
+            return newsList;
+        } else {
+            console.warn('聚合数据API返回错误，使用模拟数据:', data);
+            return generateMockNews(category, 8);
+        }
+    } catch (error) {
+        console.error('获取新闻失败，使用模拟数据:', error);
+        // 失败时使用模拟数据
+        return generateMockNews(category, 8);
+    }
+}
+
+// 格式化新闻时间
+function formatNewsTime(timestamp) {
+    // 去掉时区标识Z，避免时区转换
+    const localTimestamp = timestamp ? timestamp.replace('Z', '').replace('z', '') : new Date().toISOString();
+    
+    const now = new Date();
+    const newsTime = new Date(localTimestamp);
+    const diff = Math.floor((now - newsTime) / 1000 / 60); // 分钟
+    
+    // 调试日志
+    console.log('formatNewsTime - 原始:', timestamp, '处理后:', localTimestamp, 'diff:', diff);
+    
+    if (diff < 60) return `${diff}分钟前`;
+    if (diff < 1440) return `${Math.floor(diff / 60)}小时前`;
+    return `${Math.floor(diff / 1440)}天前`;
 }
 
 // 生成模拟新闻数据
@@ -2850,21 +2975,30 @@ function generateMockNews(category, count) {
             { title: '国产芯片获得重大进展，性能提升50%', source: '36氪' },
             { title: '新能源汽车销量创新高，智能驾驶成新焦点', source: '第一财经' },
             { title: '5G网络覆盖率突破90%，6G研发启动', source: '通信世界' },
-            { title: '云计算市场规模持续扩大，企业数字化转型加速', source: 'TechWeb' }
+            { title: '云计算市场规模持续扩大，企业数字化转型加速', source: 'TechWeb' },
+            { title: '量子计算实验取得重大突破，计算速度提升千倍', source: '量子科技' },
+            { title: '元宇宙概念持续升温，虚拟现实应用加速落地', source: 'VR产业网' },
+            { title: '区块链技术在金融领域应用加速，数字货币监管完善', source: '区块链日报' }
         ],
         finance: [
             { title: '央行降准释放流动性，市场反应积极', source: '财联社' },
             { title: 'A股三大指数集体上涨，成交额破万亿', source: '东方财富' },
             { title: '人民币汇率保持稳定，外汇储备充足', source: '新浪财经' },
             { title: '房地产市场迎来政策利好，多地出台新措施', source: '证券时报' },
-            { title: '数字人民币试点扩容，应用场景不断丰富', source: '金融界' }
+            { title: '数字人民币试点扩容，应用场景不断丰富', source: '金融界' },
+            { title: '债券市场持续活跃，绿色债券发行量创新高', source: '中国证券报' },
+            { title: '保险行业数字化转型加快，智能投保成趋势', source: '保观' },
+            { title: '私募基金规模持续增长，量化投资策略受追捧', source: '私募排排网' }
         ],
         general: [
             { title: '全国两会召开，多项民生政策引关注', source: '人民日报' },
             { title: '教育改革深化，职业教育迎来新发展', source: '新华网' },
             { title: '医疗卫生体系建设提速，基层医疗服务改善', source: '健康报' },
             { title: '生态文明建设取得新成效，绿色发展理念深入人心', source: '光明日报' },
-            { title: '文化事业繁荣发展，优秀作品不断涌现', source: '中国文化报' }
+            { title: '文化事业繁荣发展，优秀作品不断涌现', source: '中国文化报' },
+            { title: '体育事业发展迅速，全民健身活动广泛开展', source: '体育总局' },
+            { title: '科技创新推动产业升级，新兴业态不断涌现', source: '经济日报' },
+            { title: '国际合作不断深化，共建一带一路倡议取得新进展', source: '新华社' }
         ]
     };
     
@@ -2880,7 +3014,7 @@ function generateMockNews(category, count) {
 }
 
 // 切换新闻分类
-function switchNewsCategory(category) {
+async function switchNewsCategory(category) {
     currentNewsCategory = category;
     
     // 更新标签状态
@@ -2888,8 +3022,30 @@ function switchNewsCategory(category) {
         tab.classList.toggle('active', tab.dataset.category === category);
     });
     
-    // 重新渲染新闻列表
-    renderCurrentNewsList();
+    // 显示加载状态
+    const loadingEl = document.getElementById('news-loading');
+    const contentEl = document.getElementById('news-content');
+    loadingEl.classList.remove('hidden');
+    contentEl.classList.add('hidden');
+    
+    try {
+        // 如果该分类还没加载过，则获取数据
+        if (!newsData[category] || newsData[category].length === 0) {
+            newsData[category] = await fetchAllNews(category);
+            saveNewsData();
+        }
+        
+        // 重新渲染新闻列表
+        renderCurrentNewsList();
+        
+        loadingEl.classList.add('hidden');
+        contentEl.classList.remove('hidden');
+    } catch (error) {
+        console.error('切换新闻分类失败:', error);
+        loadingEl.innerHTML = '<i class="fas fa-exclamation-circle"></i> 加载失败，点击刷新重试';
+        loadingEl.onclick = () => switchNewsCategory(category);
+        loadingEl.style.cursor = 'pointer';
+    }
 }
 
 // 渲染当前选中分类的新闻列表
@@ -2902,8 +3058,8 @@ function renderCurrentNewsList() {
         return;
     }
     
-    container.innerHTML = newsList.map(item => 
-        '<li class="news-item" onclick="openNewsLink(\'' + item.title + '\')">' +
+    container.innerHTML = newsList.slice(0, 8).map((item, index) => 
+        '<li class="news-item" onclick="openNewsLink(' + index + ')">' +
         '<div class="news-item-title">' + item.title + '</div>' +
         '<div class="news-item-meta">' +
         '<span class="news-item-source">' + item.source + '</span>' +
@@ -2914,10 +3070,18 @@ function renderCurrentNewsList() {
 }
 
 // 打开新闻链接（在新标签页）
-function openNewsLink(title) {
-    // 由于是模拟数据，这里跳转到搜索页面
-    const searchUrl = 'https://www.baidu.com/s?wd=' + encodeURIComponent(title);
-    window.open(searchUrl, '_blank');
+function openNewsLink(index) {
+    const newsList = newsData[currentNewsCategory] || [];
+    const item = newsList[index];
+    
+    if (item && item.url) {
+        // 使用API返回的真实URL
+        window.open(item.url, '_blank');
+    } else {
+        // 如果没有URL，跳转到搜索页面
+        const searchUrl = 'https://www.baidu.com/s?wd=' + encodeURIComponent(item.title);
+        window.open(searchUrl, '_blank');
+    }
 }
 
 // 刷新新闻
@@ -3284,4 +3448,494 @@ function renderRecordsList(records) {
             </div>
         </div>
     `).join('');
+}
+
+// ==================== 快速记账相关变量 ====================
+let pendingQuickAccounting = null;
+
+// 解析快速记账输入
+function parseQuickAccountingInput(text) {
+    text = text.trim();
+    if (!text) return null;
+    
+    const amountMatch = text.match(/(\d+\.?\d*)/);
+    if (!amountMatch) return null;
+    
+    const amount = parseFloat(amountMatch[1]);
+    if (isNaN(amount) || amount <= 0) return null;
+    
+    let detail = text.replace(amountMatch[1], '').trim();
+    if (!detail) detail = '其他';
+    
+    let type = 'expense';
+    const incomeKeywords = ['工资', '奖金', '理财', '收益', '退款', '报销'];
+    for (const keyword of incomeKeywords) {
+        if (text.includes(keyword)) {
+            type = 'income';
+            break;
+        }
+    }
+    
+    let category = null;
+    const categories = type === 'income' ? incomeCategories : expenseCategories;
+    
+    for (const [cat, keywords] of Object.entries(categoryKeywords)) {
+        if (categories.includes(cat)) {
+            for (const keyword of keywords) {
+                if (detail.includes(keyword)) {
+                    category = cat;
+                    break;
+                }
+            }
+            if (category) break;
+        }
+    }
+    
+    if (!category) {
+        category = categories[0];
+    }
+    
+    return {
+        type,
+        category,
+        detail,
+        amount,
+        customTime: null
+    };
+}
+
+// 处理快速记账输入回车
+function handleAccountingQuickInput(event) {
+    if (event.key === 'Enter') {
+        event.preventDefault();
+        addQuickAccounting();
+    }
+}
+
+// 添加快速记账
+function addQuickAccounting() {
+    const input = document.getElementById('accounting-quick-input');
+    const text = input.value.trim();
+    
+    if (!text) return;
+    
+    const parsed = parseQuickAccountingInput(text);
+    if (!parsed) {
+        alert('请输入有效的记账内容，例如：午餐35');
+        return;
+    }
+    
+    showQuickAccountingModal(parsed);
+    input.value = '';
+}
+
+// 显示快速记账确认弹窗
+function showQuickAccountingModal(data) {
+    const modal = document.getElementById('quick-accounting-modal');
+    const timeInput = document.getElementById('qa-confirm-time');
+    const categorySelect = document.getElementById('qa-confirm-category');
+    const detailInput = document.getElementById('qa-confirm-detail');
+    const amountInput = document.getElementById('qa-confirm-amount');
+    
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    timeInput.value = `${year}-${month}-${day}T${hours}:${minutes}`;
+    
+    timeInput.onchange = function() {
+        if (pendingQuickAccounting) {
+            pendingQuickAccounting.customTime = this.value;
+        }
+    };
+    
+    const categories = data.type === 'income' ? incomeCategories : expenseCategories;
+    categorySelect.innerHTML = categories.map(cat => 
+        `<option value="${cat}" ${cat === data.category ? 'selected' : ''}>${cat}</option>`
+    ).join('');
+    
+    categorySelect.onchange = function() {
+        if (pendingQuickAccounting) {
+            pendingQuickAccounting.category = this.value;
+        }
+    };
+    
+    const typeExpenseBtn = document.getElementById('qa-confirm-type-expense');
+    const typeIncomeBtn = document.getElementById('qa-confirm-type-income');
+    
+    if (data.type === 'expense') {
+        typeExpenseBtn.classList.add('active');
+        typeIncomeBtn.classList.remove('active');
+    } else {
+        typeIncomeBtn.classList.add('active');
+        typeExpenseBtn.classList.remove('active');
+    }
+    
+    detailInput.value = data.detail;
+    amountInput.value = data.amount.toFixed(2);
+    
+    pendingQuickAccounting = {
+        ...data
+    };
+    
+    const titleElement = modal.querySelector('.modal-header h3');
+    if (titleElement) {
+        titleElement.textContent = '确认记账';
+    }
+    
+    const confirmBtn = modal.querySelector('.btn-confirm');
+    if (confirmBtn) {
+        const btnSpan = confirmBtn.querySelector('span');
+        if (btnSpan) {
+            btnSpan.textContent = '确认添加';
+        }
+    }
+    modal.classList.remove('hidden');
+    modal.setAttribute('tabindex', '0');
+    modal.focus();
+    
+    // 添加键盘事件监听 - 支持Enter提交
+    modal.removeEventListener('keydown', handleEnterKeyForQuickAccounting);
+    modal.addEventListener('keydown', handleEnterKeyForQuickAccounting);
+    
+    if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
+    }
+}
+
+// 关闭快速记账确认弹窗
+function closeQuickAccountingModal() {
+    const modal = document.getElementById('quick-accounting-modal');
+    modal.classList.add('hidden');
+    pendingQuickAccounting = null;
+    window.editingAccountId = null;
+}
+
+// 处理快速记账弹窗中的回车键
+function handleEnterKeyForQuickAccounting(event) {
+    if (event.key === 'Enter') {
+        event.preventDefault();
+        confirmQuickAccounting();
+    }
+}
+
+// 选择快速记账弹窗中的类型
+function selectQuickConfirmType(type) {
+    const typeExpenseBtn = document.getElementById('qa-confirm-type-expense');
+    const typeIncomeBtn = document.getElementById('qa-confirm-type-income');
+    
+    if (type === 'expense') {
+        typeExpenseBtn.classList.add('active');
+        typeIncomeBtn.classList.remove('active');
+    } else {
+        typeIncomeBtn.classList.add('active');
+        typeExpenseBtn.classList.remove('active');
+    }
+    
+    const categorySelect = document.getElementById('qa-confirm-category');
+    const categories = type === 'income' ? incomeCategories : expenseCategories;
+    const currentCategory = categorySelect.value;
+    
+    categorySelect.innerHTML = categories.map(cat => 
+        `<option value="${cat}">${cat}</option>`
+    ).join('');
+    
+    if (categories.includes(currentCategory)) {
+        categorySelect.value = currentCategory;
+    }
+    
+    if (pendingQuickAccounting) {
+        pendingQuickAccounting.type = type;
+        pendingQuickAccounting.category = categorySelect.value;
+    }
+}
+
+// 确认快速记账
+function confirmQuickAccounting() {
+    const timeInput = document.getElementById('qa-confirm-time');
+    const categorySelect = document.getElementById('qa-confirm-category');
+    const detailInput = document.getElementById('qa-confirm-detail');
+    const amountInput = document.getElementById('qa-confirm-amount');
+    
+    const amount = parseFloat(amountInput.value);
+    if (isNaN(amount) || amount <= 0) {
+        alert('请输入有效的金额');
+        return;
+    }
+    
+    if (window.editingAccountId) {
+        // 编辑模式
+        const record = accountingData.records.find(r => r.id === window.editingAccountId);
+        if (record) {
+            const typeExpenseBtn = document.getElementById('qa-confirm-type-expense');
+            const isExpense = typeExpenseBtn.classList.contains('active');
+            
+            record.type = isExpense ? 'expense' : 'income';
+            record.category = categorySelect.value;
+            record.note = detailInput.value.trim() || '无备注';
+            record.amount = amount;
+            record.date = timeInput.value ? new Date(timeInput.value).toISOString() : new Date().toISOString();
+            
+            saveAccountingData();
+            updateAccountingSummary();
+            renderRecentRecords();
+            
+            closeQuickAccountingModal();
+            showToast('修改成功！');
+        }
+    } else {
+        // 添加模式
+        if (!pendingQuickAccounting) return;
+        
+        const record = {
+            id: Date.now(),
+            type: pendingQuickAccounting.type,
+            category: categorySelect.value,
+            note: detailInput.value.trim() || '无备注',
+            amount: amount,
+            date: timeInput.value ? new Date(timeInput.value).toISOString() : new Date().toISOString()
+        };
+        
+        accountingData.records.unshift(record);
+        saveAccountingData();
+        
+        updateAccountingSummary();
+        renderRecentRecords();
+        
+        closeQuickAccountingModal();
+        showToast('记账成功！');
+    }
+}
+
+// 显示通知提示
+function showNotification(message) {
+    const notification = document.createElement('div');
+    notification.className = 'notification';
+    notification.textContent = message;
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: #27ae60;
+        color: white;
+        padding: 12px 24px;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        z-index: 10000;
+        animation: slideIn 0.3s ease;
+    `;
+    
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        notification.remove();
+    }, 2000);
+}
+
+// 确保收入分类选中时显示绿色背景
+function ensureIncomeCategoryGreenBackground() {
+    const container = document.getElementById('accounting-categories');
+    if (!container) return;
+    
+    const activeBtns = container.querySelectorAll('.category-item.active');
+    activeBtns.forEach(btn => {
+        const btnText = btn.textContent || btn.innerText;
+        if (container.classList.contains('income-mode')) {
+            btn.style.setProperty('background', '#27ae60', 'important');
+            btn.style.setProperty('background-color', '#27ae60', 'important');
+            btn.style.setProperty('color', 'white', 'important');
+        }
+    });
+}
+
+// 使用MutationObserver监听DOM变化
+const observer = new MutationObserver(() => {
+    ensureIncomeCategoryGreenBackground();
+});
+
+// 开始观察整个document
+observer.observe(document.body, {
+    childList: true,
+    subtree: true
+});
+
+// 页面加载完成后立即执行一次
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', ensureIncomeCategoryGreenBackground);
+} else {
+    ensureIncomeCategoryGreenBackground();
+}
+
+// 定时检查（每100ms）
+setInterval(ensureIncomeCategoryGreenBackground, 100);
+
+// 强制修复收入分类背景色 - 调试版本
+function forceFixIncomeCategoryBackground() {
+    const container = document.getElementById('accounting-categories');
+    if (!container) {
+        console.log('Container not found!');
+        return;
+    }
+    
+    console.log('Container classes:', container.classList.toString());
+    console.log('Has income-mode:', container.classList.contains('income-mode'));
+    
+    const activeBtns = container.querySelectorAll('.category-item.active');
+    console.log('Active buttons found:', activeBtns.length);
+    
+    activeBtns.forEach((btn, index) => {
+        console.log(`Button ${index} classes:`, btn.classList.toString());
+        console.log(`Button ${index} current background:`, window.getComputedStyle(btn).backgroundColor);
+        
+        if (container.classList.contains('income-mode')) {
+            console.log(`Setting button ${index} to green...`);
+            btn.style.setProperty('background', '#27ae60', 'important');
+            btn.style.setProperty('background-color', '#27ae60', 'important');
+            btn.style.background = '#27ae60';
+            btn.style.backgroundColor = '#27ae60';
+            console.log(`Button ${index} new background:`, window.getComputedStyle(btn).backgroundColor);
+        }
+    });
+}
+
+// 暴露到全局作用域以便在控制台调用
+window.debugIncomeCategory = forceFixIncomeCategoryBackground;
+window.fixIncomeCategory = forceFixIncomeCategoryBackground;
+
+console.log('Debug function loaded! Call window.fixIncomeCategory() in console to test');
+
+const HD2026 = {
+    '2026-01-01':{n:'元旦',r:'01-01至01-03'},'2026-01-02':{n:'元旦',r:'01-01至01-03'},'2026-01-03':{n:'元旦',r:'01-01至01-03'},
+    '2026-02-15':{n:'春节',r:'02-15至02-21'},'2026-02-16':{n:'春节',r:'02-15至02-21'},'2026-02-17':{n:'春节',r:'02-15至02-21'},'2026-02-18':{n:'春节',r:'02-15至02-21'},'2026-02-19':{n:'春节',r:'02-15至02-21'},'2026-02-20':{n:'春节',r:'02-15至02-21'},'2026-02-21':{n:'春节',r:'02-15至02-21'},
+    '2026-04-04':{n:'清明',r:'04-04至04-06'},'2026-04-05':{n:'清明',r:'04-04至04-06'},'2026-04-06':{n:'清明',r:'04-04至04-06'},
+    '2026-05-01':{n:'劳动节',r:'05-01至05-05'},'2026-05-02':{n:'劳动节',r:'05-01至05-05'},'2026-05-03':{n:'劳动节',r:'05-01至05-05'},'2026-05-04':{n:'劳动节',r:'05-01至05-05'},'2026-05-05':{n:'劳动节',r:'05-01至05-05'},
+    '2026-06-19':{n:'端午',r:'06-19至06-21'},'2026-06-20':{n:'端午',r:'06-19至06-21'},'2026-06-21':{n:'端午',r:'06-19至06-21'},
+    '2026-09-25':{n:'中秋',r:'09-25至09-27'},'2026-09-26':{n:'中秋',r:'09-25至09-27'},'2026-09-27':{n:'中秋',r:'09-25至09-27'},
+    '2026-10-01':{n:'国庆节',r:'10-01至10-07'},'2026-10-02':{n:'国庆节',r:'10-01至10-07'},'2026-10-03':{n:'国庆节',r:'10-01至10-07'},'2026-10-04':{n:'国庆节',r:'10-01至10-07'},'2026-10-05':{n:'国庆节',r:'10-01至10-07'},'2026-10-06':{n:'国庆节',r:'10-01至10-07'},'2026-10-07':{n:'国庆节',r:'10-01至10-07'}
+};
+const MD2026 = {'2026-01-04':'元旦补班','2026-02-14':'春节补班','2026-02-22':'春节补班','2026-04-12':'清明补班','2026-05-09':'五一补班','2026-09-27':'中秋补班','2026-10-10':'国庆补班'};
+let curHMonth = new Date();
+
+function openHolidayModal(){
+    const m=document.getElementById('holiday-calendar-modal');
+    if(m){
+        m.classList.remove('hidden');
+        m.classList.add('active');
+        curHMonth=new Date();
+        RHCal();
+    }
+}
+function closeHolidayModal(){
+    const m=document.getElementById('holiday-calendar-modal');
+    if(m){
+        m.classList.add('hidden');
+        m.classList.remove('active');
+    }
+}
+function changeHolidayMonth(d){
+    curHMonth.setMonth(curHMonth.getMonth()+d);
+    RHCal();
+}
+function RHCal(){
+    console.log('[DEBUG] RHCal called');
+    const g=document.getElementById('holiday-calendar');
+    const l=document.getElementById('holiday-calendar-month');
+    if(!g)return;
+    const y=curHMonth.getFullYear();
+    const mo=curHMonth.getMonth();
+    if(l)l.textContent=y+'年'+(mo+1)+'月';
+    const fd=new Date(y,mo,1);
+    const ld=new Date(y,mo+1,0);
+    const sd=fd.getDay();
+    const days=ld.getDate();
+    
+    g.innerHTML='';
+    
+    // 生成空白格子
+    for(let i=0;i<sd;i++){
+        const div=document.createElement('div');
+        div.className='holiday-day empty';
+        div.style.cssText='width: 90px; height: 65px; display: flex; flex-direction: column; justify-content: center; align-items: center; border-radius: 10px; font-size: 12px; background: transparent; box-shadow: none; cursor: default;';
+        g.appendChild(div);
+    }
+    
+    // 生成日期格子
+    for(let d=1;d<=days;d++){
+        const ds=y+'-'+String(mo+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
+        const hd=HD2026[ds];
+        const md=MD2026[ds];
+        const iw=new Date(y,mo,d).getDay()===0||new Date(y,mo,d).getDay()===6;
+        
+        const div=document.createElement('div');
+        let cls='holiday-day';
+        if(hd){
+            cls+=' holiday';
+        }else if(md){
+            cls+=' makeup';
+        }else if(iw){
+            cls+=' weekend';
+        }
+        div.className=cls;
+        
+        // 基础样式
+        let styles='width: 90px; height: 65px; display: flex; flex-direction: column; justify-content: center; align-items: center; border-radius: 10px; font-size: 12px; cursor: pointer; position: relative; background: var(--bg-color); padding: 4px; box-shadow: var(--neu-shadow-sm); transition: all 0.3s ease;';
+        
+        // 假期/补班背景色
+        if(hd){
+            styles+=' background: rgba(72, 187, 120, 0.2);';
+        }else if(md){
+            styles+=' background: rgba(236, 201, 75, 0.2);';
+        }
+        
+        div.style.cssText=styles;
+        
+        // 日期数字
+        const numSpan=document.createElement('span');
+        numSpan.className='holiday-day-num';
+        numSpan.style.cssText='font-weight: bold; z-index: 1; position: relative;';
+        numSpan.textContent=d;
+        div.appendChild(numSpan);
+        
+        // 假期/补班标签
+        if(hd||md){
+            const label=document.createElement('span');
+            label.className='holiday-day-label';
+            label.style.cssText='font-size: 9px; padding: 2px 4px; border-radius: 3px; margin-top: 2px; font-weight: 600; z-index: 1; position: relative;';
+            label.style.background=hd ? 'rgba(72, 187, 120, 0.3)' : 'rgba(236, 201, 75, 0.3)';
+            label.textContent=hd?'假':'班';
+            div.appendChild(label);
+        }
+        
+        div.onclick=function(){showHInfo(ds)};
+        g.appendChild(div);
+    }
+}
+function showHInfo(ds){
+    const d=new Date(ds);
+    const wd=['周日','周一','周二','周三','周四','周五','周六'][d.getDay()];
+    const hd=HD2026[ds];
+    const md=MD2026[ds];
+    const iw=d.getDay()===0||d.getDay()===6;
+    
+    const infoDiv=document.getElementById('holiday-day-info');
+    if(!infoDiv)return;
+    
+    let html=`<div class="info-date">${ds} ${wd}</div>`;
+    html+='<div class="info-content">';
+    
+    if(hd){
+        html+=`<div class="info-holiday">${hd.n}</div>`;
+        html+=`<div>放假时间：${hd.r}</div>`;
+    }else if(md){
+        html+=`<div class="info-makeup">${md}</div>`;
+    }else if(iw){
+        html+=`<div class="info-weekend">正常休息</div>`;
+    }else{
+        html+=`<div class="info-workday">正常上班</div>`;
+    }
+    
+    html+='</div>';
+    infoDiv.innerHTML=html;
 }

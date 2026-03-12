@@ -119,21 +119,21 @@
             transform: translateY(-50%);
             background: none;
             border: none;
-            color: #9f7aea;
+            color: var(--text-light);
             cursor: pointer;
             font-size: 18px;
             padding: 0;
         }
 
         .password-toggle:hover {
-            color: #9f7aea;
+            color: var(--primary-color);
         }
         }
 
         .form-actions {
             display: flex;
             align-items: center;
-            margin-bottom: 24px;
+            margin-bottom: 40px;
         }
 
         .agree-terms {
@@ -159,13 +159,13 @@
         }
 
         .agree-terms input[type="checkbox"]:checked {
-            background: var(--primary-color);
+            background: transparent;
         }
 
         .agree-terms input[type="checkbox"]:checked::after {
             content: '✓';
             position: absolute;
-            color: white;
+            color: #6b7fff;
             font-size: 14px;
             top: 50%;
             left: 50%;
