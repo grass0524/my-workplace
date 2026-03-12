@@ -564,42 +564,77 @@ let currentWord = {};
 let myVocab = [];
 
 async function initWord() {
-    // 从localStorage加载词库
-    const savedLibrary = localStorage.getItem('vocabLibrary');
-    if (savedLibrary) {
-        const parsedLibrary = JSON.parse(savedLibrary);
-        // 合并到当前词库，避免重复
-        const existingWords = new Set(vocabLibrary.map(w => w.word.toLowerCase()));
-        parsedLibrary.forEach(item => {
-            if (!existingWords.has(item.word.toLowerCase())) {
-                vocabLibrary.push(item);
+    try {
+        console.log('[initWord] 开始初始化今日单词');
+        
+        // 从localStorage加载词库
+        const savedLibrary = localStorage.getItem('vocabLibrary');
+        if (savedLibrary) {
+            try {
+                const parsedLibrary = JSON.parse(savedLibrary);
+                // 合并到当前词库，避免重复
+                const existingWords = new Set(vocabLibrary.map(w => w.word.toLowerCase()));
+                parsedLibrary.forEach(item => {
+                    if (!existingWords.has(item.word.toLowerCase())) {
+                        vocabLibrary.push(item);
+                    }
+                });
+                console.log('[initWord] 已加载词库，共', vocabLibrary.length, '个单词');
+            } catch (e) {
+                console.error('[initWord] 解析词库失败:', e);
             }
-        });
-    }
-
-    // 随机选一个 (实际应用按日期 Hash 选择)
-    const index = Math.floor(Math.random() * vocabLibrary.length);
-    currentWord = vocabLibrary[index];
-
-    // 如果音标为空，从字典API获取
-    if (!currentWord.phonetic || currentWord.phonetic.trim() === '') {
-        const fetchedPhonetic = await fetchPhoneticFromDictionary(currentWord.word);
-        if (fetchedPhonetic) {
-            currentWord.phonetic = fetchedPhonetic;
-            // 更新vocabLibrary中的音标
-            vocabLibrary[index].phonetic = fetchedPhonetic;
-            // 保存到localStorage
-            localStorage.setItem('vocabLibrary', JSON.stringify(vocabLibrary));
         }
+
+        // 检查词库是否为空
+        if (!vocabLibrary || vocabLibrary.length === 0) {
+            console.warn('[initWord] 词库为空，使用默认单词');
+            currentWord = { word: 'Welcome', phonetic: '/ˈwelkəm/', meaning: 'n. 欢迎' };
+        } else {
+            // 随机选一个 (实际应用按日期 Hash 选择)
+            const index = Math.floor(Math.random() * vocabLibrary.length);
+            currentWord = vocabLibrary[index];
+            console.log('[initWord] 选择单词:', currentWord.word);
+
+            // 如果音标为空，从字典API获取（带超时）
+            if (!currentWord.phonetic || currentWord.phonetic.trim() === '') {
+                console.log('[initWord] 获取音标:', currentWord.word);
+                const fetchedPhonetic = await fetchPhoneticFromDictionary(currentWord.word);
+                if (fetchedPhonetic) {
+                    currentWord.phonetic = fetchedPhonetic;
+                    // 更新vocabLibrary中的音标
+                    vocabLibrary[index].phonetic = fetchedPhonetic;
+                    // 保存到localStorage
+                    localStorage.setItem('vocabLibrary', JSON.stringify(vocabLibrary));
+                } else {
+                    // 如果API失败，使用默认音标
+                    currentWord.phonetic = '/ ... /';
+                }
+            }
+        }
+
+        // 更新UI
+        document.getElementById('word-spelling').textContent = currentWord.word;
+        document.getElementById('word-phonetic').textContent = currentWord.phonetic;
+        document.getElementById('word-meaning').textContent = currentWord.meaning;
+        console.log('[initWord] 初始化完成');
+
+        // Load vocab book
+        const saved = localStorage.getItem('myVocab');
+        if (saved) {
+            try {
+                myVocab = JSON.parse(saved);
+            } catch (e) {
+                console.error('[initWord] 解析生词本失败:', e);
+                myVocab = [];
+            }
+        }
+    } catch (error) {
+        console.error('[initWord] 初始化失败:', error);
+        // 显示默认单词
+        document.getElementById('word-spelling').textContent = 'Error';
+        document.getElementById('word-phonetic').textContent = '/ ... /';
+        document.getElementById('word-meaning').textContent = '加载失败，请刷新页面';
     }
-
-    document.getElementById('word-spelling').textContent = currentWord.word;
-    document.getElementById('word-phonetic').textContent = currentWord.phonetic;
-    document.getElementById('word-meaning').textContent = currentWord.meaning;
-
-    // Load vocab book
-    const saved = localStorage.getItem('myVocab');
-    if (saved) myVocab = JSON.parse(saved);
 }
 
 function playWordAudio() {
@@ -1274,10 +1309,21 @@ function closeConfirmModal(confirmed) {
 // 从字典API获取音标
 async function fetchPhoneticFromDictionary(word) {
     try {
-        const response = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${word}`);
+        // 添加超时控制（3秒）
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 3000);
+        
+        const response = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${word}`, {
+            signal: controller.signal
+        });
+        
+        clearTimeout(timeoutId);
+        
         if (!response.ok) {
+            console.warn(`获取${word}音标: HTTP ${response.status}`);
             return '';
         }
+        
         const data = await response.json();
         if (data && data.length > 0 && data[0].phonetics) {
             // 优先使用有文本的音标
@@ -1288,7 +1334,11 @@ async function fetchPhoneticFromDictionary(word) {
         }
         return '';
     } catch (error) {
-        console.warn(`获取${word}音标失败:`, error);
+        if (error.name === 'AbortError') {
+            console.warn(`获取${word}音标超时，跳过`);
+        } else {
+            console.warn(`获取${word}音标失败:`, error);
+        }
         return '';
     }
 }
