@@ -3853,6 +3853,12 @@ function RHCal(){
     const sd=fd.getDay();
     const days=ld.getDate();
     
+    // 获取今天的日期
+    const today=new Date();
+    const todayY=today.getFullYear();
+    const todayM=today.getMonth();
+    const todayD=today.getDate();
+    
     g.innerHTML='';
     
     // 生成空白格子
@@ -3893,6 +3899,13 @@ function RHCal(){
         
         div.style.cssText=styles;
         
+        // 今天日期右上角的紫色小点
+        if(y===todayY && mo===todayM && d===todayD){
+            const dot=document.createElement('span');
+            dot.style.cssText='position:absolute;top:6px;right:6px;width:8px;height:8px;border-radius:50%;background:#9f7aea;';
+            div.appendChild(dot);
+        }
+        
         // 日期数字
         const numSpan=document.createElement('span');
         numSpan.className='holiday-day-num';
@@ -3913,36 +3926,6 @@ function RHCal(){
         g.appendChild(div);
     }
     showMonthHolidays();
-}
-function showHInfo(ds){
-    console.log('[DEBUG] showHInfo called for:', ds);
-    const d=new Date(ds);
-    const wd=['周日','周一','周二','周三','周四','周五','周六'][d.getDay()];
-    const hd=HD2026[ds];
-    const md=MD2026[ds];
-    const iw=d.getDay()===0||d.getDay()===6;
-    
-    const infoDiv=document.getElementById('holiday-day-info');
-    console.log('[DEBUG] infoDiv found:', !!infoDiv);
-    if(!infoDiv)return;
-    
-    let html=`<div class="info-date">${ds} ${wd}</div>`;
-    html+='<div class="info-content">';
-    
-    if(hd){
-        html+=`<div class="info-holiday">${hd.n}</div>`;
-        html+=`<div>放假时间：${hd.r}</div>`;
-    }else if(md){
-        html+=`<div class="info-makeup">${md}</div>`;
-    }else if(iw){
-        html+='<div class="info-weekend">正常休息</div>';
-    }else{
-        html+='<div class="info-workday">正常上班</div>';
-    }
-    
-    html+='</div>';
-    console.log('[DEBUG] Setting innerHTML');
-    infoDiv.innerHTML=html;
 }
 function showMonthHolidays(){
     console.log('[DEBUG] showMonthHolidays called');
