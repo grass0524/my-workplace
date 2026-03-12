@@ -1,0 +1,5 @@
+{
+  "url": "https://your-project-id.supabase.co",
+  "key": "your-anon-public-key-here",
+  "instructions": "复制此文件为 supabase.json 并填入你的 Supabase 项目凭证"
+}

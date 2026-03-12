@@ -359,6 +359,99 @@ input[type="number"] {
         margin-left: auto !important;
         margin-right: -10px !important;
     }
+
+/* 认证状态栏样式 */
+.auth-status-bar,
+.auth-login-bar {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+.sync-status {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: 8px;
+    background: var(--card-bg);
+    box-shadow:
+        inset 3px 3px 6px var(--shadow-dark),
+        inset -3px -3px 6px var(--shadow-light);
+    font-size: 13px;
+    color: var(--text-secondary);
+}
+.sync-icon {
+    color: #48bb78;
+}
+.sync-status.syncing .sync-icon {
+    animation: spin 1s linear infinite;
+}
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+.sync-status.error .sync-icon {
+    color: #e74c3c;
+}
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.user-email {
+    font-size: 14px;
+    color: var(--text-secondary);
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.btn-logout {
+    width: 36px;
+    height: 36px;
+    border: none;
+    border-radius: 8px;
+    background: var(--card-bg);
+    box-shadow:
+        inset 3px 3px 6px var(--shadow-dark),
+        inset -3px -3px 6px var(--shadow-light);
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.btn-logout:hover {
+    color: #e74c3c;
+    transform: translateY(-1px);
+    box-shadow:
+        2px 2px 4px var(--shadow-dark),
+        -2px -2px 4px var(--shadow-light);
+}
+.btn-login-main {
+    padding: 8px 20px;
+    border: none;
+    border-radius: 8px;
+    background: var(--primary-color);
+    box-shadow:
+        4px 4px 8px var(--shadow-dark),
+        -4px -4px 8px var(--shadow-light);
+    color: white;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.btn-login-main:hover {
+    transform: translateY(-2px);
+    box-shadow:
+        2px 2px 4px var(--shadow-dark),
+        -2px -2px 4px var(--shadow-light);
+}
 </style>
 <style>
 /* ==================== 记账模块 - 完整pencil设计样式 ==================== */
@@ -1417,9 +1510,32 @@ input[type="number"] {
 }</style>
 </head>
 <body>
-        <header class="header">
-            <h1>My Workplace</h1>
-            <div class="date-info" id="current-date"></div>
+        <header class="header" style="display: flex; justify-content: space-between; align-items: center;">
+            <div class="header-left">
+                <h1>My Workplace</h1>
+                <div class="date-info" id="current-date"></div>
+            </div>
+            <div class="header-right">
+                <!-- 已登录状态 -->
+                <div class="auth-status-bar" id="auth-status-bar" style="display: none;">
+                    <div class="sync-status" id="sync-status">
+                        <i class="fas fa-cloud sync-icon"></i>
+                        <span class="sync-text">已同步</span>
+                    </div>
+                    <div class="user-info">
+                        <span class="user-email" id="user-email"></span>
+                        <button class="btn-logout" onclick="handleLogout()" title="登出">
+                            <i class="fas fa-sign-out-alt"></i>
+                        </button>
+                    </div>
+                </div>
+                <!-- 未登录状态 -->
+                <div class="auth-login-bar" id="auth-login-bar">
+                    <button class="btn-login-main" onclick="window.location.href='login.html'">
+                        <i class="fas fa-sign-in-alt"></i> 登录
+                    </button>
+                </div>
+            </div>
         </header>
 
         <!-- 每日一言 -->
@@ -2117,5 +2233,142 @@ function testQuickAccounting() {
     </div>
 </div>
 
+    <!-- Supabase SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- 认证模块 -->
+    <script src="js/auth.js"></script>
+    <!-- 数据同步模块 -->
+    <script src="js/sync.js"></script>
+    <!-- 认证UI逻辑 -->
+    <script>
+        let dataSync = null;
+
+        // 初始化认证和同步
+        async function initAuthAndSync() {
+            console.log('[AuthUI] 初始化认证和同步');
+            
+            // 初始化认证
+            const authResult = await initAuth();
+            if (authResult.error) {
+                console.error('[AuthUI] 认证初始化失败:', authResult.error);
+                updateAuthUI();
+                return;
+            }
+
+            // 更新UI
+            updateAuthUI();
+
+            // 如果已登录，初始化同步
+            if (window.auth.isAuthenticated()) {
+                console.log('[AuthUI] 用户已登录，初始化同步');
+                dataSync = await initDataSync();
+                setupSyncListeners();
+                
+                // 首次同步
+                if (dataSync) {
+                    updateSyncStatus('同步中...');
+                    await dataSync.syncAll();
+                }
+            }
+
+            // 监听登录/登出事件
+            window.auth.onLogin(async (user) => {
+                console.log('[AuthUI] 用户已登录:', user);
+                updateAuthUI();
+                dataSync = await initDataSync();
+                setupSyncListeners();
+                
+                // 登录后同步数据
+                if (dataSync) {
+                    updateSyncStatus('同步中...');
+                    await dataSync.syncAll();
+                }
+            });
+
+            window.auth.onLogout(() => {
+                console.log('[AuthUI] 用户已登出');
+                updateAuthUI();
+                if (dataSync) {
+                    dataSync.stopAutoSync();
+                }
+            });
+        }
+
+        // 更新认证UI
+        function updateAuthUI() {
+            const statusBar = document.getElementById('auth-status-bar');
+            const loginBar = document.getElementById('auth-login-bar');
+            const userEmail = document.getElementById('user-email');
+
+            if (window.auth.isAuthenticated()) {
+                const user = window.auth.getCurrentUser();
+                if (userEmail) userEmail.textContent = user.email;
+                if (statusBar) statusBar.style.display = 'flex';
+                if (loginBar) loginBar.style.display = 'none';
+            } else {
+                if (statusBar) statusBar.style.display = 'none';
+                if (loginBar) loginBar.style.display = 'flex';
+            }
+        }
+
+        // 设置同步监听器
+        function setupSyncListeners() {
+            if (!dataSync) return;
+
+            // 监听同步完成事件
+            window.addEventListener('syncComplete', (event) => {
+                updateSyncStatus('已同步');
+                console.log('[AuthUI] 同步完成于:', event.detail.timestamp);
+                
+                // 3秒后隐藏同步状态
+                setTimeout(() => {
+                    updateSyncStatus('已同步');
+                }, 3000);
+            });
+            
+            // 监听网络状态变化
+            window.addEventListener('online', () => {
+                console.log('[AuthUI] 网络已恢复');
+                if (dataSync && window.auth.isAuthenticated()) {
+                    updateSyncStatus('同步中...');
+                    dataSync.syncAll();
+                }
+            });
+            
+            window.addEventListener('offline', () => {
+                console.log('[AuthUI] 网络已断开');
+                updateSyncStatus('离线', false);
+            });
+        }
+
+        // 更新同步状态
+        function updateSyncStatus(status, isError = false) {
+            const syncStatus = document.getElementById('sync-status');
+            if (!syncStatus) return;
+
+            const syncText = syncStatus.querySelector('.sync-text');
+            if (syncText) syncText.textContent = status;
+
+            syncStatus.classList.remove('syncing', 'error');
+            if (status === '同步中...') {
+                syncStatus.classList.add('syncing');
+            } else if (isError) {
+                syncStatus.classList.add('error');
+            }
+        }
+
+        // 登出处理
+        async function handleLogout() {
+            if (confirm('确定要登出吗？未同步的数据可能会丢失。')) {
+                const result = await window.auth.logout();
+                if (!result.error) {
+                    window.location.href = 'login.html';
+                }
+            }
+        }
+
+        // 页面加载时初始化
+        window.addEventListener('DOMContentLoaded', initAuthAndSync);
+    </script>
 </body>
 </html>
