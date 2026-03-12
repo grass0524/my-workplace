@@ -2236,6 +2236,13 @@ function testQuickAccounting() {
     <!-- Supabase SDK -->
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     <!-- 认证模块 -->
+    <script>
+        // 内联Supabase配置（避免file://协议的CORS问题）
+        window.supabaseConfig = {
+            "url": "https://aidajdmocdgecwwmzphm.supabase.co",
+            "key": "sb_publishable_BYAXSI16XDU__PZiGnmsIw_dV6ycGp2"
+        };
+    </script>
     <script src="js/auth.js"></script>
     <!-- 数据同步模块 -->
     <script src="js/sync.js"></script>
