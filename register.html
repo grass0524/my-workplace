@@ -376,7 +376,15 @@
         </p>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+        <script>
+        // 内联Supabase配置（避免file://协议的CORS问题）
+        window.supabaseConfig = {
+  "url": "https://aidajdmocdgecwwmzphm.supabase.co",
+  "key": "sb_publishable_BYAXSI16XDU__PZiGnmsIw_dV6ycGp2"
+}
+;
+    </script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="js/auth.js"></script>
     <script>
         function togglePassword(inputId) {

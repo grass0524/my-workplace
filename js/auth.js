@@ -269,8 +269,15 @@ class Auth {
 // 创建全局认证实例
 const auth = new Auth();
 
-// 从配置文件加载 Supabase 配置
+// 从配置文件或window对象加载 Supabase 配置
 async function loadConfig() {
+    // 优先从window对象读取（支持file://协议）
+    if (window.supabaseConfig) {
+        console.log('[Auth] 使用内联配置');
+        return window.supabaseConfig;
+    }
+
+    // 尝试从配置文件加载
     try {
         const response = await fetch('/config/supabase.json');
         if (!response.ok) {
