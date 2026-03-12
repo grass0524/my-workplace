@@ -445,17 +445,22 @@
 
             try {
                 // 调用注册函数
+                console.log('[Register] 开始注册:', email);
                 const result = await window.auth.register(email, password);
+                console.log('[Register] 注册结果:', result);
 
                 if (result.error) {
+                    console.error('[Register] 注册失败:', result.error);
                     showError(result.error.message);
                 } else {
-                    showSuccess('注册成功！正在跳转到主页...');
+                    // 注册成功
+                    showSuccess('注册成功！正在跳转到登录页面...');
                     setTimeout(() => {
-                        window.location.href = 'index.html';
+                        window.location.href = 'login.html';
                     }, 1500);
                 }
             } catch (error) {
+                console.error('[Register] 注册异常:', error);
                 showError('注册失败：' + error.message);
             } finally {
                 btn.disabled = false;
