@@ -195,6 +195,9 @@ class DataSync {
             const localDataRaw = localStorage.getItem(config.localKey);
             const localData = localDataRaw ? JSON.parse(localDataRaw) : {};
 
+            console.log(`[Sync] ${dataType} - 本地数据:`, localDataRaw ? `(${Array.isArray(localData) ? localData.length : Object.keys(localData).length}项)` : '空');
+            console.log(`[Sync] ${dataType} - 云端数据:`, cloudData ? `(${Array.isArray(cloudData.data) ? cloudData.data.length : Object.keys(cloudData.data || {}).length}项)` : '无');
+
             // 3. 根据合并策略处理数据
             let mergedData;
             let needUpload = false;
@@ -203,10 +206,12 @@ class DataSync {
                 // 云端无数据，直接上传本地数据
                 mergedData = localData;
                 needUpload = true;
+                console.log(`[Sync] ${dataType} - 云端无数据，将上传本地数据`);
             } else if (!localDataRaw) {
                 // 本地无数据，直接使用云端数据
                 mergedData = cloudData.data;
                 this.saveToLocal(config.localKey, mergedData);
+                console.log(`[Sync] ${dataType} - 本地无数据，使用云端数据`);
             } else {
                 // 两边都有数据，需要合并
                 const cloudTimestamp = new Date(cloudData.updated_at).getTime();
@@ -215,15 +220,20 @@ class DataSync {
                 if (config.mergeStrategy === 'append') {
                     // 追加合并策略（用于列表数据）
                     mergedData = this.mergeAppendData(localData, cloudData.data);
+                    // 立即保存合并后的数据到本地
+                    this.saveToLocal(config.localKey, mergedData);
                     needUpload = true;
+                    console.log(`[Sync] ${dataType} - 追加合并，结果: ${Array.isArray(mergedData) ? mergedData.length : Object.keys(mergedData).length}项`);
                 } else if (config.mergeStrategy === 'replace') {
                     // 替换策略（时间戳比较）
                     if (cloudTimestamp > localTimestamp) {
                         mergedData = cloudData.data;
                         this.saveToLocal(config.localKey, mergedData);
+                        console.log(`[Sync] ${dataType} - 云端数据更新，使用云端数据`);
                     } else {
                         mergedData = localData;
                         needUpload = true;
+                        console.log(`[Sync] ${dataType} - 本地数据更新，使用本地数据`);
                     }
                 }
             }
@@ -511,6 +521,9 @@ async function initDataSync() {
         }
 
         console.log('[Sync] 数据同步引擎已就绪');
+
+        // 将 dataSync 实例暴露到全局，供 triggerSync() 使用
+        window.dataSync = dataSync;
     }
 
     return dataSync;

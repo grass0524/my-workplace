@@ -2243,21 +2243,88 @@ function initAccounting() {
 function loadAccountingData() {
     const saved = localStorage.getItem('accountingData');
     if (saved) {
-        accountingData = JSON.parse(saved);
-        // 修复数据类型：如果不是数组，尝试转换
-        if (!Array.isArray(accountingData)) {
-            console.warn('[loadAccountingData] 检测到错误的数据类型，自动修复');
-            if (typeof accountingData === 'object' && accountingData !== null) {
-                const values = Object.values(accountingData);
-                accountingData = values.filter(v => typeof v === 'object' && v !== null && (v.amount || v.income));
-                console.log('[loadAccountingData] 已修复accountingData为数组，共', accountingData.length, '项');
+        const parsed = JSON.parse(saved);
+
+        // 修复数据结构：如果是嵌套数组，提取里面的数据
+        if (Array.isArray(parsed)) {
+            if (parsed.length > 0 && Array.isArray(parsed[0])) {
+                // 嵌套数组：[[{...}, {...}]]，提取内层数组
+                console.warn('[loadAccountingData] 检测到嵌套数组结构，自动修复');
+                accountingData = { records: parsed[0] };
+                console.log('[loadAccountingData] 已修复数据结构，共', accountingData.records.length, '项记录');
+                // 保存修复后的结构
+                saveAccountingData();
+            } else if (parsed.length > 0 && typeof parsed[0] === 'object' && parsed[0].amount) {
+                // 直接是记录数组：[{...}, {...}]，包装成records对象
+                console.warn('[loadAccountingData] 检测到记录数组结构，自动修复');
+                accountingData = { records: parsed };
+                console.log('[loadAccountingData] 已修复数据结构，共', accountingData.records.length, '项记录');
+                // 保存修复后的结构
+                saveAccountingData();
             } else {
-                accountingData = [];
+                accountingData = { records: [] };
             }
+        } else if (typeof parsed === 'object' && parsed !== null) {
+            if (Array.isArray(parsed.records)) {
+                // 正确的结构
+                accountingData = parsed;
+            } else {
+                // 错误的对象结构
+                console.warn('[loadAccountingData] 检测到错误的对象结构，自动修复');
+                const values = Object.values(parsed).filter(v => typeof v === 'object' && v !== null && v.amount);
+                accountingData = { records: values };
+                console.log('[loadAccountingData] 已修复数据结构，共', accountingData.records.length, '项记录');
+                // 保存修复后的结构
+                saveAccountingData();
+            }
+        } else {
+            accountingData = { records: [] };
         }
     }
 }
 
+function loadAccountingData() {
+    const saved = localStorage.getItem('accountingData');
+    if (saved) {
+        const parsed = JSON.parse(saved);
+
+        // 修复数据结构：如果是嵌套数组，提取里面的数据
+        if (Array.isArray(parsed)) {
+            if (parsed.length > 0 && Array.isArray(parsed[0])) {
+                // 嵌套数组：[[{...}, {...}]]，提取内层数组
+                console.warn('[loadAccountingData] 检测到嵌套数组结构，自动修复');
+                accountingData = { records: parsed[0] };
+                console.log('[loadAccountingData] 已修复数据结构，共', accountingData.records.length, '项记录');
+                // 保存修复后的结构
+                saveAccountingData();
+            } else if (parsed.length > 0 && typeof parsed[0] === 'object' && parsed[0].amount) {
+                // 直接是记录数组：[{...}, {...}]，包装成records对象
+                console.warn('[loadAccountingData] 检测到记录数组结构，自动修复');
+                accountingData = { records: parsed };
+                console.log('[loadAccountingData] 已修复数据结构，共', accountingData.records.length, '项记录');
+                // 保存修复后的结构
+                saveAccountingData();
+            } else {
+                accountingData = { records: [] };
+            }
+        } else if (typeof parsed === 'object' && parsed !== null) {
+            if (Array.isArray(parsed.records)) {
+                // 正确的结构
+                accountingData = parsed;
+            } else {
+                // 错误的对象结构
+                console.warn('[loadAccountingData] 检测到错误的对象结构，自动修复');
+                const values = Object.values(parsed).filter(v => typeof v === 'object' && v !== null && v.amount);
+                accountingData = { records: values };
+                console.log('[loadAccountingData] 已修复数据结构，共', accountingData.records.length, '项记录');
+                // 保存修复后的结构
+                saveAccountingData();
+            }
+        } else {
+            accountingData = { records: [] };
+        }
+    }
+}
 // 保存记账数据
 function saveAccountingData() {
     localStorage.setItem('accountingData', JSON.stringify(accountingData));
