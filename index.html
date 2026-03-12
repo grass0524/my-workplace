@@ -2370,7 +2370,7 @@ function testQuickAccounting() {
 
         // 登出处理
         async function handleLogout() {
-            if (confirm('确定要登出吗？未同步的数据可能会丢失。')) {
+            if (await showConfirm('确定要登出吗？未同步的数据可能会丢失。')) {
                 const result = await window.auth.logout();
                 if (!result.error) {
                     window.location.href = 'login.html';

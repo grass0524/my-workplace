@@ -169,8 +169,18 @@ class Auth {
         try {
             console.log('[Auth] 发送密码重置邮件:', email);
 
+            // 检测当前协议，file:// 使用相对路径，http(s):// 使用完整路径
+            let resetUrl;
+            if (window.location.protocol === 'file:') {
+                // file:// 协议，使用相对路径
+                resetUrl = 'reset-password.html';
+            } else {
+                // http:// 或 https://，使用完整路径
+                resetUrl = window.location.origin + '/reset-password.html';
+            }
+
             const { error } = await this.supabase.auth.resetPasswordForEmail(email, {
-                redirectTo: window.location.origin + '/reset-password.html',
+                redirectTo: resetUrl,
             });
 
             if (error) {
@@ -178,7 +188,7 @@ class Auth {
                 return { error };
             }
 
-            console.log('[Auth] 重置邮件发送成功');
+            console.log('[Auth] 重置邮件发送成功，跳转地址:', resetUrl);
             return { error: null };
         } catch (error) {
             console.error('[Auth] 发送重置邮件异常:', error);
