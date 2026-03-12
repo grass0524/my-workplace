@@ -178,6 +178,7 @@ class DataSync {
 
         try {
             const config = this.dataTypes[dataType];
+            this.currentDataType = config.localKey;
 
             // 1. 下载云端数据
             const { data: cloudData, error: downloadError } = await this.downloadData(dataType);
@@ -270,6 +271,32 @@ class DataSync {
      * 追加合并策略：合并两个数据集，去重
      */
     mergeAppendData(localData, cloudData) {
+        // 确保数据类型正确
+        const arrayTypes = ['healthRecords', 'todos', 'accountingData', 'myVocab'];
+        const currentDataType = Object.keys(this.dataTypes).find(key => this.dataTypes[key].localKey === this.currentDataType);
+        
+        // 如果应该是数组但localData不是数组，尝试修复
+        if (arrayTypes.includes(this.currentDataType) && !Array.isArray(localData)) {
+            console.warn('[Sync] localData类型错误，自动修复:', this.currentDataType);
+            if (typeof localData === 'object' && localData !== null) {
+                localData = Object.values(localData).filter(v => typeof v === 'object' && v !== null);
+                console.log('[Sync] 已修复localData为数组，共', localData.length, '项');
+            } else {
+                localData = [];
+            }
+        }
+        
+        // 如果应该是数组但cloudData不是数组，尝试修复
+        if (arrayTypes.includes(this.currentDataType) && !Array.isArray(cloudData)) {
+            console.warn('[Sync] cloudData类型错误，自动修复:', this.currentDataType);
+            if (typeof cloudData === 'object' && cloudData !== null) {
+                cloudData = Object.values(cloudData).filter(v => typeof v === 'object' && v !== null);
+                console.log('[Sync] 已修复cloudData为数组，共', cloudData.length, '项');
+            } else {
+                cloudData = [];
+            }
+        }
+        
         // 处理数组类型数据
         if (Array.isArray(localData) && Array.isArray(cloudData)) {
             // 使用ID去重，如果没有ID则使用整个对象比较
