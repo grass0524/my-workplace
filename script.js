@@ -270,6 +270,18 @@ function initTodos() {
     const saved = localStorage.getItem('todos');
     if (saved) {
         todos = JSON.parse(saved);
+        // 修复数据类型：如果todos不是数组，尝试转换
+        if (!Array.isArray(todos)) {
+            console.warn('[initTodos] 检测到错误的数据类型，自动修复');
+            if (typeof todos === 'object' && todos !== null) {
+                // 提取所有对象类型的值
+                const values = Object.values(todos);
+                todos = values.filter(v => typeof v === 'object' && v !== null && v.text);
+                console.log('[initTodos] 已修复todos为数组，共', todos.length, '项');
+            } else {
+                todos = [];
+            }
+        }
         // 兼容旧数据：如果缺少 date 字段，补全为创建时间或今天
         todos.forEach(todo => {
             if (!todo.date) {
@@ -2227,6 +2239,17 @@ function loadAccountingData() {
     const saved = localStorage.getItem('accountingData');
     if (saved) {
         accountingData = JSON.parse(saved);
+        // 修复数据类型：如果不是数组，尝试转换
+        if (!Array.isArray(accountingData)) {
+            console.warn('[loadAccountingData] 检测到错误的数据类型，自动修复');
+            if (typeof accountingData === 'object' && accountingData !== null) {
+                const values = Object.values(accountingData);
+                accountingData = values.filter(v => typeof v === 'object' && v !== null && (v.amount || v.income));
+                console.log('[loadAccountingData] 已修复accountingData为数组，共', accountingData.length, '项');
+            } else {
+                accountingData = [];
+            }
+        }
     }
 }
 
