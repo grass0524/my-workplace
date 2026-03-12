@@ -8,7 +8,7 @@ class DataSync {
         this.auth = auth;
         this.supabase = null;
         this.isSyncing = false;
-        this.syncInterval = 30000; // 30秒自动同步一次
+        this.syncInterval = 300000; // 5分钟自动同步一次
         this.syncTimer = null;
         this.offlineQueue = []; // 离线操作队列
         this.lastSyncTime = null;
@@ -61,6 +61,9 @@ class DataSync {
         // 监听在线状态
         window.addEventListener('online', () => this.handleOnline());
         window.addEventListener('offline', () => this.handleOffline());
+
+        this.isReady = true; // 标记同步引擎已准备就绪
+        console.log('[Sync] 同步引擎已就绪');
 
         return true;
     }

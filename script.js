@@ -324,6 +324,7 @@ function addTodo() {
     input.value = '';
     saveTodos();
     renderTodos();
+    triggerSync();
 }
 
 function toggleTodo(id) {
@@ -334,6 +335,7 @@ function toggleTodo(id) {
         todos.sort((a, b) => a.completed - b.completed || b.id - a.id);
         saveTodos();
         renderTodos();
+        triggerSync();
     }
 }
 
@@ -341,6 +343,7 @@ function deleteTodo(id) {
     todos = todos.filter(t => t.id !== id);
     saveTodos();
     renderTodos();
+    triggerSync();
 }
 
 function editTodo(id) {
@@ -369,6 +372,7 @@ function saveTodoEdit(id) {
         todo.text = newText;
         saveTodos();
         renderTodos();
+        triggerSync();
         showToast('任务已更新');
     }
 }
@@ -398,6 +402,7 @@ function handleTodoEditKeypress(event, id) {
 
 function saveTodos() {
     localStorage.setItem('todos', JSON.stringify(todos));
+    triggerSync();
 }
 
 function renderTodos() {
@@ -2256,6 +2261,7 @@ function loadAccountingData() {
 // 保存记账数据
 function saveAccountingData() {
     localStorage.setItem('accountingData', JSON.stringify(accountingData));
+    triggerSync();
 }
 
 // 智能解析用户输入

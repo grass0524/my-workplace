@@ -2378,6 +2378,14 @@ function testQuickAccounting() {
             }
         }
 
+        // 触发立即同步（供script.js调用）
+        function triggerSync() {
+            if (window.dataSync && window.dataSync.isReady) {
+                console.log('[Sync] 手动触发同步');
+                window.dataSync.syncAll();
+            }
+        }
+
         // 页面加载时初始化
         window.addEventListener('DOMContentLoaded', initAuthAndSync);
     </script>
