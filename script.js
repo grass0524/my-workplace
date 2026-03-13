@@ -107,11 +107,32 @@ let healthRecords = {};
 let currentHealthMonth = new Date();
 
 function initHealth() {
+    console.log('[Health] initHealth called');
     const saved = localStorage.getItem('healthRecords');
+    console.log('[Health] Loaded from localStorage:', saved ? `${saved.length} characters` : 'null');
+    
     if (saved) {
-        healthRecords = JSON.parse(saved);
+        try {
+            healthRecords = JSON.parse(saved);
+            console.log('[Health] Parsed healthRecords:', healthRecords);
+            
+            // 检测并修复数组格式
+            if (Array.isArray(healthRecords)) {
+                console.error('[Health] 检测到数组格式的旧数据，已清除');
+                healthRecords = {};
+                localStorage.setItem('healthRecords', JSON.stringify(healthRecords));
+            }
+        } catch (error) {
+            console.error('[Health] Failed to parse healthRecords:', error);
+            healthRecords = {};
+        }
+    } else {
+        healthRecords = {};
+        console.log('[Health] No saved data found, starting with empty object');
     }
+    
     updateHealthUI();
+    console.log('[Health] initHealth completed');
 }
 
 function getTodayStr() {
@@ -119,15 +140,34 @@ function getTodayStr() {
 }
 
 function toggleHealth(type) {
-    const today = getTodayStr();
-    if (!healthRecords[today]) {
-        healthRecords[today] = { water: false, toilet: false, exercise: false };
+    try {
+        console.log('[Health] toggleHealth called with type:', type);
+        const today = getTodayStr();
+        if (!healthRecords[today]) {
+            healthRecords[today] = { water: false, toilet: false, exercise: false };
+        }
+        
+        const oldValue = healthRecords[today][type];
+        healthRecords[today][type] = !healthRecords[today][type];
+        const newValue = healthRecords[today][type];
+        console.log('[Health] Toggled', type, 'from', oldValue, 'to', newValue);
+        
+        updateHealthUI();
+        
+        console.log('[Health] Calling saveHealth()...');
+        saveHealth();
+        
+        if (window.dataSync) {
+            console.log('[Health] Syncing health records...');
+            window.dataSync.syncAll(['healthRecords']);
+        } else {
+            console.warn('[Health] window.dataSync is not available yet, skipping sync');
+        }
+        
+        console.log('[Health] toggleHealth completed successfully');
+    } catch (error) {
+        console.error('[Health] Error in toggleHealth:', error);
     }
-    
-    healthRecords[today][type] = !healthRecords[today][type];
-    updateHealthUI();
-    saveHealth();
-    window.dataSync.syncAll(['healthRecords']);
 }
 
 function updateHealthUI() {
@@ -162,12 +202,32 @@ function updateHealthUI() {
 }
 
 function saveHealth() {
-    // 优先使用同步引擎的保存方法（包含时间戳）
-    if (window.dataSync) {
-        window.dataSync.saveToLocal('healthRecords', healthRecords);
-    } else {
-        // 降级方案：直接保存到 localStorage
-        localStorage.setItem('healthRecords', JSON.stringify(healthRecords));
+    try {
+        console.log('[Health] saveHealth called, healthRecords:', healthRecords);
+        const dataStr = JSON.stringify(healthRecords);
+        console.log('[Health] Saving health records, length:', dataStr.length);
+        
+        // 优先使用同步引擎的保存方法（包含时间戳）
+        if (window.dataSync) {
+            console.log('[Health] Using dataSync.saveToLocal()');
+            window.dataSync.saveToLocal('healthRecords', healthRecords);
+        } else {
+            console.log('[Health] Using localStorage directly (fallback)');
+            localStorage.setItem('healthRecords', JSON.stringify(healthRecords));
+        }
+        
+        // Verify it was saved
+        const saved = localStorage.getItem('healthRecords');
+        console.log('[Health] Verification - saved data length:', saved ? saved.length : 0);
+    } catch (error) {
+        console.error('[Health] Error in saveHealth:', error);
+        // Fallback: try to save directly to localStorage
+        try {
+            localStorage.setItem('healthRecords', JSON.stringify(healthRecords));
+            console.log('[Health] Fallback save successful');
+        } catch (fallbackError) {
+            console.error('[Health] Fallback save also failed:', fallbackError);
+        }
     }
 }
 

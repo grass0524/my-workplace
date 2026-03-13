@@ -98,7 +98,13 @@ class DataSync {
                 'moodEntries': []
             };
             const defaultValue = JSON.stringify(defaultValues[config.localKey] || '{}');
-            const localData = JSON.parse(localStorage.getItem(config.localKey) || defaultValue);
+            let localData = JSON.parse(localStorage.getItem(config.localKey) || defaultValue);
+
+            // 检查 healthRecords 格式，确保是对象而不是数组
+            if (dataType === 'healthRecords' && Array.isArray(localData)) {
+                console.error('[Sync] 检测到 healthRecords 是数组格式，拒绝上传');
+                return { error: { message: 'healthRecords 格式错误：应该是对象而不是数组' } };
+            }
 
             // 添加同步元数据
             const syncData = {
@@ -166,6 +172,27 @@ class DataSync {
             }
 
             console.log('[Sync] 下载成功:', dataType, data);
+            
+            // 特殊处理：修复 healthRecords 的错误格式（数组 -> 对象）
+            if (dataType === 'healthRecords' && data && data.data && Array.isArray(data.data)) {
+                console.warn('[Sync] 检测到 healthRecords 云端数据格式错误（数组），需要修复');
+                
+                // 清空云端错误数据（保留本地数据）
+                const { error: deleteError } = await this.supabase
+                    .from(config.tableName)
+                    .delete()
+                    .eq('user_id', this.auth.user.id);
+                
+                if (deleteError) {
+                    console.error('[Sync] 清空云端错误数据失败:', deleteError);
+                } else {
+                    console.log('[Sync] 已清空云端的错误格式数据');
+                }
+                
+                // 返回空数据，让本地数据作为主数据
+                return { data: null, error: null };
+            }
+            
             return { data, error: null };
         } catch (error) {
             console.error('[Sync] 下载异常:', error);
@@ -252,7 +279,23 @@ class DataSync {
                         // 时间戳比较策略（用于其他替换类型数据）
                         if (cloudTimestamp > localTimestamp) {
                             mergedData = cloudData.data;
-                            this.saveToLocal(config.localKey, mergedData);
+                            
+                            // 额外检查：healthRecords 必须是对象格式
+                            if (dataType === 'healthRecords' && Array.isArray(mergedData)) {
+                                console.error('[Sync] 拒绝保存数组格式的 healthRecords，清空云端数据');
+                                
+                                // 清空云端错误数据
+                                await this.supabase
+                                    .from(config.tableName)
+                                    .delete()
+                                    .eq('user_id', this.auth.user.id);
+                                
+                                // 使用本地数据
+                                mergedData = localData;
+                                needUpload = true;
+                            } else {
+                                this.saveToLocal(config.localKey, mergedData);
+                            }
                             console.log(`[Sync] ${dataType} - 云端数据更新，使用云端数据`);
                         } else {
                             mergedData = localData;
@@ -311,6 +354,21 @@ class DataSync {
      * 追加合并策略：合并两个数据集，去重
      */
     mergeAppendData(localData, cloudData) {
+        // 确保 healthRecords 是对象格式
+        if (this.currentDataType === 'healthRecords') {
+            console.warn('[Sync] healthRecords 不应使用 mergeAppendData，使用对象合并');
+            // 强制转换为对象
+            if (Array.isArray(localData)) {
+                console.warn('[Sync] localData 是数组，转换为空对象');
+                localData = {};
+            }
+            if (Array.isArray(cloudData)) {
+                console.warn('[Sync] cloudData 是数组，转换为空对象');
+                cloudData = {};
+            }
+            return { ...localData, ...cloudData };
+        }
+        
         // 确保数据类型正确
         const arrayTypes = ['todos', 'accountingData', 'myVocab', 'moodEntries'];
         const currentDataType = Object.keys(this.dataTypes).find(key => this.dataTypes[key].localKey === this.currentDataType);
