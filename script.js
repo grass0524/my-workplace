@@ -1655,7 +1655,7 @@ function saveMood() {
 
     moodEntries.unshift(newEntry);
     localStorage.setItem('moodEntries', JSON.stringify(moodEntries));
-    
+    triggerSync();    
     noteInput.value = '';
     renderMoodRecent();
 }
@@ -1731,7 +1731,7 @@ async function deleteMood(id) {
     if (await showConfirm('确定要删除这条心情日记吗？')) {
         moodEntries = moodEntries.filter(e => e.id !== id);
         localStorage.setItem('moodEntries', JSON.stringify(moodEntries));
-        renderMoodRecent();
+    triggerSync();        renderMoodRecent();
 
         // If modal is open, re-render modal views
         if (!document.getElementById('mood-modal').classList.contains('hidden')) {
@@ -1801,7 +1801,7 @@ function saveMoodEdit(id, location = 'home') {
     if (entry) {
         entry.note = newNote;
         localStorage.setItem('moodEntries', JSON.stringify(moodEntries));
-        renderMoodRecent();
+    triggerSync();        renderMoodRecent();
 
         // If modal is open, re-render modal views
         if (!document.getElementById('mood-modal').classList.contains('hidden')) {

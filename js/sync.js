@@ -39,6 +39,11 @@ class DataSync {
                 tableName: 'accounting_data',
                 localKey: 'accountingData',
                 mergeStrategy: 'append'
+            },
+            moodEntries: {
+                tableName: 'mood_entries',
+                localKey: 'moodEntries',
+                mergeStrategy: 'append'
             }
         };
     }
@@ -89,7 +94,8 @@ class DataSync {
                 'todos': [],
                 'accountingData': [],
                 'vocabLibrary': {},
-                'myVocab': {}
+                'myVocab': {},
+                'moodEntries': []
             };
             const defaultValue = JSON.stringify(defaultValues[config.localKey] || '{}');
             const localData = JSON.parse(localStorage.getItem(config.localKey) || defaultValue);
@@ -285,7 +291,7 @@ class DataSync {
      */
     mergeAppendData(localData, cloudData) {
         // 确保数据类型正确
-        const arrayTypes = ['healthRecords', 'todos', 'accountingData', 'myVocab'];
+        const arrayTypes = ['healthRecords', 'todos', 'accountingData', 'myVocab', 'moodEntries'];
         const currentDataType = Object.keys(this.dataTypes).find(key => this.dataTypes[key].localKey === this.currentDataType);
         
         // 如果应该是数组但localData不是数组，尝试修复
