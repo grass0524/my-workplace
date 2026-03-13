@@ -127,6 +127,7 @@ function toggleHealth(type) {
     healthRecords[today][type] = !healthRecords[today][type];
     updateHealthUI();
     saveHealth();
+    triggerSync();
 }
 
 function updateHealthUI() {
@@ -2063,6 +2064,7 @@ function saveHealthEdit() {
     }
 
     saveHealth();
+    triggerSync();
     renderHealthCalendar();
 
     // If editing today's date, also update main UI
@@ -3258,17 +3260,20 @@ let incomeExpenseBarChart = null;
 function showAccountingStats() {
     const modal = document.getElementById('accounting-stats-modal');
     modal.classList.remove('hidden');
-    currentStatsPeriod = 'day';
-    updateStatsButtons();
-    renderAccountingStats();
+    // 禁用主页面滚动
+    document.body.style.overflow = 'hidden';
+    document.body.style.position = 'fixed';
+    document.body.style.width = '100%';
 }
 
 // 关闭记账统计弹窗
 function closeAccountingStats() {
     document.getElementById('accounting-stats-modal').classList.add('hidden');
-    // iframe应用无需清理图表
+    // 恢复主页面滚动
+    document.body.style.overflow = '';
+    document.body.style.position = '';
+    document.body.style.width = '';
 }
-
 
 // 监听来自记账统计iframe的消息
 window.addEventListener('message', function(event) {
