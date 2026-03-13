@@ -162,10 +162,12 @@ function updateHealthUI() {
 }
 
 function saveHealth() {
-    localStorage.setItem('healthRecords', JSON.stringify(healthRecords));
-    // 使用同步引擎的保存方法来更新时间戳
+    // 优先使用同步引擎的保存方法（包含时间戳）
     if (window.dataSync) {
         window.dataSync.saveToLocal('healthRecords', healthRecords);
+    } else {
+        // 降级方案：直接保存到 localStorage
+        localStorage.setItem('healthRecords', JSON.stringify(healthRecords));
     }
 }
 
