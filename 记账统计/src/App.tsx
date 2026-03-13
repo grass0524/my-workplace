@@ -74,9 +74,9 @@ export default function App() {
 
   return (
 <div className="w-full h-full" style={{ background: "transparent", margin: 0, padding: 0 }}>
-      <Card className="w-full max-w-6xl h-full flex flex-col overflow-hidden">
+      <Card className="w-full max-w-6xl h-full mx-auto flex flex-col overflow-hidden">
         {/* Header */}
-        <div className="p-6 flex items-center justify-between border-b border-white/20">
+        <div className="px-6 pt-6 pb-3 flex items-center justify-between border-b border-white/20">
           <h1 className="text-2xl font-bold text-slate-800">记账统计</h1>
           
           <div className="flex gap-4">
@@ -413,10 +413,10 @@ function MonthView({
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 0.95 }}
-      className="h-full flex flex-col p-6 overflow-y-auto"
+      className="h-full flex flex-col px-6 pt-3 pb-6 overflow-y-auto"
     >
       {/* Month Selector & Summary */}
-      <div className="flex flex-col md:flex-row items-center justify-between mb-8 gap-4">
+      <div className="flex flex-col md:flex-row items-center justify-between mb-6 gap-4">
         <div className="flex items-center gap-4">
           <IconButton icon={ChevronLeft} onClick={() => setCurrentMonth(subMonths(currentMonth, 1))} />
           <div className="text-center">
@@ -458,7 +458,7 @@ function MonthView({
       ) : (
         <>
           {/* Main Chart */}
-      <Card className="p-6 mb-8 min-h-[320px]" inset>
+      <Card className="p-6 mb-6 min-h-[320px]" inset>
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-sm font-bold text-slate-500 flex items-center gap-2">
             <BarChart3 size={16} /> 每日收支趋势
@@ -672,10 +672,10 @@ function YearView({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20 }}
-      className="h-full flex flex-col p-6 overflow-y-auto"
+      className="h-full flex flex-col px-6 pt-3 pb-6 overflow-y-auto"
     >
       {/* Year Selector & Summary */}
-      <div className="flex flex-col md:flex-row items-center justify-between mb-8 gap-4">
+      <div className="flex flex-col md:flex-row items-center justify-between mb-6 gap-4">
         <div className="flex items-center gap-4">
           <IconButton icon={ChevronLeft} onClick={() => setCurrentYear(subYears(currentYear, 1))} />
           <div className="text-center">
@@ -717,7 +717,7 @@ function YearView({
       ) : (
         <>
           {/* Main Chart */}
-      <Card className="p-6 mb-8 min-h-[360px]" inset>
+      <Card className="p-6 mb-6 min-h-[360px]" inset>
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-sm font-bold text-slate-500 flex items-center gap-2">
             <BarChart3 size={16} /> 每月收支趋势

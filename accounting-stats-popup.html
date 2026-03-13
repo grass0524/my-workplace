@@ -1,0 +1,867 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>记账统计弹窗 - 新拟物风格</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'PingFang SC', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #E8EEF5;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        /* 新拟物风格弹窗容器 */
+        .popup-container {
+            width: 900px;
+            height: 680px;
+            background: #E8EEF5;
+            border-radius: 24px;
+            box-shadow:
+                8px 8px 40px rgba(163, 177, 198, 0.6),
+                -4px -4px 20px rgba(255, 255, 255, 0.8);
+            padding: 32px;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        /* 头部 */
+        .popup-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 50px;
+        }
+
+        .popup-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: #2D3748;
+        }
+
+        .close-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 18px;
+            background: #E8EEF5;
+            box-shadow:
+                3px 3px 6px rgba(163, 177, 198, 0.4),
+                -2px -2px 4px rgba(255, 255, 255, 0.8);
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            font-weight: 300;
+            color: #718096;
+            transition: all 0.2s;
+        }
+
+        .close-btn:hover {
+            box-shadow:
+                2px 2px 4px rgba(163, 177, 198, 0.5),
+                -1px -1px 2px rgba(255, 255, 255, 0.9);
+        }
+
+        /* Tab 切换栏 */
+        .tabs-bar {
+            display: flex;
+            gap: 12px;
+            height: 48px;
+        }
+
+        .tab-item {
+            flex: 1;
+            height: 100%;
+            border-radius: 16px;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            font-size: 16px;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .tab-item.active {
+            background: linear-gradient(180deg, #E8EEF5 0%, #D9E2EC 100%);
+            box-shadow:
+                4px 4px 8px rgba(163, 177, 198, 0.5),
+                -3px -3px 6px rgba(255, 255, 255, 0.9);
+            font-weight: 600;
+        }
+
+        .tab-item.active .tab-text {
+            color: #E53E3E;
+        }
+
+        .tab-item.inactive {
+            background: #E8EEF5;
+            box-shadow:
+                inset 2px 2px 4px rgba(163, 177, 198, 0.3),
+                inset -1px -1px 2px rgba(255, 255, 255, 0.5);
+        }
+
+        .tab-item.inactive .tab-text {
+            color: #718096;
+            font-weight: 500;
+        }
+
+        .tab-indicator {
+            position: absolute;
+            bottom: 8px;
+            width: 40px;
+            height: 3px;
+            border-radius: 1.5px;
+            background: #E53E3E;
+        }
+
+        /* 内容区域 */
+        .content-area {
+            flex: 1;
+            display: flex;
+            gap: 24px;
+            overflow: hidden;
+        }
+
+        /* 按日统计 - 左侧面板 */
+        .daily-left-panel {
+            width: 380px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        /* 日历头部 */
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 36px;
+        }
+
+        .nav-btn {
+            width: 28px;
+            height: 28px;
+            border-radius: 8px;
+            background: #E8EEF5;
+            box-shadow:
+                inset 1px 1px 2px rgba(163, 177, 198, 0.3);
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            color: #718096;
+        }
+
+        .current-month {
+            font-size: 16px;
+            font-weight: 600;
+            color: #2D3748;
+        }
+
+        /* 日历网格 */
+        .calendar-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            flex: 1;
+        }
+
+        .week-days {
+            display: flex;
+            gap: 4px;
+            height: 28px;
+        }
+
+        .week-day {
+            flex: 1;
+            text-align: center;
+            font-size: 12px;
+            font-weight: 500;
+            color: #A0AEC0;
+        }
+
+        .calendar-days {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 6px;
+            flex: 1;
+        }
+
+        .day-cell {
+            background: #E8EEF5;
+            border-radius: 12px;
+            box-shadow:
+                inset 2px 2px 4px rgba(163, 177, 198, 0.3),
+                inset -1px -1px 2px rgba(255, 255, 255, 0.5);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            cursor: pointer;
+            transition: all 0.2s;
+            min-height: 70px;
+        }
+
+        .day-cell:hover {
+            box-shadow:
+                inset 1px 1px 3px rgba(163, 177, 198, 0.25),
+                inset -1px -1px 2px rgba(255, 255, 255, 0.6);
+        }
+
+        .day-cell.selected {
+            background: linear-gradient(180deg, #E8EEF5 0%, #D9E2EC 100%);
+            box-shadow:
+                3px 3px 6px rgba(163, 177, 198, 0.4),
+                -2px -2px 4px rgba(255, 255, 255, 0.8);
+        }
+
+        .day-number {
+            font-size: 14px;
+            font-weight: 500;
+            color: #2D3748;
+        }
+
+        .day-balance {
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .day-balance.positive {
+            color: #E53E3E;
+        }
+
+        .day-balance.negative {
+            color: #38A169;
+        }
+
+        .day-balance.empty {
+            color: #CBD5E0;
+        }
+
+        /* 右侧明细面板 */
+        .daily-right-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        /* 统计卡片 */
+        .stats-card {
+            background: #E8EEF5;
+            border-radius: 16px;
+            box-shadow:
+                inset 2px 2px 4px rgba(163, 177, 198, 0.3),
+                inset -1px -1px 2px rgba(255, 255, 255, 0.5);
+            padding: 20px;
+            display: flex;
+            justify-content: space-around;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-label {
+            font-size: 13px;
+            color: #718096;
+            margin-bottom: 8px;
+        }
+
+        .stat-value {
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        .stat-value.income {
+            color: #E53E3E;
+        }
+
+        .stat-value.expense {
+            color: #38A169;
+        }
+
+        /* 明细头部 */
+        .detail-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 40px;
+        }
+
+        .detail-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #2D3748;
+        }
+
+        .filter-btn {
+            background: #E8EEF5;
+            border-radius: 10px;
+            box-shadow:
+                inset 1px 1px 2px rgba(163, 177, 198, 0.3);
+            border: none;
+            padding: 8px 16px;
+            font-size: 13px;
+            color: #718096;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        /* 明细列表 */
+        .detail-list {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            overflow-y: auto;
+            padding-right: 8px;
+        }
+
+        .detail-item {
+            background: #E8EEF5;
+            border-radius: 12px;
+            box-shadow:
+                inset 2px 2px 4px rgba(163, 177, 198, 0.3),
+                inset -1px -1px 2px rgba(255, 255, 255, 0.5);
+            padding: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .detail-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .detail-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #667EEA 0%, #764BA2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 18px;
+        }
+
+        .detail-info h4 {
+            font-size: 14px;
+            font-weight: 500;
+            color: #2D3748;
+            margin-bottom: 4px;
+        }
+
+        .detail-info p {
+            font-size: 12px;
+            color: #A0AEC0;
+        }
+
+        .detail-amount {
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .detail-amount.income {
+            color: #E53E3E;
+        }
+
+        .detail-amount.expense {
+            color: #38A169;
+        }
+
+        /* Tab 内容切换 */
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: flex;
+        }
+
+        /* 按月统计内容 */
+        .monthly-content {
+            flex-direction: column;
+            gap: 20px;
+            width: 100%;
+        }
+
+        .month-selector {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            padding: 16px;
+            background: #E8EEF5;
+            border-radius: 16px;
+            box-shadow:
+                inset 2px 2px 4px rgba(163, 177, 198, 0.3),
+                inset -1px -1px 2px rgba(255, 255, 255, 0.5);
+        }
+
+        .month-info {
+            text-align: center;
+        }
+
+        .month-name {
+            font-size: 18px;
+            font-weight: 600;
+            color: #2D3748;
+            margin-bottom: 6px;
+        }
+
+        .month-balance {
+            font-size: 24px;
+            font-weight: 700;
+        }
+
+        .month-balance.positive {
+            color: #E53E3E;
+        }
+
+        .month-balance.negative {
+            color: #38A169;
+        }
+
+        .charts-section {
+            display: flex;
+            gap: 20px;
+            height: 400px;
+        }
+
+        .chart-container {
+            flex: 1;
+            background: #E8EEF5;
+            border-radius: 16px;
+            box-shadow:
+                inset 2px 2px 4px rgba(163, 177, 198, 0.3),
+                inset -1px -1px 2px rgba(255, 255, 255, 0.5);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chart-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #2D3748;
+            margin-bottom: 16px;
+        }
+
+        .donut-chart {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .donut-center {
+            position: absolute;
+            text-align: center;
+        }
+
+        .donut-center .label {
+            font-size: 12px;
+            color: #718096;
+            margin-bottom: 4px;
+        }
+
+        .donut-center .value {
+            font-size: 20px;
+            font-weight: 700;
+            color: #2D3748;
+        }
+
+        /* 滚动条样式 */
+        .detail-list::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .detail-list::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .detail-list::-webkit-scrollbar-thumb {
+            background: rgba(163, 177, 198, 0.5);
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body>
+    <div class="popup-container">
+        <!-- 头部 -->
+        <div class="popup-header">
+            <h1 class="popup-title">记账统计</h1>
+            <button class="close-btn">×</button>
+        </div>
+
+        <!-- Tab 切换栏 -->
+        <div class="tabs-bar">
+            <button class="tab-item active" data-tab="daily">
+                <span class="tab-text">按日</span>
+                <div class="tab-indicator"></div>
+            </button>
+            <button class="tab-item inactive" data-tab="monthly">
+                <span class="tab-text">按月</span>
+            </button>
+            <button class="tab-item inactive" data-tab="yearly">
+                <span class="tab-text">按年</span>
+            </button>
+        </div>
+
+        <!-- 内容区域 -->
+        <div class="content-area">
+            <!-- 按日统计内容 -->
+            <div class="tab-content active" id="daily-content">
+                <!-- 左侧日历面板 -->
+                <div class="daily-left-panel">
+                    <div class="calendar-header">
+                        <button class="nav-btn">‹</button>
+                        <span class="current-month">2024年1月</span>
+                        <button class="nav-btn">›</button>
+                    </div>
+                    <div class="calendar-grid">
+                        <div class="week-days">
+                            <div class="week-day">日</div>
+                            <div class="week-day">一</div>
+                            <div class="week-day">二</div>
+                            <div class="week-day">三</div>
+                            <div class="week-day">四</div>
+                            <div class="week-day">五</div>
+                            <div class="week-day">六</div>
+                        </div>
+                        <div class="calendar-days">
+                            <!-- 示例日期格子 -->
+                            <div class="day-cell">
+                                <span class="day-number">1</span>
+                                <span class="day-balance positive">+¥200</span>
+                            </div>
+                            <div class="day-cell">
+                                <span class="day-number">2</span>
+                                <span class="day-balance negative">-¥150</span>
+                            </div>
+                            <div class="day-cell">
+                                <span class="day-number">3</span>
+                                <span class="day-balance empty">—</span>
+                            </div>
+                            <div class="day-cell">
+                                <span class="day-number">4</span>
+                                <span class="day-balance positive">+¥350</span>
+                            </div>
+                            <div class="day-cell selected">
+                                <span class="day-number">5</span>
+                                <span class="day-balance positive">+¥180</span>
+                            </div>
+                            <div class="day-cell">
+                                <span class="day-number">6</span>
+                                <span class="day-balance empty">—</span>
+                            </div>
+                            <div class="day-cell">
+                                <span class="day-number">7</span>
+                                <span class="day-balance negative">-¥280</span>
+                            </div>
+                            <!-- 更多日期... -->
+                            <div class="day-cell"><span class="day-number">8</span><span class="day-balance empty">—</span></div>
+                            <div class="day-cell"><span class="day-number">9</span><span class="day-balance positive">+¥500</span></div>
+                            <div class="day-cell"><span class="day-number">10</span><span class="day-balance negative">-¥320</span></div>
+                            <div class="day-cell"><span class="day-number">11</span><span class="day-balance empty">—</span></div>
+                            <div class="day-cell"><span class="day-number">12</span><span class="day-balance positive">+¥420</span></div>
+                            <div class="day-cell"><span class="day-number">13</span><span class="day-balance negative">-¥180</span></div>
+                            <div class="day-cell"><span class="day-number">14</span><span class="day-balance empty">—</span></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 右侧明细面板 -->
+                <div class="daily-right-panel">
+                    <div class="stats-card">
+                        <div class="stat-item">
+                            <div class="stat-label">今日收入</div>
+                            <div class="stat-value income">+¥180.00</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">今日支出</div>
+                            <div class="stat-value expense">-¥95.50</div>
+                        </div>
+                    </div>
+
+                    <div class="detail-header">
+                        <h3 class="detail-title">今日明细</h3>
+                        <button class="filter-btn">
+                            全部明细
+                            <span>▼</span>
+                        </button>
+                    </div>
+
+                    <div class="detail-list">
+                        <div class="detail-item">
+                            <div class="detail-left">
+                                <div class="detail-icon">🍔</div>
+                                <div class="detail-info">
+                                    <h4>午餐</h4>
+                                    <p>12:30</p>
+                                </div>
+                            </div>
+                            <div class="detail-amount expense">-¥35.00</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-left">
+                                <div class="detail-icon">💰</div>
+                                <div class="detail-info">
+                                    <h4>工资</h4>
+                                    <p>09:00</p>
+                                </div>
+                            </div>
+                            <div class="detail-amount income">+¥180.00</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-left">
+                                <div class="detail-icon">🚇</div>
+                                <div class="detail-info">
+                                    <h4>地铁</h4>
+                                    <p>08:15</p>
+                                </div>
+                            </div>
+                            <div class="detail-amount expense">-¥5.00</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-left">
+                                <div class="detail-icon">☕</div>
+                                <div class="detail-info">
+                                    <h4>咖啡</h4>
+                                    <p>14:20</p>
+                                </div>
+                            </div>
+                            <div class="detail-amount expense">-¥28.00</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-left">
+                                <div class="detail-icon">🛒</div>
+                                <div class="detail-info">
+                                    <h4>超市购物</h4>
+                                    <p>18:45</p>
+                                </div>
+                            </div>
+                            <div class="detail-amount expense">-¥27.50</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 按月统计内容 -->
+            <div class="tab-content" id="monthly-content">
+                <div class="monthly-content">
+                    <div class="month-selector">
+                        <button class="nav-btn">‹</button>
+                        <div class="month-info">
+                            <div class="month-name">2024年1月</div>
+                            <div class="month-balance positive">+¥3,580.00</div>
+                        </div>
+                        <button class="nav-btn">›</button>
+                    </div>
+
+                    <div class="charts-section">
+                        <div class="chart-container">
+                            <div class="chart-title">每日收支趋势</div>
+                            <div style="flex: 1; display: flex; align-items: center; justify-content: center; color: #A0AEC0;">
+                                折线+柱状图区域
+                            </div>
+                        </div>
+                        <div class="chart-container">
+                            <div class="chart-title">收支分类统计</div>
+                            <div class="donut-chart">
+                                <div style="width: 200px; height: 200px; border-radius: 50%; border: 30px solid #E53E3E; border-right-color: #38A169;"></div>
+                                <div class="donut-center">
+                                    <div class="label">总收支</div>
+                                    <div class="value">¥12,580</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="detail-header">
+                        <h3 class="detail-title">当月明细</h3>
+                        <button class="filter-btn">
+                            全部明细
+                            <span>▼</span>
+                        </button>
+                    </div>
+
+                    <div class="detail-list" style="height: 200px;">
+                        <div class="detail-item">
+                            <div class="detail-left">
+                                <div class="detail-icon">💰</div>
+                                <div class="detail-info">
+                                    <h4>工资</h4>
+                                    <p>1月5日</p>
+                                </div>
+                            </div>
+                            <div class="detail-amount income">+¥8,000.00</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-left">
+                                <div class="detail-icon">🏠</div>
+                                <div class="detail-info">
+                                    <h4>房租</h4>
+                                    <p>1月1日</p>
+                                </div>
+                            </div>
+                            <div class="detail-amount expense">-¥2,500.00</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-left">
+                                <div class="detail-icon">🍔</div>
+                                <div class="detail-info">
+                                    <h4>餐饮</h4>
+                                    <p>1月3日</p>
+                                </div>
+                            </div>
+                            <div class="detail-amount expense">-¥1,200.00</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 按年统计内容 -->
+            <div class="tab-content" id="yearly-content">
+                <div class="monthly-content">
+                    <div class="month-selector">
+                        <button class="nav-btn">‹</button>
+                        <div class="month-info">
+                            <div class="month-name">2024年</div>
+                            <div class="month-balance positive">+¥42,960.00</div>
+                        </div>
+                        <button class="nav-btn">›</button>
+                    </div>
+
+                    <div class="charts-section">
+                        <div class="chart-container">
+                            <div class="chart-title">每月收支趋势</div>
+                            <div style="flex: 1; display: flex; align-items: center; justify-content: center; color: #A0AEC0;">
+                                月度折线+柱状图区域
+                            </div>
+                        </div>
+                        <div class="chart-container">
+                            <div class="chart-title">年度收支分类</div>
+                            <div class="donut-chart">
+                                <div style="width: 200px; height: 200px; border-radius: 50%; border: 30px solid #E53E3E; border-right-color: #38A169;"></div>
+                                <div class="donut-center">
+                                    <div class="label">总收支</div>
+                                    <div class="value">¥156,800</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="detail-header">
+                        <h3 class="detail-title">年度明细</h3>
+                        <button class="filter-btn">
+                            全部明细
+                            <span>▼</span>
+                        </button>
+                    </div>
+
+                    <div class="detail-list" style="height: 200px;">
+                        <div class="detail-item">
+                            <div class="detail-left">
+                                <div class="detail-icon">💰</div>
+                                <div class="detail-info">
+                                    <h4>12月工资</h4>
+                                    <p>12月</p>
+                                </div>
+                            </div>
+                            <div class="detail-amount income">+¥8,000.00</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-left">
+                                <div class="detail-icon">🎁</div>
+                                <div class="detail-info">
+                                    <h4>年终奖</h4>
+                                    <p>12月</p>
+                                </div>
+                            </div>
+                            <div class="detail-amount income">+¥20,000.00</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-left">
+                                <div class="detail-icon">🏠</div>
+                                <div class="detail-info">
+                                    <h4>全年房租</h4>
+                                    <p>累计</p>
+                                </div>
+                            </div>
+                            <div class="detail-amount expense">-¥30,000.00</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Tab 切换功能
+        document.querySelectorAll('.tab-item').forEach(tab => {
+            tab.addEventListener('click', function() {
+                // 移除所有 active 类
+                document.querySelectorAll('.tab-item').forEach(t => {
+                    t.classList.remove('active');
+                    t.classList.add('inactive');
+                    const indicator = t.querySelector('.tab-indicator');
+                    if (indicator) indicator.remove();
+                });
+
+                document.querySelectorAll('.tab-content').forEach(content => {
+                    content.classList.remove('active');
+                });
+
+                // 添加 active 类到当前 tab
+                this.classList.remove('inactive');
+                this.classList.add('active');
+
+                // 添加指示器
+                const indicator = document.createElement('div');
+                indicator.className = 'tab-indicator';
+                this.appendChild(indicator);
+
+                // 显示对应内容
+                const tabName = this.getAttribute('data-tab');
+                document.getElementById(tabName + '-content').classList.add('active');
+            });
+        });
+
+        // 日期格子点击效果
+        document.querySelectorAll('.day-cell').forEach(cell => {
+            cell.addEventListener('click', function() {
+                document.querySelectorAll('.day-cell').forEach(c => c.classList.remove('selected'));
+                this.classList.add('selected');
+            });
+        });
+    </script>
+</body>
+</html>

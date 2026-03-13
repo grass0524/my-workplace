@@ -61,3 +61,7 @@
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(163, 177, 198, 0.6);
 }
+
+.bg-bg-neumorphic {
+  background-color: #e6e9f0;
+}
