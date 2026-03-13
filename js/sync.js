@@ -18,7 +18,7 @@ class DataSync {
             healthRecords: {
                 tableName: 'health_records',
                 localKey: 'healthRecords',
-                mergeStrategy: 'append' // 列表数据采用追加合并
+                mergeStrategy: 'replace'
             },
             todos: {
                 tableName: 'todos',
@@ -90,7 +90,7 @@ class DataSync {
         try {
             // 从localStorage读取本地数据，根据数据类型使用正确的默认值
             const defaultValues = {
-                'healthRecords': [],
+                'healthRecords': {},
                 'todos': [],
                 'accountingData': [],
                 'vocabLibrary': {},
@@ -291,7 +291,7 @@ class DataSync {
      */
     mergeAppendData(localData, cloudData) {
         // 确保数据类型正确
-        const arrayTypes = ['healthRecords', 'todos', 'accountingData', 'myVocab', 'moodEntries'];
+        const arrayTypes = ['todos', 'accountingData', 'myVocab', 'moodEntries'];
         const currentDataType = Object.keys(this.dataTypes).find(key => this.dataTypes[key].localKey === this.currentDataType);
         
         // 如果应该是数组但localData不是数组，尝试修复
