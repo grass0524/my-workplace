@@ -2280,7 +2280,13 @@ function importData(event) {
                 if (confirmed) {
                     // Import all data
                     if (imported.data.healthRecords) {
-                        localStorage.setItem('healthRecords', JSON.stringify(imported.data.healthRecords));
+                        // 检查并修复 healthRecords 格式
+                        let hrData = imported.data.healthRecords;
+                        if (Array.isArray(hrData)) {
+                            console.warn('[Import] 检测到数组格式的 healthRecords，已跳过');
+                        } else {
+                            localStorage.setItem('healthRecords', JSON.stringify(hrData));
+                        }
                     }
                     if (imported.data.todos) {
                         localStorage.setItem('todos', JSON.stringify(imported.data.todos));

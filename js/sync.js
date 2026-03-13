@@ -257,10 +257,18 @@ class DataSync {
 
                 if (config.mergeStrategy === 'append') {
                     // 追加合并策略（用于列表数据）
-                    mergedData = this.mergeAppendData(localData, cloudData.data);
-                    // 立即保存合并后的数据到本地
-                    this.saveToLocal(config.localKey, mergedData);
-                    needUpload = true;
+                    // 如果本地数据比云端少，说明可能发生了删除，使用本地数据
+                    if (Array.isArray(localData) && Array.isArray(cloudData.data) && localData.length < cloudData.data.length) {
+                        console.log(`[Sync] ${dataType} - 本地数量(${localData.length}) < 云端数量(${cloudData.data.length})，使用本地数据（可能是删除操作）`);
+                        mergedData = localData;
+                        this.saveToLocal(config.localKey, mergedData);
+                        needUpload = true;
+                    } else {
+                        mergedData = this.mergeAppendData(localData, cloudData.data);
+                        // 立即保存合并后的数据到本地
+                        this.saveToLocal(config.localKey, mergedData);
+                        needUpload = true;
+                    }
                     console.log(`[Sync] ${dataType} - 追加合并，结果: ${Array.isArray(mergedData) ? mergedData.length : Object.keys(mergedData).length}项`);
                 } else if (config.mergeStrategy === 'replace') {
                     // 替换策略：对于对象数据，合并键；对于时间戳比较，使用更新的一方
