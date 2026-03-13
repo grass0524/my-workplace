@@ -112,19 +112,26 @@ function initHealth() {
     console.log('[Health] Loaded from localStorage:', saved ? `${saved.length} characters` : 'null');
     
     if (saved) {
-        try {
-            healthRecords = JSON.parse(saved);
-            console.log('[Health] Parsed healthRecords:', healthRecords);
-            
-            // 检测并修复数组格式
-            if (Array.isArray(healthRecords)) {
-                console.error('[Health] 检测到数组格式的旧数据，已清除');
-                healthRecords = {};
-                localStorage.setItem('healthRecords', JSON.stringify(healthRecords));
-            }
-        } catch (error) {
-            console.error('[Health] Failed to parse healthRecords:', error);
+        // 先检查字符串格式，避免解析错误的数据
+        if (saved.trim().startsWith('[')) {
+            console.error('[Health] 检测到数组格式的旧数据，已清除');
+            localStorage.removeItem('healthRecords');
             healthRecords = {};
+        } else {
+            try {
+                healthRecords = JSON.parse(saved);
+                console.log('[Health] Parsed healthRecords:', healthRecords);
+                
+                // 二次检测：确保解析后的数据不是数组
+                if (Array.isArray(healthRecords)) {
+                    console.error('[Health] 解析后仍是数组格式，已清除');
+                    localStorage.removeItem('healthRecords');
+                    healthRecords = {};
+                }
+            } catch (error) {
+                console.error('[Health] Failed to parse healthRecords:', error);
+                healthRecords = {};
+            }
         }
     } else {
         healthRecords = {};
@@ -2364,21 +2371,49 @@ function initAccounting() {
 }
 
 // 加载记账数据
+
 function loadAccountingData() {
     const saved = localStorage.getItem('accountingData');
     if (saved) {
         const parsed = JSON.parse(saved);
 
-        // 修复数据结构：如果是嵌套数组，提取里面的数据
+        // 修复数据结构：如果是嵌套数组，递归提取所有记录
         if (Array.isArray(parsed)) {
-            if (parsed.length > 0 && Array.isArray(parsed[0])) {
-                // 嵌套数组：[[{...}, {...}]]，提取内层数组
-                console.warn('[loadAccountingData] 检测到嵌套数组结构，自动修复');
-                accountingData = { records: parsed[0] };
-                console.log('[loadAccountingData] 已修复数据结构，共', accountingData.records.length, '项记录');
-                // 保存修复后的结构
-                saveAccountingData();
-            } else if (parsed.length > 0 && typeof parsed[0] === 'object' && parsed[0].amount) {
+            console.warn('[loadAccountingData] 检测到数组结构，正在递归提取记录...');
+            
+            // 递归提取所有记录
+            function extractAllRecords(data) {
+                let records = [];
+                if (Array.isArray(data)) {
+                    data.forEach(item => {
+                        if (Array.isArray(item)) {
+                            records = records.concat(extractAllRecords(item));
+                        } else if (item && typeof item === 'object' && item.id) {
+                            records.push(item);
+                        }
+                    });
+                }
+                return records;
+            }
+            
+            const allRecords = extractAllRecords(parsed);
+            console.log('[loadAccountingData] 提取到', allRecords.length, '条记录');
+            
+            // 去重（按 id）
+            const uniqueRecords = [];
+            const seenIds = new Set();
+            allRecords.forEach(record => {
+                if (!seenIds.has(record.id)) {
+                    seenIds.add(record.id);
+                    uniqueRecords.push(record);
+                }
+            });
+            
+            accountingData = { records: uniqueRecords };
+            // 保存修复后的数据
+            saveAccountingData();
+            console.log('[loadAccountingData] 已修复数据结构，去重后共', uniqueRecords.length, '项记录');
+        } else if (typeof parsed === 'object' && parsed !== null && parsed.length > 0 && typeof parsed[0] === 'object' && parsed[0].amount) {
                 // 直接是记录数组：[{...}, {...}]，包装成records对象
                 console.warn('[loadAccountingData] 检测到记录数组结构，自动修复');
                 accountingData = { records: parsed };
@@ -2404,50 +2439,6 @@ function loadAccountingData() {
         } else {
             accountingData = { records: [] };
         }
-    }
-}
-
-function loadAccountingData() {
-    const saved = localStorage.getItem('accountingData');
-    if (saved) {
-        const parsed = JSON.parse(saved);
-
-        // 修复数据结构：如果是嵌套数组，提取里面的数据
-        if (Array.isArray(parsed)) {
-            if (parsed.length > 0 && Array.isArray(parsed[0])) {
-                // 嵌套数组：[[{...}, {...}]]，提取内层数组
-                console.warn('[loadAccountingData] 检测到嵌套数组结构，自动修复');
-                accountingData = { records: parsed[0] };
-                console.log('[loadAccountingData] 已修复数据结构，共', accountingData.records.length, '项记录');
-                // 保存修复后的结构
-                saveAccountingData();
-            } else if (parsed.length > 0 && typeof parsed[0] === 'object' && parsed[0].amount) {
-                // 直接是记录数组：[{...}, {...}]，包装成records对象
-                console.warn('[loadAccountingData] 检测到记录数组结构，自动修复');
-                accountingData = { records: parsed };
-                console.log('[loadAccountingData] 已修复数据结构，共', accountingData.records.length, '项记录');
-                // 保存修复后的结构
-                saveAccountingData();
-            } else {
-                accountingData = { records: [] };
-            }
-        } else if (typeof parsed === 'object' && parsed !== null) {
-            if (Array.isArray(parsed.records)) {
-                // 正确的结构
-                accountingData = parsed;
-            } else {
-                // 错误的对象结构
-                console.warn('[loadAccountingData] 检测到错误的对象结构，自动修复');
-                const values = Object.values(parsed).filter(v => typeof v === 'object' && v !== null && v.amount);
-                accountingData = { records: values };
-                console.log('[loadAccountingData] 已修复数据结构，共', accountingData.records.length, '项记录');
-                // 保存修复后的结构
-                saveAccountingData();
-            }
-        } else {
-            accountingData = { records: [] };
-        }
-    }
 }
 // 保存记账数据
 function saveAccountingData() {
@@ -3351,10 +3342,16 @@ function closeAccountingStats() {
 window.addEventListener('message', function(event) {
     if (event.data.type === 'close-accounting-stats') {
         closeAccountingStats();
+    } else if (event.data.type === 'request-accounting-data') {
+        // 返回真实的记账数据
+        console.log('[Main] 收到 iframe 数据请求，返回记账数据:', accountingData);
+        event.source?.postMessage({
+            type: 'accounting-data-response',
+            data: accountingData.records || []
+        }, event.origin || '*');
     }
 });
 
-// 切换统计周期
 function switchStatsPeriod(period) {
     currentStatsPeriod = period;
     updateStatsButtons();

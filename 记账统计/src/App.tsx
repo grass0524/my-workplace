@@ -51,7 +51,7 @@ import {
 import { motion, AnimatePresence } from 'motion/react';
 import { Card, Button, IconButton } from './components/Neumorphic';
 import { TransactionItem } from './components/TransactionItem';
-import { MOCK_TRANSACTIONS, getCategoryStats } from './mockData';
+import { getCategoryStats } from './mockData';
 import { Transaction, TransactionType } from './types';
 
 type ViewType = 'day' | 'month' | 'year';
@@ -63,7 +63,37 @@ export default function App() {
   const [currentYear, setCurrentYear] = useState(new Date());
   const [filter, setFilter] = useState<'all' | 'income' | 'expense'>('all');
 
-  const transactions = useMemo(() => MOCK_TRANSACTIONS, []);
+  const [realTransactions, setRealTransactions] = useState<Array<any>>([]);
+
+  // 从父窗口获取真实数据
+  React.useEffect(() => {
+    // 请求父窗口的数据
+    window.parent.postMessage({ type: 'request-accounting-data' }, '*');
+
+    const handleMessage = (event: MessageEvent) => {
+      if (event.data.type === 'accounting-data-response') {
+        console.log('[AccountingStats] 收到真实数据:', event.data.data);
+        
+        // 转换数据格式以匹配 mockData 的结构
+        const convertedData = (event.data.data || []).map((record: any) => ({
+          id: record.id?.toString() || Date.now().toString(),
+          type: record.type || 'expense',
+          category: record.category || '其他',
+          amount: parseFloat(record.amount) || 0,
+          date: new Date(record.date || new Date()),
+          note: record.note || record.category || '未命名'
+        }));
+        
+        console.log('[AccountingStats] 转换后的数据:', convertedData);
+        setRealTransactions(convertedData);
+      }
+    };
+
+    window.addEventListener('message', handleMessage);
+    return () => window.removeEventListener('message', handleMessage);
+  }, []);
+
+  const transactions = useMemo(() => realTransactions.length > 0 ? realTransactions : [], [realTransactions]);
 
   const filteredTransactions = useMemo(() => {
     return transactions.filter(t => {
