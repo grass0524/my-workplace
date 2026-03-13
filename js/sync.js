@@ -201,6 +201,11 @@ class DataSync {
             const localDataRaw = localStorage.getItem(config.localKey);
             const localData = localDataRaw ? JSON.parse(localDataRaw) : {};
 
+            // 检查本地数据是否为空（对象无键或数组长度为0）
+            const isLocalEmpty = Array.isArray(localData) 
+                ? localData.length === 0 
+                : Object.keys(localData).length === 0;
+
             console.log(`[Sync] ${dataType} - 本地数据:`, localDataRaw ? `(${Array.isArray(localData) ? localData.length : Object.keys(localData).length}项)` : '空');
             console.log(`[Sync] ${dataType} - 云端数据:`, cloudData ? `(${Array.isArray(cloudData.data) ? cloudData.data.length : Object.keys(cloudData.data || {}).length}项)` : '无');
 
@@ -213,11 +218,11 @@ class DataSync {
                 mergedData = localData;
                 needUpload = true;
                 console.log(`[Sync] ${dataType} - 云端无数据，将上传本地数据`);
-            } else if (!localDataRaw) {
-                // 本地无数据，直接使用云端数据
+            } else if (!localDataRaw || isLocalEmpty) {
+                // 本地无数据或数据为空，直接使用云端数据
                 mergedData = cloudData.data;
                 this.saveToLocal(config.localKey, mergedData);
-                console.log(`[Sync] ${dataType} - 本地无数据，使用云端数据`);
+                console.log(`[Sync] ${dataType} - 本地无数据或数据为空，使用云端数据`);
             } else {
                 // 两边都有数据，需要合并
                 const cloudTimestamp = new Date(cloudData.updated_at).getTime();
@@ -231,15 +236,29 @@ class DataSync {
                     needUpload = true;
                     console.log(`[Sync] ${dataType} - 追加合并，结果: ${Array.isArray(mergedData) ? mergedData.length : Object.keys(mergedData).length}项`);
                 } else if (config.mergeStrategy === 'replace') {
-                    // 替换策略（时间戳比较）
-                    if (cloudTimestamp > localTimestamp) {
-                        mergedData = cloudData.data;
+                    // 替换策略：对于对象数据，合并键；对于时间戳比较，使用更新的一方
+                    if (typeof localData === 'object' && typeof cloudData.data === 'object' && !Array.isArray(localData) && !Array.isArray(cloudData.data)) {
+                        // 对象合并策略（如健康打卡记录）
+                        mergedData = { ...localData };
+                        for (const key of Object.keys(cloudData.data)) {
+                            if (!mergedData[key] || cloudTimestamp > localTimestamp) {
+                                mergedData[key] = cloudData.data[key];
+                            }
+                        }
                         this.saveToLocal(config.localKey, mergedData);
-                        console.log(`[Sync] ${dataType} - 云端数据更新，使用云端数据`);
-                    } else {
-                        mergedData = localData;
                         needUpload = true;
-                        console.log(`[Sync] ${dataType} - 本地数据更新，使用本地数据`);
+                        console.log(`[Sync] ${dataType} - 对象合并，结果: ${Object.keys(mergedData).length}项`);
+                    } else {
+                        // 时间戳比较策略（用于其他替换类型数据）
+                        if (cloudTimestamp > localTimestamp) {
+                            mergedData = cloudData.data;
+                            this.saveToLocal(config.localKey, mergedData);
+                            console.log(`[Sync] ${dataType} - 云端数据更新，使用云端数据`);
+                        } else {
+                            mergedData = localData;
+                            needUpload = true;
+                            console.log(`[Sync] ${dataType} - 本地数据更新，使用本地数据`);
+                        }
                     }
                 }
             }
