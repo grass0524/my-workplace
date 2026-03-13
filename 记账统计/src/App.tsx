@@ -584,7 +584,7 @@ function MonthView({
         </div>
 
         {/* Details List */}
-        <Card className="p-6 flex flex-col h-full">
+        <Card className="p-6 flex flex-col h-[500px]">
           <div className="flex items-center justify-between mb-6">
             <h3 className="text-sm font-bold text-slate-500">本月明细</h3>
             <div className="relative group">
@@ -843,7 +843,7 @@ function YearView({
         </div>
 
         {/* Details List */}
-        <Card className="p-6 flex flex-col h-full">
+        <Card className="p-6 flex flex-col h-[500px]">
           <div className="flex items-center justify-between mb-6">
             <h3 className="text-sm font-bold text-slate-500">年度明细</h3>
             <div className="relative group">
