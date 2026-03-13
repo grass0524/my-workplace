@@ -7,7 +7,7 @@
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
     <title>My Workplace</title>
-<link rel="stylesheet" href="style.css?v=1773112062">
+<link rel="stylesheet" href="style.css?v=1773112064">
     <!-- 引入 Font Awesome 图标库 (CDN) -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" media="print" onload="this.media='all'">
     <!-- 引入 Lucide 图标库 (pencil设计使用) -->
@@ -2036,66 +2036,15 @@ input[type="number"] {
 
     <!-- 记账统计弹窗 -->
     <div id="accounting-stats-modal" class="modal hidden">
-        <div class="modal-content modal-lg">
-            <div class="modal-header">
-                <h3>记账统计</h3>
-                <div class="stats-tabs">
-                    <button class="stats-period-btn active" data-period="day" onclick="switchStatsPeriod('day')">日</button>
-                    <button class="stats-period-btn" data-period="month" onclick="switchStatsPeriod('month')">月</button>
-                    <button class="stats-period-btn" data-period="year" onclick="switchStatsPeriod('year')">年</button>
-                </div>
-                <button class="btn-close" onclick="closeAccountingStats()"><i class="fas fa-times"></i></button>
-            </div>
-            <div class="modal-body">
-                <div class="stats-overview">
-                    <div class="stat-card balance">
-                        <span class="stat-label">结余</span>
-                        <span class="stat-value" id="stats-balance">¥0.00</span>
-                    </div>
-                    <div class="stat-card income">
-                        <span class="stat-label">收入</span>
-                        <span class="stat-value" id="stats-total-income">¥0.00</span>
-                    </div>
-                    <div class="stat-card expense">
-                        <span class="stat-label">支出</span>
-                        <span class="stat-value" id="stats-total-expense">¥0.00</span>
-                    </div>
-                </div>
-                
-                <div class="stats-content">
-                    <!-- 图表可视化区域 -->
-                    <div class="stats-section">
-                        <h4>收支分析</h4>
-                        <div class="stats-charts">
-                            <div class="chart-container">
-                                <canvas id="expense-pie-chart"></canvas>
-                                <div class="chart-legend" id="pie-chart-legend"></div>
-                            </div>
-                            <div class="chart-container">
-                                <canvas id="income-expense-bar-chart"></canvas>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="stats-section">
-                        <h4>分类统计</h4>
-                        <div class="stats-category-list" id="stats-category-list">
-                            <!-- 动态生成 -->
-                        </div>
-                    </div>
-
-                    <div class="stats-section">
-                        <h4>详细记录</h4>
-                        <div class="stats-records-list" id="stats-records-list">
-                            <!-- 动态生成 -->
-                        </div>
-                    </div>
-                </div>
-            </div>
+        <div class="modal-content" style="width: 95vw; height: 90vh; max-width: 1400px; padding: 0; overflow: hidden; background: transparent; box-shadow: none; border: none;">
+            <iframe 
+                id="accounting-stats-iframe"
+                src="http://localhost:3001"
+                style="width: 100%; height: 100%; border: none;"
+                frameborder="0">
+            </iframe>
         </div>
     </div>
-
-    <!-- 自定义提示组件 -->
     <div id="toast" class="toast hidden">
         <div class="toast-content">
             <i class="fas fa-info-circle toast-icon"></i>
@@ -2143,7 +2092,7 @@ input[type="number"] {
     </div>
 
     <!-- Chart.js 图表库 -->
-    <script src="https://unpkg.com/chart.js@4.4.0/dist/chart.umd.min.js" defer></script>
+    <script src="https://unpkg.com/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <script>
     // 强制清除新闻缓存以显示7条新闻
     if (localStorage.getItem('newsData')) {

@@ -2810,7 +2810,7 @@ input:checked + .mood-icon-wrapper {
 }
 
 .stats-period-btn.active {
-    box-shadow: var(--neu-shadow-in);
+    box-shadow: var(--neu-shadow-out);
     background: var(--primary-color);
     color: white;
 }
@@ -3350,7 +3350,7 @@ input:checked + .mood-icon-wrapper {
 }
 
 .stats-period-btn.active {
-    box-shadow: var(--neu-shadow-in);
+    box-shadow: var(--neu-shadow-out);
     background: var(--primary-color);
     color: white;
 }
@@ -6098,3 +6098,4 @@ section.holiday-card {
 #confirm-modal .modal-footer {
     border: none !important;
 }
+

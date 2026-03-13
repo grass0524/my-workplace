@@ -1,0 +1,5 @@
+{
+  "name": "新拟物记账统计",
+  "description": "一个基于新拟物风格的记账统计弹窗设计，支持日、月、年维度的收支分析。",
+  "requestFramePermissions": []
+}

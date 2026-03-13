@@ -3266,16 +3266,16 @@ function showAccountingStats() {
 // 关闭记账统计弹窗
 function closeAccountingStats() {
     document.getElementById('accounting-stats-modal').classList.add('hidden');
-    // 销毁图表实例
-    if (expensePieChart) {
-        expensePieChart.destroy();
-        expensePieChart = null;
-    }
-    if (incomeExpenseBarChart) {
-        incomeExpenseBarChart.destroy();
-        incomeExpenseBarChart = null;
-    }
+    // iframe应用无需清理图表
 }
+
+
+// 监听来自记账统计iframe的消息
+window.addEventListener('message', function(event) {
+    if (event.data.type === 'close-accounting-stats') {
+        closeAccountingStats();
+    }
+});
 
 // 切换统计周期
 function switchStatsPeriod(period) {
