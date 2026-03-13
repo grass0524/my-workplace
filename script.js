@@ -127,7 +127,7 @@ function toggleHealth(type) {
     healthRecords[today][type] = !healthRecords[today][type];
     updateHealthUI();
     saveHealth();
-    triggerSync();
+    window.dataSync.syncAll(['healthRecords']);
 }
 
 function updateHealthUI() {
@@ -163,6 +163,10 @@ function updateHealthUI() {
 
 function saveHealth() {
     localStorage.setItem('healthRecords', JSON.stringify(healthRecords));
+    // 使用同步引擎的保存方法来更新时间戳
+    if (window.dataSync) {
+        window.dataSync.saveToLocal('healthRecords', healthRecords);
+    }
 }
 
 // Health History Modal
@@ -336,7 +340,7 @@ function toggleTodo(id) {
         todos.sort((a, b) => a.completed - b.completed || b.id - a.id);
         saveTodos();
         renderTodos();
-        triggerSync();
+        window.dataSync.syncAll(['todos']);
     }
 }
 
@@ -344,7 +348,7 @@ function deleteTodo(id) {
     todos = todos.filter(t => t.id !== id);
     saveTodos();
     renderTodos();
-    triggerSync();
+    window.dataSync.syncAll(['todos']);
 }
 
 function editTodo(id) {
@@ -403,7 +407,7 @@ function handleTodoEditKeypress(event, id) {
 
 function saveTodos() {
     localStorage.setItem('todos', JSON.stringify(todos));
-    triggerSync();
+    window.dataSync.syncAll(['todos']);
 }
 
 function renderTodos() {
@@ -1655,7 +1659,7 @@ function saveMood() {
 
     moodEntries.unshift(newEntry);
     localStorage.setItem('moodEntries', JSON.stringify(moodEntries));
-    triggerSync();    
+    window.dataSync.syncAll(['moodEntries']);    
     noteInput.value = '';
     renderMoodRecent();
 }
@@ -1731,7 +1735,7 @@ async function deleteMood(id) {
     if (await showConfirm('确定要删除这条心情日记吗？')) {
         moodEntries = moodEntries.filter(e => e.id !== id);
         localStorage.setItem('moodEntries', JSON.stringify(moodEntries));
-    triggerSync();        renderMoodRecent();
+    window.dataSync.syncAll(['moodEntries']);        renderMoodRecent();
 
         // If modal is open, re-render modal views
         if (!document.getElementById('mood-modal').classList.contains('hidden')) {
@@ -2064,7 +2068,7 @@ function saveHealthEdit() {
     }
 
     saveHealth();
-    triggerSync();
+    window.dataSync.syncAll(['healthRecords']);
     renderHealthCalendar();
 
     // If editing today's date, also update main UI

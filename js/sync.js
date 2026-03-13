@@ -265,20 +265,22 @@ class DataSync {
 
     /**
      * 同步所有数据
+     * @param {string[]} [dataTypesToSync] - 指定要同步的数据类型，不传则同步所有
      */
-    async syncAll() {
+    async syncAll(dataTypesToSync = null) {
         if (!this.auth.isAuthenticated()) {
             console.warn('[Sync] 用户未登录，跳过同步');
             return;
         }
 
-        console.log('[Sync] 开始同步所有数据');
+        const typesToSync = dataTypesToSync || Object.keys(this.dataTypes);
+        console.log('[Sync] 开始同步:', typesToSync);
 
-        for (const dataType of Object.keys(this.dataTypes)) {
+        for (const dataType of typesToSync) {
             await this.syncData(dataType);
         }
 
-        console.log('[Sync] 所有数据同步完成');
+        console.log('[Sync] 数据同步完成');
 
         // 触发自定义事件
         window.dispatchEvent(new CustomEvent('syncComplete', {
