@@ -2745,7 +2745,10 @@ function updateAccountingSummary() {
 }
 function renderRecentRecords() {
     const container = document.getElementById('accounting-records-list');
-    const recentRecords = accountingData.records.slice(0, 5);
+    // 按时间倒序排序，然后取前5条
+    const recentRecords = accountingData.records
+        .sort((a, b) => new Date(b.date) - new Date(a.date) || b.id - a.id)
+        .slice(0, 5);
     
     if (recentRecords.length === 0) {
         container.innerHTML = '<p style="text-align: center; color: var(--text-light); padding: 20px;">暂无记账记录</p>';
