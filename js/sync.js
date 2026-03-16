@@ -246,10 +246,19 @@ class DataSync {
                 needUpload = true;
                 console.log(`[Sync] ${dataType} - 云端无数据，将上传本地数据`);
             } else if (!localDataRaw || isLocalEmpty) {
-                // 本地无数据或数据为空，直接使用云端数据
-                mergedData = cloudData.data;
-                this.saveToLocal(config.localKey, mergedData);
-                console.log(`[Sync] ${dataType} - 本地无数据或数据为空，使用云端数据`);
+                // 本地无数据或数据为空
+                if (localDataRaw && isLocalEmpty) {
+                    // 本地显式为空数组/对象，说明用户删除了所有数据
+                    // 应该用空数据覆盖云端，而不是使用云端数据
+                    mergedData = localData;
+                    console.log(`[Sync] ${dataType} - 本地数据已清空，将清空云端数据`);
+                    needUpload = true;
+                } else {
+                    // 本地根本没有数据（新设备），使用云端数据
+                    mergedData = cloudData.data;
+                    this.saveToLocal(config.localKey, mergedData);
+                    console.log(`[Sync] ${dataType} - 本地无数据（新设备），使用云端数据`);
+                }
             } else {
                 // 两边都有数据，需要合并
                 const cloudTimestamp = new Date(cloudData.updated_at).getTime();
@@ -384,11 +393,14 @@ class DataSync {
         }
 
         console.log('[Sync] 数据同步完成');
+        console.log('[Sync] 准备触发syncComplete事件，时间戳:', this.lastSyncTime);
 
         // 触发自定义事件
-        window.dispatchEvent(new CustomEvent('syncComplete', {
+        const event = new CustomEvent('syncComplete', {
             detail: { timestamp: this.lastSyncTime }
-        }));
+        });
+        window.dispatchEvent(event);
+        console.log('[Sync] syncComplete事件已触发');
     }
 
     /**

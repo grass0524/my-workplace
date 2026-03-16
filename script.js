@@ -1751,6 +1751,10 @@ function handleMoodInput(event) {
         saveMood(); // 调用保存函数
     }
 }
+// 将handleMoodInput暴露到全局
+if (typeof window !== 'undefined') {
+    window.handleMoodInput = handleMoodInput;
+}
 
 function renderMoodRecent() {
     const list = document.getElementById('mood-recent-list');
