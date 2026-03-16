@@ -21,3 +21,8 @@ START_SERVER.md
 TIANAPI_SETUP.md
 config/supabase.json
 .wrangler/
+
+.dev.vars*
+!.dev.vars.example
+.env*
+!.env.example
