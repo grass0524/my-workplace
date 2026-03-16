@@ -1809,6 +1809,15 @@ input[type="number"] {
                             <label><input type="radio" name="mood" value="angry"> <span class="mood-icon-wrapper angry"><i class="fas fa-face-angry mood-icon"></i></span></label>
                             <label><input type="radio" name="mood" value="tired"> <span class="mood-icon-wrapper tired"><i class="fas fa-face-tired mood-icon"></i></span></label>
                         </div>
+                        <script>
+                            // 心情日记Enter键支持（必须在input元素之前定义）
+                            function handleMoodInput(event) {
+                                if (event.key === 'Enter') {
+                                    event.preventDefault();
+                                    saveMood();
+                                }
+                            }
+                        </script>
                         <div class="mood-text-group">
                             <input type="text" id="mood-note" placeholder="今天心情怎么样？" onkeypress="handleMoodInput(event)">
                             <button class="btn-add" onclick="saveMood()"><i class="fas fa-plus"></i></button>
@@ -2108,15 +2117,6 @@ input[type="number"] {
 </script>
 
 <script src="script.js?v=1773397945"></script>
-    <!-- 心情日记Enter键支持 -->
-    <script>
-        function handleMoodInput(event) {
-            if (event.key === 'Enter') {
-                event.preventDefault();
-                saveMood();
-            }
-        }
-    </script>
 <script>
 // 测试函数
 function testQuickAccounting() {
