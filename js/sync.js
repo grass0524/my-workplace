@@ -438,23 +438,31 @@ class DataSync {
         
         // 处理数组类型数据
         if (Array.isArray(localData) && Array.isArray(cloudData)) {
-            // 使用ID去重，如果没有ID则使用整个对象比较
-            const merged = [...localData];
-            const localIds = new Set();
-
-            localData.forEach(item => {
-                if (item.id) localIds.add(item.id);
-            });
-
+            // 优先使用云端数据，合并ID去重
+            const merged = [];
+            const allIds = new Set();
+            
+            // 先添加云端数据（云端优先）
             cloudData.forEach(item => {
                 if (item.id) {
-                    if (!localIds.has(item.id)) {
+                    allIds.add(item.id);
+                    merged.push(item);
+                } else {
+                    merged.push(item);
+                }
+            });
+            
+            // 再添加本地独有的数据（不在云端的）
+            localData.forEach(item => {
+                if (item.id) {
+                    if (!allIds.has(item.id)) {
                         merged.push(item);
                     }
+                    // 如果ID已存在，跳过本地数据（使用云端的新数据）
                 } else {
                     // 没有ID，检查是否已存在
-                    const exists = merged.some(localItem =>
-                        JSON.stringify(localItem) === JSON.stringify(item)
+                    const exists = merged.some(cloudItem =>
+                        JSON.stringify(cloudItem) === JSON.stringify(item)
                     );
                     if (!exists) {
                         merged.push(item);
@@ -462,6 +470,7 @@ class DataSync {
                 }
             });
 
+            console.log(`[Sync] mergeAppendData: 云端${cloudData.length}项 + 本地独有${localData.length}项 = 合并${merged.length}项`);
             return merged;
         }
 
