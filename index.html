@@ -2211,7 +2211,25 @@ function testQuickAccounting() {
 
             // 如果已登录，初始化同步
             if (window.auth.isAuthenticated()) {
-                console.log('[AuthUI] 用户已登录，初始化同步');
+                console.log('[AuthUI] 用户已登录，清理并初始化同步');
+                
+                // 清理可能存在的旧数据
+                const userDataKeys = [
+                    'todos',
+                    'healthRecords',
+                    'myVocab',
+                    'vocabLibrary',
+                    'accountingData',
+                    'moodEntries',
+                    'dailyQuote'
+                ];
+                
+                userDataKeys.forEach(key => {
+                    localStorage.removeItem(key);
+                });
+                
+                console.log('[AuthUI] 旧数据已清理');
+                
                 dataSync = await initDataSync();
                 setupSyncListeners();
                 
@@ -2225,6 +2243,37 @@ function testQuickAccounting() {
             // 监听登录/登出事件
             window.auth.onLogin(async (user) => {
                 console.log('[AuthUI] 用户已登录:', user);
+                
+                // 清理旧用户数据（防止数据泄露）
+                console.log('[AuthUI] 清理旧用户数据');
+                const userDataKeys = [
+                    'todos',
+                    'healthRecords',
+                    'myVocab',
+                    'vocabLibrary',
+                    'accountingData',
+                    'moodEntries',
+                    'dailyQuote',
+                    'todos_timestamp',
+                    'healthRecords_timestamp',
+                    'myVocab_timestamp',
+                    'vocabLibrary_timestamp',
+                    'accountingData_timestamp',
+                    'moodEntries_timestamp',
+                    'sync_timestamp_todos',
+                    'sync_timestamp_healthRecords',
+                    'sync_timestamp_myVocab',
+                    'sync_timestamp_vocabLibrary',
+                    'sync_timestamp_accountingData',
+                    'sync_timestamp_moodEntries'
+                ];
+                
+                userDataKeys.forEach(key => {
+                    localStorage.removeItem(key);
+                });
+                
+                console.log('[AuthUI] 旧数据已清理，开始同步新用户数据');
+                
                 updateAuthUI();
                 dataSync = await initDataSync();
                 setupSyncListeners();
@@ -2238,6 +2287,42 @@ function testQuickAccounting() {
 
             window.auth.onLogout(() => {
                 console.log('[AuthUI] 用户已登出');
+                
+                // 清理所有用户数据
+                console.log('[AuthUI] 清理本地用户数据');
+                const userDataKeys = [
+                    'todos',
+                    'healthRecords',
+                    'myVocab',
+                    'vocabLibrary',
+                    'accountingData',
+                    'moodEntries',
+                    'dailyQuote',
+                    'todos_timestamp',
+                    'healthRecords_timestamp',
+                    'myVocab_timestamp',
+                    'vocabLibrary_timestamp',
+                    'accountingData_timestamp',
+                    'moodEntries_timestamp',
+                    'sync_timestamp_todos',
+                    'sync_timestamp_healthRecords',
+                    'sync_timestamp_myVocab',
+                    'sync_timestamp_vocabLibrary',
+                    'sync_timestamp_accountingData',
+                    'sync_timestamp_moodEntries'
+                ];
+                
+                userDataKeys.forEach(key => {
+                    localStorage.removeItem(key);
+                });
+                
+                console.log('[AuthUI] 本地数据已清理');
+                
+                // 刷新页面以清理内存中的数据
+                setTimeout(() => {
+                    window.location.reload();
+                }, 500);
+                
                 updateAuthUI();
                 if (dataSync) {
                     dataSync.stopAutoSync();
