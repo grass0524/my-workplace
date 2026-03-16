@@ -257,19 +257,52 @@ class DataSync {
 
                 if (config.mergeStrategy === 'append') {
                     // 追加合并策略（用于列表数据）
-                    // 如果本地数据比云端少，说明可能发生了删除，使用本地数据
-                    if (Array.isArray(localData) && Array.isArray(cloudData.data) && localData.length < cloudData.data.length) {
-                        console.log(`[Sync] ${dataType} - 本地数量(${localData.length}) < 云端数量(${cloudData.data.length})，使用本地数据（可能是删除操作）`);
+                    // 改进：比较ID集合而不是简单比较数量
+                    
+                    // 确保数据是数组
+                    if (!Array.isArray(localData) || !Array.isArray(cloudData.data)) {
+                        console.warn(`[Sync] ${dataType} - 数据类型错误，强制使用合并逻辑`);
+                        mergedData = this.mergeAppendData(
+                            Array.isArray(localData) ? localData : [],
+                            Array.isArray(cloudData.data) ? cloudData.data : []
+                        );
+                        this.saveToLocal(config.localKey, mergedData);
+                        needUpload = true;
+                    } else {
+                        const localIds = new Set(localData.map(item => item.id).filter(id => id));
+                        const cloudIds = new Set(cloudData.data.map(item => item.id).filter(id => id));
+                    
+                    // 找出差异
+                    const localOnly = [...localIds].filter(id => !cloudIds.has(id));
+                    const cloudOnly = [...cloudIds].filter(id => !localIds.has(id));
+                    
+                    if (localOnly.length > 0 && cloudOnly.length === 0) {
+                        // 本地有独有的，说明本地有新增，使用本地数据
+                        console.log(`[Sync] ${dataType} - 本地有新增(${localOnly.length}项)，使用本地数据`);
+                        mergedData = localData;
+                        this.saveToLocal(config.localKey, mergedData);
+                        needUpload = true;
+                    } else if (cloudOnly.length > 0 && localOnly.length === 0) {
+                        // 云端有独有的，说明云端有新增，使用云端数据
+                        console.log(`[Sync] ${dataType} - 云端有新增(${cloudOnly.length}项)，使用云端数据`);
+                        mergedData = cloudData.data;
+                        this.saveToLocal(config.localKey, mergedData);
+                        needUpload = true;
+                    } else if (localOnly.length === 0 && cloudOnly.length === 0 && localData.length < cloudData.data.length) {
+                        // 双方都没有独有的，但本地数量更少，说明发生了删除，使用本地数据
+                        console.log(`[Sync] ${dataType} - 检测到删除操作，本地数量(${localData.length}) < 云端数量(${cloudData.data.length})，使用本地数据`);
                         mergedData = localData;
                         this.saveToLocal(config.localKey, mergedData);
                         needUpload = true;
                     } else {
+                        // 其他情况，进行合并
+                        console.log(`[Sync] ${dataType} - 双方都有变化或数量相同，进行合并（本地独有:${localOnly.length}，云端独有:${cloudOnly.length}）`);
                         mergedData = this.mergeAppendData(localData, cloudData.data);
-                        // 立即保存合并后的数据到本地
                         this.saveToLocal(config.localKey, mergedData);
                         needUpload = true;
                     }
-                    console.log(`[Sync] ${dataType} - 追加合并，结果: ${Array.isArray(mergedData) ? mergedData.length : Object.keys(mergedData).length}项`);
+                    console.log(`[Sync] ${dataType} - 合并结果: ${Array.isArray(mergedData) ? mergedData.length : Object.keys(mergedData).length}项`);
+                    }
                 } else if (config.mergeStrategy === 'replace') {
                     // 替换策略：对于对象数据，合并键；对于时间戳比较，使用更新的一方
                     if (typeof localData === 'object' && typeof cloudData.data === 'object' && !Array.isArray(localData) && !Array.isArray(cloudData.data)) {

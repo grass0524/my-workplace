@@ -398,7 +398,7 @@ function addTodo() {
     input.value = '';
     saveTodos();
     renderTodos();
-    triggerSync();
+    // triggerSync(); // 已在 saveTodos() 中触发同步
 }
 
 function toggleTodo(id) {
@@ -409,7 +409,7 @@ function toggleTodo(id) {
         todos.sort((a, b) => a.completed - b.completed || b.id - a.id);
         saveTodos();
         renderTodos();
-        window.dataSync.syncAll(['todos']);
+        // window.dataSync.syncAll(['todos']); // 已在 saveTodos() 中处理
     }
 }
 
@@ -417,7 +417,7 @@ function deleteTodo(id) {
     todos = todos.filter(t => t.id !== id);
     saveTodos();
     renderTodos();
-    window.dataSync.syncAll(['todos']);
+    // window.dataSync.syncAll(['todos']); // 已在 saveTodos() 中处理
 }
 
 function editTodo(id) {
@@ -476,7 +476,18 @@ function handleTodoEditKeypress(event, id) {
 
 function saveTodos() {
     localStorage.setItem('todos', JSON.stringify(todos));
-    window.dataSync.syncAll(['todos']);
+    console.log('[saveTodos] 已保存到本地，待办数量:', todos.length);
+    
+    if (window.dataSync && window.dataSync.isReady) {
+        console.log('[saveTodos] 触发同步');
+        window.dataSync.syncAll(['todos']).then(() => {
+            console.log('[saveTodos] 同步成功');
+        }).catch(err => {
+            console.error('[saveTodos] 同步失败:', err);
+        });
+    } else {
+        console.warn('[saveTodos] dataSync未就绪，跳过同步');
+    }
 }
 
 function renderTodos() {
@@ -2443,7 +2454,7 @@ function loadAccountingData() {
 // 保存记账数据
 function saveAccountingData() {
     localStorage.setItem('accountingData', JSON.stringify(accountingData));
-    triggerSync();
+    // triggerSync(); // 已在 saveTodos() 中触发同步
 }
 
 // 智能解析用户输入

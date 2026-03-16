@@ -1,0 +1,4 @@
+# Cloudflare Pages Redirects
+# 将 /config 路由到正确的处理方式
+
+/config/* /config.html 404
