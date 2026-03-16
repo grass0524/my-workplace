@@ -512,16 +512,17 @@
         }
     </script>
     <script>
-        // 初始化认证服务
-        document.addEventListener('DOMContentLoaded', async () => {
-            console.log('[Register] 初始化认证服务');
+        // 初始化认证服务（立即执行，不等待DOMContentLoaded）
+        (async () => {
+            console.log('[Register] 开始初始化认证服务');
             const result = await initAuth();
             if (result.error) {
                 console.error('[Register] 认证初始化失败:', result.error);
             } else {
                 console.log('[Register] 认证服务已初始化');
+                console.log('[Register] isInitialized:', window.auth.isInitialized);
             }
-        });
+        })();
     </script>
 </body>
 </html>
