@@ -629,7 +629,7 @@ class DataSync {
 let dataSync = null;
 
 // 初始化同步引擎
-async function initDataSync() {
+async function initDataSync(autoSync = false) {
     if (dataSync) {
         return dataSync;
     }
@@ -641,9 +641,13 @@ async function initDataSync() {
         // 加载离线队列
         dataSync.loadOfflineQueue();
 
-        // 如果在线，立即同步一次
-        if (navigator.onLine && window.auth.isAuthenticated()) {
+        // 默认不自动同步，让调用者决定何时同步
+        // 如果需要自动同步，传入 autoSync = true
+        if (autoSync && navigator.onLine && window.auth.isAuthenticated()) {
+            console.log('[Sync] initDataSync: 自动同步已启用');
             await dataSync.syncAll();
+        } else {
+            console.log('[Sync] initDataSync: 等待手动触发同步');
         }
 
         console.log('[Sync] 数据同步引擎已就绪');

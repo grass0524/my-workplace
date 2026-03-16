@@ -2230,13 +2230,18 @@ function testQuickAccounting() {
                 
                 console.log('[AuthUI] 旧数据已清理');
                 
-                dataSync = await initDataSync();
+                // 先初始化同步引擎（不自动同步）
+                dataSync = await initDataSync(false);
+                
+                // 先设置事件监听器
                 setupSyncListeners();
                 
-                // 首次同步
+                // 手动同步数据
                 if (dataSync) {
+                    console.log('[AuthUI] 开始同步数据...');
                     updateSyncStatus('同步中...');
                     await dataSync.syncAll();
+                    console.log('[AuthUI] 数据同步完成');
                 }
             }
 
@@ -2275,13 +2280,19 @@ function testQuickAccounting() {
                 console.log('[AuthUI] 旧数据已清理，开始同步新用户数据');
                 
                 updateAuthUI();
-                dataSync = await initDataSync();
+                
+                // 先初始化同步引擎（不自动同步）
+                dataSync = await initDataSync(false);
+                
+                // 先设置事件监听器，确保能捕获到syncComplete事件
                 setupSyncListeners();
                 
-                // 登录后同步数据
+                // 登录后手动同步数据
                 if (dataSync) {
+                    console.log('[AuthUI] 开始同步数据...');
                     updateSyncStatus('同步中...');
                     await dataSync.syncAll();
+                    console.log('[AuthUI] 数据同步完成');
                 }
             });
 
@@ -2350,42 +2361,122 @@ function testQuickAccounting() {
         // 设置同步监听器
         function setupSyncListeners() {
             if (!dataSync) return;
+            
+            // 防止重复注册事件监听器
+            if (window.syncListenersSetup) {
+                console.log('[AuthUI] 事件监听器已设置，跳过重复注册');
+                return;
+            }
+            window.syncListenersSetup = true;
+            console.log('[AuthUI] 设置同步事件监听器');
 
             // 监听同步完成事件
             window.addEventListener('syncComplete', async (event) => {
                 updateSyncStatus('已同步');
+                console.log('[AuthUI] ========== 同步完成，开始重新加载所有数据 ==========');
                 console.log('[AuthUI] 同步完成于:', event.detail.timestamp);
                 
                 // 等待一小段时间确保数据写入完成
-                await new Promise(resolve => setTimeout(resolve, 100));
+                await new Promise(resolve => setTimeout(resolve, 200));
                 
-                // 重新渲染页面数据
-                console.log('[AuthUI] 重新渲染页面数据');
-                
-                // 检查本地数据
-                const localTodos = JSON.parse(localStorage.getItem('todos') || '[]');
-                console.log('[AuthUI] 本地待办数量:', localTodos.length);
-                
-                // 重新初始化待办事项
-                if (typeof initTodos === 'function') {
-                    console.log('[AuthUI] 执行 initTodos()');
-                    initTodos();
-                    console.log('[AuthUI] initTodos() 完成');
+                // 重新加载所有数据并渲染
+                console.log('[AuthUI] 步骤1: 重新加载待办事项');
+                try {
+                    if (typeof initTodos === 'function') {
+                        // 重新从localStorage加载todos数据
+                        const savedTodos = localStorage.getItem('todos');
+                        if (savedTodos) {
+                            todos = JSON.parse(savedTodos);
+                            console.log('[AuthUI] 已重新加载待办数据，数量:', todos.length);
+                        }
+                        renderTodos();
+                        console.log('[AuthUI] 待办事项已重新渲染');
+                    }
+                } catch (e) {
+                    console.error('[AuthUI] 重新加载待办事项失败:', e);
                 }
                 
-                // 重新初始化健康打卡
-                if (typeof initHealth === 'function') {
-                    console.log('[AuthUI] 执行 initHealth()');
-                    initHealth();
-                    console.log('[AuthUI] initHealth() 完成');
+                console.log('[AuthUI] 步骤2: 重新加载健康打卡');
+                try {
+                    if (typeof initHealth === 'function') {
+                        // 重新从localStorage加载healthRecords数据
+                        const savedHealth = localStorage.getItem('healthRecords');
+                        if (savedHealth) {
+                            healthRecords = JSON.parse(savedHealth);
+                            console.log('[AuthUI] 已重新加载健康打卡数据');
+                        }
+                        updateHealthUI();
+                        console.log('[AuthUI] 健康打卡已重新渲染');
+                    }
+                } catch (e) {
+                    console.error('[AuthUI] 重新加载健康打卡失败:', e);
                 }
                 
-                // 再次确认数据已渲染
-                setTimeout(() => {
-                    const finalTodos = JSON.parse(localStorage.getItem('todos') || '[]');
-                    console.log('[AuthUI] 最终确认 - 本地待办数量:', finalTodos.length);
-                    console.log('[AuthUI] 最终确认 - todos全局变量数量:', typeof todos !== 'undefined' ? todos.length : '未定义');
-                }, 100);
+                console.log('[AuthUI] 步骤3: 重新加载心情日记');
+                try {
+                    if (typeof moodEntries !== 'undefined') {
+                        const savedMood = localStorage.getItem('moodEntries');
+                        if (savedMood) {
+                            moodEntries = JSON.parse(savedMood);
+                            console.log('[AuthUI] 已重新加载心情日记数据，数量:', moodEntries.length);
+                        }
+                        renderMoodEntries();
+                        console.log('[AuthUI] 心情日记已重新渲染');
+                    }
+                } catch (e) {
+                    console.error('[AuthUI] 重新加载心情日记失败:', e);
+                }
+                
+                console.log('[AuthUI] 步骤4: 重新加载每日一句');
+                try {
+                    if (typeof initQuote === 'function') {
+                        initQuote();
+                        console.log('[AuthUI] 每日一句已重新渲染');
+                    }
+                } catch (e) {
+                    console.error('[AuthUI] 重新加载每日一句失败:', e);
+                }
+                
+                console.log('[AuthUI] 步骤5: 重新加载词库');
+                try {
+                    if (typeof vocabLibrary !== 'undefined') {
+                        const savedVocab = localStorage.getItem('vocabLibrary');
+                        if (savedVocab) {
+                            vocabLibrary = JSON.parse(savedVocab);
+                            console.log('[AuthUI] 已重新加载词库数据，数量:', vocabLibrary.length);
+                        }
+                    }
+                    if (typeof myVocab !== 'undefined') {
+                        const savedMyVocab = localStorage.getItem('myVocab');
+                        if (savedMyVocab) {
+                            myVocab = JSON.parse(savedMyVocab);
+                            console.log('[AuthUI] 已重新加载生词本数据，数量:', myVocab.length);
+                        }
+                    }
+                    if (typeof renderVocabModal === 'function') {
+                        renderVocabModal();
+                    }
+                } catch (e) {
+                    console.error('[AuthUI] 重新加载词库失败:', e);
+                }
+                
+                console.log('[AuthUI] 步骤6: 重新加载记账数据');
+                try {
+                    if (typeof accountingData !== 'undefined') {
+                        const savedAccounting = localStorage.getItem('accountingData');
+                        if (savedAccounting) {
+                            accountingData = JSON.parse(savedAccounting);
+                            console.log('[AuthUI] 已重新加载记账数据，记录数:', accountingData.records?.length || 0);
+                        }
+                    }
+                    if (typeof renderAccountingRecords === 'function') {
+                        renderAccountingRecords();
+                    }
+                } catch (e) {
+                    console.error('[AuthUI] 重新加载记账数据失败:', e);
+                }
+                
+                console.log('[AuthUI] ========== 所有数据重新加载完成 ==========');
                 
                 // 3秒后隐藏同步状态
                 setTimeout(() => {
