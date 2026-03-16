@@ -1744,6 +1744,14 @@ function saveMood() {
     renderMoodRecent();
 }
 
+
+function handleMoodInput(event) {
+    if (event.key === 'Enter') {
+        event.preventDefault(); // 防止换行
+        saveMood(); // 调用保存函数
+    }
+}
+
 function renderMoodRecent() {
     const list = document.getElementById('mood-recent-list');
     list.innerHTML = '';
