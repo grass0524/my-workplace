@@ -2454,7 +2454,28 @@ function loadAccountingData() {
 // 保存记账数据
 function saveAccountingData() {
     localStorage.setItem('accountingData', JSON.stringify(accountingData));
-    // triggerSync(); // 已在 saveTodos() 中触发同步
+    console.log('[saveAccountingData] 已保存记账数据，记录数:', accountingData.records.length);
+    
+    // 重新渲染统计（如果统计弹窗打开）
+    const modal = document.getElementById('accounting-modal');
+    if (modal && !modal.classList.contains('hidden')) {
+        console.log('[saveAccountingData] 统计弹窗已打开，重新渲染');
+        const activePeriod = document.querySelector('.stats-period-switch .btn-icon.active');
+        if (activePeriod) {
+            renderAccountingStats(activePeriod.dataset.period);
+        }
+    }
+    
+    if (window.dataSync && window.dataSync.isReady) {
+        console.log('[saveAccountingData] 触发记账数据同步');
+        window.dataSync.syncAll(['accountingData']).then(() => {
+            console.log('[saveAccountingData] 记账数据同步成功');
+        }).catch(err => {
+            console.error('[saveAccountingData] 记账数据同步失败:', err);
+        });
+    } else {
+        console.warn('[saveAccountingData] dataSync未就绪，跳过同步');
+    }
 }
 
 // 智能解析用户输入
