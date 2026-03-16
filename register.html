@@ -489,5 +489,17 @@
             errorDiv.classList.remove('show');
         }
     </script>
+    <script>
+        // 初始化认证服务
+        document.addEventListener('DOMContentLoaded', async () => {
+            console.log('[Register] 初始化认证服务');
+            const result = await initAuth();
+            if (result.error) {
+                console.error('[Register] 认证初始化失败:', result.error);
+            } else {
+                console.log('[Register] 认证服务已初始化');
+            }
+        });
+    </script>
 </body>
 </html>
