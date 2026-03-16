@@ -2271,6 +2271,19 @@ function testQuickAccounting() {
                 updateSyncStatus('已同步');
                 console.log('[AuthUI] 同步完成于:', event.detail.timestamp);
                 
+                // 重新渲染页面数据
+                console.log('[AuthUI] 重新渲染页面数据');
+                
+                // 重新初始化待办事项
+                if (typeof initTodos === 'function') {
+                    initTodos();
+                }
+                
+                // 重新初始化健康打卡
+                if (typeof initHealth === 'function') {
+                    initHealth();
+                }
+                
                 // 3秒后隐藏同步状态
                 setTimeout(() => {
                     updateSyncStatus('已同步');
