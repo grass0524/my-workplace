@@ -20,3 +20,4 @@ HOLIDAY_CALENDAR_README.md
 START_SERVER.md
 TIANAPI_SETUP.md
 config/supabase.json
+.wrangler/
