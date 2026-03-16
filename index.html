@@ -2108,6 +2108,15 @@ input[type="number"] {
 </script>
 
 <script src="script.js?v=1773397945"></script>
+    <!-- 心情日记Enter键支持 -->
+    <script>
+        function handleMoodInput(event) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                saveMood();
+            }
+        }
+    </script>
 <script>
 // 测试函数
 function testQuickAccounting() {
