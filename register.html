@@ -445,12 +445,15 @@
 
             try {
                 // 确保认证服务已初始化
-                if (!window.auth || !window.auth.isInitialized) {
+                if (!window.auth || !window.auth.supabase) {
                     console.log('[Register] 认证服务未初始化，正在初始化...');
                     const initResult = await initAuth();
                     if (initResult.error) {
                         throw new Error('认证服务初始化失败：' + initResult.error.message);
                     }
+                    console.log('[Register] 认证服务初始化完成');
+                } else {
+                    console.log('[Register] 认证服务已就绪');
                 }
                 
                 // 调用注册函数
