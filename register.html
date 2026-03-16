@@ -445,9 +445,16 @@
 
             try {
                 // 确保认证服务已初始化
-                if (!window.auth || !window.auth.supabase) {
+                console.log('[Register] 检查认证服务状态:', {
+                    hasAuth: !!window.auth,
+                    hasSupabase: !!(window.auth && window.auth.supabase),
+                    isInitialized: !!(window.auth && window.auth.isInitialized)
+                });
+                
+                if (!window.auth || !window.auth.isInitialized) {
                     console.log('[Register] 认证服务未初始化，正在初始化...');
                     const initResult = await initAuth();
+                    console.log('[Register] 初始化结果:', initResult);
                     if (initResult.error) {
                         throw new Error('认证服务初始化失败：' + initResult.error.message);
                     }
