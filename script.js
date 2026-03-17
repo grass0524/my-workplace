@@ -2993,98 +2993,6 @@ function switchAccountingPeriod(period) {
 }
 
 // 渲染统计数据
-function renderAccountingStats(period) {
-    const now = new Date();
-    let startDate, endDate, title;
-    
-    switch (period) {
-        case 'day':
-            startDate = new Date(now.setHours(0, 0, 0, 0));
-            endDate = new Date(now.setHours(23, 59, 59, 999));
-            title = '今日';
-            break;
-        case 'month':
-            startDate = new Date(now.getFullYear(), now.getMonth(), 1);
-            endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0);
-            title = '本月';
-            break;
-        case 'year':
-            startDate = new Date(now.getFullYear(), 0, 1);
-            endDate = new Date(now.getFullYear(), 11, 31);
-            title = '本年';
-            break;
-    }
-    
-    const periodRecords = accountingData.records.filter(r => {
-        const recordDate = new Date(r.date);
-        return recordDate >= startDate && recordDate <= endDate;
-    });
-    
-    const totalIncome = periodRecords
-        .filter(r => r.type === 'income')
-        .reduce((sum, r) => sum + r.amount, 0);
-    
-    const totalExpense = periodRecords
-        .filter(r => r.type === 'expense')
-        .reduce((sum, r) => sum + r.amount, 0);
-    
-    const balance = totalIncome - totalExpense;
-    
-    // 渲染概览
-    document.getElementById('accounting-stats-overview').innerHTML = 
-        '<div class="accounting-stat-card total">' +
-        '<span class="label">收支结余</span>' +
-        '<span class="value">¥' + balance.toFixed(2) + '</span>' +
-        '</div>' +
-        '<div class="accounting-stat-card income">' +
-        '<span class="label">总收入</span>' +
-        '<span class="value">¥' + totalIncome.toFixed(2) + '</span>' +
-        '</div>' +
-        '<div class="accounting-stat-card expense">' +
-        '<span class="label">总支出</span>' +
-        '<span class="value">¥' + totalExpense.toFixed(2) + '</span>' +
-        '</div>';
-    
-    // 按分类统计
-    const categoryStats = {};
-    periodRecords.forEach(r => {
-        if (!categoryStats[r.category]) {
-            categoryStats[r.category] = { type: r.type, amount: 0, records: [] };
-        }
-        categoryStats[r.category].amount += r.amount;
-        categoryStats[r.category].records.push(r);
-    });
-    
-    // 渲染分类详情
-    const sortedCategories = Object.entries(categoryStats)
-        .sort((a, b) => b[1].amount - a[1].amount);
-    
-    if (sortedCategories.length === 0) {
-        document.getElementById('accounting-stats-detail').innerHTML = 
-            '<p style="text-align: center; color: var(--text-light); padding: 40px;">暂无记录</p>';
-    } else {
-        document.getElementById('accounting-stats-detail').innerHTML = sortedCategories.map(([cat, data]) => 
-            '<div class="accounting-stats-category">' +
-            '<div class="accounting-stats-category-header">' +
-            '<span class="accounting-stats-category-name">' + cat + '</span>' +
-            '<span class="accounting-stats-category-amount ' + data.type + '">' +
-            (data.type === 'income' ? '+' : '-') + '¥' + data.amount.toFixed(2) +
-            '</span>' +
-            '</div>' +
-            '<div class="accounting-stats-category-records">' +
-            data.records.slice(0, 3).map(r => 
-                '<div style="display: flex; justify-content: space-between; font-size: 13px; color: var(--text-light); padding: 8px 0;">' +
-                '<span>' + r.note + '</span>' +
-                '<span>' + new Date(r.date).toLocaleDateString('zh-CN') + '</span>' +
-                '</div>'
-            ).join('') +
-            '</div>' +
-            '</div>'
-        ).join('');
-    }
-}
-
-
 // ==================== 热点新闻功能 ====================
 
 // 新闻数据存储
@@ -3426,7 +3334,7 @@ window.addEventListener('message', function(event) {
 function switchStatsPeriod(period) {
     currentStatsPeriod = period;
     updateStatsButtons();
-    renderAccountingStats();
+    renderAccountingStats(currentStatsPeriod);
 }
 
 // 更新统计周期按钮状态
@@ -3437,11 +3345,14 @@ function updateStatsButtons() {
 }
 
 // 渲染统计数据
-function renderAccountingStats() {
+function renderAccountingStats(period) {
     const now = new Date();
     let startDate, endDate;
-    
-    switch (currentStatsPeriod) {
+
+    // 如果没有传参，使用当前周期
+    const statsPeriod = period || currentStatsPeriod;
+
+    switch (statsPeriod) {
         case 'day':
             startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
             endDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59);
