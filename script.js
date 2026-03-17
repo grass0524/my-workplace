@@ -706,18 +706,34 @@ async function initWord() {
             // 检查是否有用户导入的词库
             const hasUserVocab = vocabLibrary.length > BUILTIN_WORD_COUNT;
 
-            // 如果有保存的索引，且日期相同，且是用户导入的词库索引，则使用保存的索引
+            // 如果有保存的索引，且日期相同
             if (savedIndex !== null && savedDate === todayDate) {
                 const savedIndexNum = parseInt(savedIndex);
-                // 只恢复用户词库的索引（>= BUILTIN_WORD_COUNT）
-                if (savedIndexNum >= BUILTIN_WORD_COUNT && savedIndexNum < vocabLibrary.length) {
+                // 检查是否有用户导入的词库
+                const hasUserVocab = vocabLibrary.length > BUILTIN_WORD_COUNT;
+
+                // 如果有用户词库，但保存的是内置单词索引，自动重新选择
+                if (hasUserVocab && savedIndexNum < BUILTIN_WORD_COUNT) {
+                    console.log('[initWord] 检测到旧的内置单词索引，自动切换到用户词库');
+                    await selectRandomUserVocabWord();
+                } else if (hasUserVocab && savedIndexNum >= BUILTIN_WORD_COUNT && savedIndexNum < vocabLibrary.length) {
+                    // 恢复用户词库的单词
                     currentWordIndex = savedIndexNum;
                     currentWord = vocabLibrary[currentWordIndex];
-                    console.log('[initWord] 恢复上次选择的单词:', currentWord.word, '索引:', currentWordIndex);
+                    console.log('[initWord] 恢复上次选择的用户词库单词:', currentWord.word, '索引:', currentWordIndex);
+                } else if (!hasUserVocab && savedIndexNum < vocabLibrary.length) {
+                    // 没有用户词库，恢复内置单词
+                    currentWordIndex = savedIndexNum;
+                    currentWord = vocabLibrary[currentWordIndex];
+                    console.log('[initWord] 恢复上次选择的内置单词:', currentWord.word, '索引:', currentWordIndex);
                 } else {
-                    // 保存的索引无效（可能是内置词库或超出范围），重新选择
+                    // 索引无效，重新选择
                     console.log('[initWord] 保存的索引无效，重新选择');
-                    await selectRandomUserVocabWord();
+                    if (hasUserVocab) {
+                        await selectRandomUserVocabWord();
+                    } else {
+                        selectRandomBuiltinWord();
+                    }
                 }
             } else {
                 // 没有保存的索引，或日期不同，选择新单词
