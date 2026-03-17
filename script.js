@@ -2467,9 +2467,14 @@ function loadAccountingData() {
 }
 // 保存记账数据
 function saveAccountingData() {
+    // 保存到本地
     localStorage.setItem('accountingData', JSON.stringify(accountingData));
+
+    // 保存时间戳（用于同步时比较新旧数据）
+    localStorage.setItem('accountingData_timestamp', Date.now().toString());
+
     console.log('[saveAccountingData] 已保存记账数据，记录数:', accountingData.records.length);
-    
+
     // 重新渲染统计（如果统计弹窗打开）
     const modal = document.getElementById('accounting-modal');
     if (modal && !modal.classList.contains('hidden')) {
@@ -2479,13 +2484,16 @@ function saveAccountingData() {
             renderAccountingStats(activePeriod.dataset.period);
         }
     }
-    
+
     if (window.dataSync && window.dataSync.isReady) {
-        console.log('[saveAccountingData] 触发记账数据同步');
-        window.dataSync.syncAll(['accountingData']).then(() => {
-            console.log('[saveAccountingData] 记账数据同步成功');
+        console.log('[saveAccountingData] 正在上传到云端...');
+
+        // 使用 uploadData 而不是 syncAll，避免下载旧数据覆盖本地更改
+        // 同时避免连续快速添加时的并发冲突
+        window.dataSync.uploadData('accountingData').then(() => {
+            console.log('[saveAccountingData] ✅ 已上传到云端');
         }).catch(err => {
-            console.error('[saveAccountingData] 记账数据同步失败:', err);
+            console.error('[saveAccountingData] ❌ 上传失败:', err);
         });
     } else {
         console.warn('[saveAccountingData] dataSync未就绪，跳过同步');
