@@ -2824,18 +2824,31 @@ function deleteAccountingRecord(id) {
     showConfirmModal(
         '确认删除',
         '确定要删除这条记账记录吗？',
-        () => {
+        async () => {
             // 从数据中删除
             const index = accountingData.records.findIndex(r => r.id === id);
             if (index !== -1) {
                 accountingData.records.splice(index, 1);
-                saveAccountingData();
-                
-                // 更新UI
+
+                // 立即保存到本地
+                localStorage.setItem('accountingData', JSON.stringify(accountingData));
+
+                // 立即更新UI
                 updateAccountingSummary();
                 renderRecentRecords();
-                
+
                 showToast('删除成功！');
+
+                // 立即上传到云端（不下载，避免覆盖）
+                if (window.dataSync && window.dataSync.isReady) {
+                    console.log('[deleteAccountingRecord] 正在上传删除后的数据到云端...');
+                    try {
+                        await window.dataSync.uploadData('accountingData');
+                        console.log('[deleteAccountingRecord] ✅ 已上传删除后的数据到云端');
+                    } catch (err) {
+                        console.error('[deleteAccountingRecord] ❌ 上传失败:', err);
+                    }
+                }
             }
         }
     );
