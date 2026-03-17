@@ -3306,6 +3306,10 @@ function showAccountingStats() {
     document.body.style.overflow = 'hidden';
     document.body.style.position = 'fixed';
     document.body.style.width = '100%';
+
+    // 渲染统计数据（使用当前周期）
+    console.log('[showAccountingStats] 渲染统计数据');
+    renderAccountingStats(currentStatsPeriod);
 }
 
 // 关闭记账统计弹窗
@@ -3317,34 +3321,6 @@ function closeAccountingStats() {
     document.body.style.width = '';
 }
 
-// 监听来自记账统计iframe的消息
-window.addEventListener('message', function(event) {
-    console.log('[Main] 收到消息:', event.data);
-
-    if (event.data.type === 'close-accounting-stats') {
-        closeAccountingStats();
-    } else if (event.data.type === 'request-accounting-data') {
-        // 返回真实的记账数据
-        console.log('[Main] 收到 iframe 数据请求，返回记账数据:', accountingData);
-        console.log('[Main] event.origin:', event.origin);
-        console.log('[Main] event.source:', event.source);
-
-        const response = {
-            type: 'accounting-data-response',
-            data: accountingData.records || []
-        };
-
-        console.log('[Main] 发送响应:', response);
-
-        try {
-            event.source.postMessage(response, event.origin || '*');
-            console.log('[Main] ✅ 响应已发送');
-        } catch (err) {
-            console.error('[Main] ❌ 发送响应失败:', err);
-        }
-    }
-});
-
 function switchStatsPeriod(period) {
     currentStatsPeriod = period;
     updateStatsButtons();
@@ -3353,7 +3329,7 @@ function switchStatsPeriod(period) {
 
 // 更新统计周期按钮状态
 function updateStatsButtons() {
-    document.querySelectorAll('.stats-period-btn').forEach(btn => {
+    document.querySelectorAll('.stats-period-switch .btn-icon').forEach(btn => {
         btn.classList.toggle('active', btn.dataset.period === currentStatsPeriod);
     });
 }
