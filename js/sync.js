@@ -385,11 +385,25 @@ class DataSync {
                     const cloudOnly = [...cloudIds].filter(id => !localIds.has(id));
 
                     if (localOnly.length > 0 && cloudOnly.length === 0) {
-                        // 本地有独有的，说明本地有新增，使用本地数据
-                        console.log(`[Sync] ${dataType} - 本地有新增(${localOnly.length}项)，使用本地数据`);
-                        mergedData = dataType === 'accountingData' ? { records: localArray } : localArray;
-                        this.saveToLocal(config.localKey, mergedData);
-                        needUpload = true;
+                        // 本地有独有的ID，可能是：
+                        // 1. 本地真的有新增
+                        // 2. 云端删除了这些ID
+                        // 比较时间戳决定
+                        const cloudTimestamp = new Date(cloudData.updated_at).getTime();
+                        const localTimestamp = this.getLocalDataTimestamp(config.localKey);
+
+                        if (localTimestamp > cloudTimestamp) {
+                            // 本地更新，使用本地数据（可能是新增或删除）
+                            console.log(`[Sync] ${dataType} - 本地有变更(${localOnly.length}项独有)，本地更新(${new Date(localTimestamp).toLocaleTimeString()}) > 云端(${new Date(cloudTimestamp).toLocaleTimeString()})，使用本地数据`);
+                            mergedData = dataType === 'accountingData' ? { records: localArray } : localArray;
+                            this.saveToLocal(config.localKey, mergedData);
+                            needUpload = true;
+                        } else {
+                            // 云端更新，使用云端数据
+                            console.log(`[Sync] ${dataType} - 本地有变更(${localOnly.length}项独有)，但云端更新(${new Date(cloudTimestamp).toLocaleTimeString()}) >= 本地(${new Date(localTimestamp).toLocaleTimeString()})，使用云端数据`);
+                            mergedData = dataType === 'accountingData' ? { records: cloudArray } : cloudArray;
+                            this.saveToLocal(config.localKey, mergedData);
+                        }
                     } else if (cloudOnly.length > 0 && localOnly.length === 0) {
                         // 云端有独有的，说明云端有新增，使用云端数据
                         console.log(`[Sync] ${dataType} - 云端有新增(${cloudOnly.length}项)，使用云端数据`);

@@ -2830,8 +2830,9 @@ function deleteAccountingRecord(id) {
             if (index !== -1) {
                 accountingData.records.splice(index, 1);
 
-                // 立即保存到本地
+                // 立即保存到本地（包括时间戳，用于同步比较）
                 localStorage.setItem('accountingData', JSON.stringify(accountingData));
+                localStorage.setItem('accountingData_timestamp', Date.now().toString());
 
                 // 立即更新UI
                 updateAccountingSummary();
