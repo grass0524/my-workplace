@@ -8,8 +8,6 @@
     <meta http-equiv="Expires" content="0">
     <title>My Workplace</title>
 <link rel="stylesheet" href="style.css?v=1773112064">
-    <!-- 记账统计样式 -->
-    <link rel="stylesheet" href="accounting-stats-styles.css">
     <!-- 引入 Font Awesome 图标库 (CDN) -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" media="print" onload="this.media='all'">
     <!-- 引入 Lucide 图标库 (pencil设计使用) -->
@@ -1507,8 +1505,6 @@ input[type="number"] {
 .type-toggle-group .type-toggle-btn.income.active span {
     color: #ffffff !important;
 }</style>
-<!-- Chart.js 图表库 -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
 </head>
 <body>
         <header class="header" style="display: flex; justify-content: space-between; align-items: center;">
@@ -2049,82 +2045,13 @@ input[type="number"] {
 
     <!-- 记账统计弹窗 -->
     <div id="accounting-stats-modal" class="modal hidden">
-        <div class="modal-content" style="width: 95vw; height: 90vh; max-width: 1400px; background: #e6e9f0; border-radius: 24px; overflow: hidden; display: flex; flex-direction: column;">
-            <!-- 关闭按钮 -->
-            <button class="modal-close-btn" onclick="closeAccountingStats()" style="position: absolute; top: 20px; right: 20px; z-index: 10; background: #e6e9f0; box-shadow: 5px 5px 10px rgba(163, 177, 198, 0.4), -5px -5px 10px rgba(255, 255, 255, 0.8); border: none; border-radius: 12px; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #64748b; transition: all 0.2s;">
-                <i class="fas fa-times"></i>
-            </button>
-
-            <!-- 头部 -->
-            <div style="padding: 30px 40px 20px; border-bottom: 1px solid rgba(255,255,255,0.3);">
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <h1 style="margin: 0; font-size: 28px; font-weight: 700; color: #334155;">记账统计</h1>
-
-                    <!-- 视图切换按钮 -->
-                    <div style="display: flex; gap: 12px; background: #e6e9f0; box-shadow: inset 4px 4px 8px rgba(163, 177, 198, 0.4), inset -4px -4px 8px rgba(255, 255, 255, 0.8); border-radius: 14px; padding: 6px;">
-                        <button class="neumorphic-btn active" data-period="day" onclick="switchStatsPeriod('day')" style="padding: 10px 24px; margin: 0;">
-                            今日
-                        </button>
-                        <button class="neumorphic-btn" data-period="month" onclick="switchStatsPeriod('month')" style="padding: 10px 24px; margin: 0;">
-                            本月
-                        </button>
-                        <button class="neumorphic-btn" data-period="year" onclick="switchStatsPeriod('year')" style="padding: 10px 24px; margin: 0;">
-                            本年
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 内容区域 -->
-            <div style="flex: 1; overflow-y: auto; padding: 30px 40px;">
-                <!-- 概览卡片 -->
-                <div class="overview-grid">
-                    <div class="stats-card overview-card">
-                        <div class="stat-label">收支结余</div>
-                        <div class="stat-value text-balance" id="stats-balance">¥0.00</div>
-                    </div>
-                    <div class="stats-card overview-card">
-                        <div class="stat-label">总收入</div>
-                        <div class="stat-value text-income" id="stats-total-income">¥0.00</div>
-                    </div>
-                    <div class="stats-card overview-card">
-                        <div class="stat-label">总支出</div>
-                        <div class="stat-value text-expense" id="stats-total-expense">¥0.00</div>
-                    </div>
-                </div>
-
-                <!-- 图表 -->
-                <div class="charts-grid">
-                    <!-- 支出饼图 -->
-                    <div class="chart-container">
-                        <h3 style="margin: 0 0 20px 0; font-size: 16px; font-weight: 600; color: #475569;">支出分类</h3>
-                        <div style="position: relative; height: 280px;">
-                            <canvas id="expense-pie-chart"></canvas>
-                        </div>
-                        <div id="pie-chart-legend" style="margin-top: 20px;"></div>
-                    </div>
-
-                    <!-- 收支柱状图 -->
-                    <div class="chart-container">
-                        <h3 style="margin: 0 0 20px 0; font-size: 16px; font-weight: 600; color: #475569;">收支对比</h3>
-                        <div style="position: relative; height: 280px;">
-                            <canvas id="income-expense-bar-chart"></canvas>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 分类列表 -->
-                <div class="stats-card">
-                    <h3 style="margin: 0 0 20px 0; font-size: 16px; font-weight: 600; color: #475569;">分类详情</h3>
-                    <div id="stats-category-list"></div>
-                </div>
-
-                <!-- 记录列表 -->
-                <div class="stats-card">
-                    <h3 style="margin: 0 0 20px 0; font-size: 16px; font-weight: 600; color: #475569;">详细记录</h3>
-                    <div id="stats-records-list" style="max-height: 350px; overflow-y: auto;"></div>
-                </div>
-            </div>
+        <div class="modal-content" style="width: 95vw; height: 100vh; max-width: 1400px; padding: 0; overflow: hidden; background: transparent; box-shadow: none; border: none;">
+            <iframe
+                id="accounting-stats-iframe"
+                src="https://2879bbb8.accounting-stats.pages.dev"
+                style="width: 100%; height: 100vh; border: none;"
+                frameborder="0">
+            </iframe>
         </div>
     </div>
     <div id="toast" class="toast hidden">
@@ -2189,7 +2116,7 @@ input[type="number"] {
 }
 </script>
 
-<script src="script.js?v=1773780000"></script>
+<script src="script.js?v=1773760000"></script>
 <script>
 // 测试函数
 function testQuickAccounting() {
