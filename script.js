@@ -706,16 +706,27 @@ async function initWord() {
             // 检查是否有用户导入的词库
             const hasUserVocab = vocabLibrary.length > BUILTIN_WORD_COUNT;
 
+            // 详细日志
+            console.log('[initWord] 词库总数:', vocabLibrary.length);
+            console.log('[initWord] 内置单词数:', BUILTIN_WORD_COUNT);
+            console.log('[initWord] 是否有用户词库:', hasUserVocab);
+            console.log('[initWord] 保存的索引:', savedIndex);
+            console.log('[initWord] 保存的日期:', savedDate);
+            console.log('[initWord] 今天日期:', todayDate);
+            console.log('[initWord] 日期匹配:', savedDate === todayDate);
+
             // 如果有保存的索引，且日期相同
             if (savedIndex !== null && savedDate === todayDate) {
                 const savedIndexNum = parseInt(savedIndex);
-                // 检查是否有用户导入的词库
-                const hasUserVocab = vocabLibrary.length > BUILTIN_WORD_COUNT;
+                console.log('[initWord] 保存的索引数值:', savedIndexNum);
 
                 // 如果有用户词库，但保存的是内置单词索引，自动重新选择
                 if (hasUserVocab && savedIndexNum < BUILTIN_WORD_COUNT) {
                     console.log('[initWord] 检测到旧的内置单词索引，自动切换到用户词库');
+                    console.log('[initWord] 调用 selectRandomUserVocabWord()...');
                     await selectRandomUserVocabWord();
+                    console.log('[initWord] selectRandomUserVocabWord() 返回完成');
+                    console.log('[initWord] 最终选择的单词:', currentWord.word, '索引:', currentWordIndex);
                 } else if (hasUserVocab && savedIndexNum >= BUILTIN_WORD_COUNT && savedIndexNum < vocabLibrary.length) {
                     // 恢复用户词库的单词
                     currentWordIndex = savedIndexNum;
@@ -729,6 +740,7 @@ async function initWord() {
                 } else {
                     // 索引无效，重新选择
                     console.log('[initWord] 保存的索引无效，重新选择');
+                    console.log('[initWord] hasUserVocab:', hasUserVocab, 'savedIndexNum:', savedIndexNum, 'vocabLibrary.length:', vocabLibrary.length);
                     if (hasUserVocab) {
                         await selectRandomUserVocabWord();
                     } else {
@@ -737,10 +749,16 @@ async function initWord() {
                 }
             } else {
                 // 没有保存的索引，或日期不同，选择新单词
+                console.log('[initWord] 无保存索引或日期不匹配，选择新单词');
+                console.log('[initWord] hasUserVocab:', hasUserVocab);
                 if (hasUserVocab) {
+                    console.log('[initWord] 调用 selectRandomUserVocabWord()...');
                     await selectRandomUserVocabWord();
+                    console.log('[initWord] selectRandomUserVocabWord() 返回完成');
+                    console.log('[initWord] 最终选择的单词:', currentWord.word, '索引:', currentWordIndex);
                 } else {
                     // 没有用户词库，使用内置词库
+                    console.log('[initWord] 使用内置词库');
                     selectRandomBuiltinWord();
                 }
             }
@@ -788,8 +806,16 @@ async function initWord() {
 
 // 从用户导入的词库中随机选择一个未显示过的单词
 async function selectRandomUserVocabWord() {
+    console.log('[selectRandomUserVocabWord] 开始执行');
+    console.log('[selectRandomUserVocabWord] vocabLibrary.length:', vocabLibrary.length);
+    console.log('[selectRandomUserVocabWord] BUILTIN_WORD_COUNT:', BUILTIN_WORD_COUNT);
+
     const userVocabStart = BUILTIN_WORD_COUNT;
     const userVocabEnd = vocabLibrary.length - 1;
+
+    console.log('[selectRandomUserVocabWord] userVocabStart:', userVocabStart);
+    console.log('[selectRandomUserVocabWord] userVocabEnd:', userVocabEnd);
+    console.log('[selectRandomUserVocabWord] userVocabStart > userVocabEnd:', userVocabStart > userVocabEnd);
 
     if (userVocabStart > userVocabEnd) {
         // 没有用户导入的词库
@@ -806,6 +832,8 @@ async function selectRandomUserVocabWord() {
         }
     }
 
+    console.log('[selectRandomUserVocabWord] 未显示的单词数:', unshownIndices.length);
+
     if (unshownIndices.length === 0) {
         // 所有用户词库单词都已显示过
         console.warn('[selectRandomUserVocabWord] 词库已学完');
@@ -817,6 +845,7 @@ async function selectRandomUserVocabWord() {
         const randomIndex = Math.floor(Math.random() * (userVocabEnd - userVocabStart + 1)) + userVocabStart;
         currentWordIndex = randomIndex;
         currentWord = vocabLibrary[currentWordIndex];
+        console.log('[selectRandomUserVocabWord] 重置后选择新单词:', currentWord.word, '索引:', currentWordIndex);
     } else {
         // 从未显示过的单词中随机选择
         const randomPos = Math.floor(Math.random() * unshownIndices.length);
@@ -830,6 +859,8 @@ async function selectRandomUserVocabWord() {
     const todayDate = `${today.getFullYear()}-${today.getMonth() + 1}-${today.getDate()}`;
     localStorage.setItem('currentWordIndex', currentWordIndex.toString());
     localStorage.setItem('currentWordDate', todayDate);
+    console.log('[selectRandomUserVocabWord] 已保存到localStorage - 索引:', currentWordIndex, '日期:', todayDate);
+    console.log('[selectRandomUserVocabWord] 执行完成');
 }
 
 // 从内置词库中随机选择

@@ -67,13 +67,12 @@ export default function App() {
 
   // 从父窗口获取真实数据
   React.useEffect(() => {
-    // 请求父窗口的数据
-    window.parent.postMessage({ type: 'request-accounting-data' }, '*');
+    console.log('[AccountingStats] 组件已加载，准备请求数据');
 
     const handleMessage = (event: MessageEvent) => {
       if (event.data.type === 'accounting-data-response') {
         console.log('[AccountingStats] 收到真实数据:', event.data.data);
-        
+
         // 转换数据格式以匹配 mockData 的结构
         const convertedData = (event.data.data || []).map((record: any) => ({
           id: record.id?.toString() || Date.now().toString(),
@@ -83,17 +82,49 @@ export default function App() {
           date: new Date(record.date || new Date()),
           note: record.note || record.category || '未命名'
         }));
-        
+
         console.log('[AccountingStats] 转换后的数据:', convertedData);
         setRealTransactions(convertedData);
       }
     };
 
     window.addEventListener('message', handleMessage);
-    return () => window.removeEventListener('message', handleMessage);
+
+    // 多次尝试请求数据，确保父窗口已准备好
+    const requestCount = 5;
+    let attempts = 0;
+
+    const requestData = () => {
+      if (attempts < requestCount) {
+        attempts++;
+        console.log(`[AccountingStats] 发送数据请求 (尝试 ${attempts}/${requestCount})`);
+        window.parent.postMessage({ type: 'request-accounting-data' }, '*');
+      }
+    };
+
+    // 立即请求一次
+    requestData();
+
+    // 每秒重试一次
+    const timer = setInterval(() => {
+      if (attempts < requestCount) {
+        requestData();
+      } else {
+        clearInterval(timer);
+        console.log('[AccountingStats] 请求完成，停止重试');
+      }
+    }, 1000);
+
+    return () => {
+      window.removeEventListener('message', handleMessage);
+      clearInterval(timer);
+    };
   }, []);
 
-  const transactions = useMemo(() => realTransactions.length > 0 ? realTransactions : [], [realTransactions]);
+  const transactions = useMemo(() => {
+    console.log('[AccountingStats] 当前交易数据数量:', realTransactions.length);
+    return realTransactions;
+  }, [realTransactions]);
 
   const filteredTransactions = useMemo(() => {
     return transactions.filter(t => {
