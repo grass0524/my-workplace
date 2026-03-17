@@ -658,7 +658,7 @@ let myVocab = [];
 async function initWord() {
     try {
         console.log('[initWord] 开始初始化今日单词');
-        
+
         // 从localStorage加载词库
         const savedLibrary = localStorage.getItem('vocabLibrary');
         if (savedLibrary) {
@@ -682,10 +682,20 @@ async function initWord() {
             console.warn('[initWord] 词库为空，使用默认单词');
             currentWord = { word: 'Welcome', phonetic: '/ˈwelkəm/', meaning: 'n. 欢迎' };
         } else {
-            // 随机选一个 (实际应用按日期 Hash 选择)
-            const index = Math.floor(Math.random() * vocabLibrary.length);
+            // 按日期选择单词（同一天总是同一个单词）
+            const today = new Date();
+            const dateKey = `${today.getFullYear()}-${today.getMonth() + 1}-${today.getDate()}`;
+
+            // 生成简单的哈希值
+            let hash = 0;
+            for (let i = 0; i < dateKey.length; i++) {
+                hash = ((hash << 5) - hash) + dateKey.charCodeAt(i);
+                hash = hash & hash; // Convert to 32bit integer
+            }
+            const index = Math.abs(hash) % vocabLibrary.length;
+
             currentWord = vocabLibrary[index];
-            console.log('[initWord] 选择单词:', currentWord.word);
+            console.log('[initWord] 今日单词:', currentWord.word, '索引:', index);
 
             // 如果音标为空，从字典API获取（带超时）
             if (!currentWord.phonetic || currentWord.phonetic.trim() === '') {
