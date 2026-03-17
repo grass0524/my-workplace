@@ -29,7 +29,10 @@ document.addEventListener('DOMContentLoaded', () => {
     initQuote();
     initAccounting();
     setTimeout(initNews, 1000);;
-    setTimeout(initWord, 1500);;
+
+    // 延迟初始化今日单词，等待同步完成（同步通常需要几秒钟）
+    // 如果用户已登录，会在同步完成后重新初始化
+    setTimeout(initWord, 10000);
 });
 function initDate() {
     const options = { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' };

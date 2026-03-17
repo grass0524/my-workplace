@@ -2116,7 +2116,7 @@ input[type="number"] {
 }
 </script>
 
-<script src="script.js?v=1773880001"></script>
+<script src="script.js?v=1773880002"></script>
 <script>
 // 测试函数
 function testQuickAccounting() {
@@ -2464,6 +2464,13 @@ function testQuickAccounting() {
                     }
                     if (typeof renderVocabModal === 'function') {
                         renderVocabModal();
+                    }
+
+                    // 重新初始化今日单词（确保使用最新的词库数据）
+                    if (typeof initWord === 'function') {
+                        console.log('[AuthUI] 重新初始化今日单词...');
+                        await initWord();
+                        console.log('[AuthUI] 今日单词重新初始化完成');
                     }
                 } catch (e) {
                     console.error('[AuthUI] 重新加载词库失败:', e);
