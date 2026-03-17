@@ -3319,15 +3319,29 @@ function closeAccountingStats() {
 
 // 监听来自记账统计iframe的消息
 window.addEventListener('message', function(event) {
+    console.log('[Main] 收到消息:', event.data);
+
     if (event.data.type === 'close-accounting-stats') {
         closeAccountingStats();
     } else if (event.data.type === 'request-accounting-data') {
         // 返回真实的记账数据
         console.log('[Main] 收到 iframe 数据请求，返回记账数据:', accountingData);
-        event.source?.postMessage({
+        console.log('[Main] event.origin:', event.origin);
+        console.log('[Main] event.source:', event.source);
+
+        const response = {
             type: 'accounting-data-response',
             data: accountingData.records || []
-        }, event.origin || '*');
+        };
+
+        console.log('[Main] 发送响应:', response);
+
+        try {
+            event.source.postMessage(response, event.origin || '*');
+            console.log('[Main] ✅ 响应已发送');
+        } catch (err) {
+            console.error('[Main] ❌ 发送响应失败:', err);
+        }
     }
 });
 
