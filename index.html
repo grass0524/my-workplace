@@ -2116,7 +2116,7 @@ input[type="number"] {
 }
 </script>
 
-<script src="script.js?v=1773880002"></script>
+<script src="script.js?v=1773880003"></script>
 <script>
 // 测试函数
 function testQuickAccounting() {
@@ -2429,8 +2429,10 @@ function testQuickAccounting() {
                             moodEntries = JSON.parse(savedMood);
                             console.log('[AuthUI] 已重新加载心情日记数据，数量:', moodEntries.length);
                         }
-                        renderMoodEntries();
-                        console.log('[AuthUI] 心情日记已重新渲染');
+                        if (typeof renderMoodRecent === 'function') {
+                            renderMoodRecent();
+                            console.log('[AuthUI] 心情日记已重新渲染');
+                        }
                     }
                 } catch (e) {
                     console.error('[AuthUI] 重新加载心情日记失败:', e);
