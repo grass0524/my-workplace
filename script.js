@@ -653,7 +653,10 @@ let vocabLibrary = [
 ];
 
 let currentWord = {};
+let currentWordIndex = -1;  // 当前选择的单词索引
 let myVocab = [];
+let shownWordIndices = [];   // 已显示过的单词索引（针对用户导入的词库）
+const BUILTIN_WORD_COUNT = 5;  // 内置单词数量
 
 async function initWord() {
     try {
@@ -677,72 +680,66 @@ async function initWord() {
             }
         }
 
+        // 加载已显示过的单词索引列表
+        const savedShownIndices = localStorage.getItem('shownWordIndices');
+        if (savedShownIndices) {
+            try {
+                shownWordIndices = JSON.parse(savedShownIndices);
+                console.log('[initWord] 已加载已显示单词列表，共', shownWordIndices.length, '个');
+            } catch (e) {
+                console.error('[initWord] 解析已显示单词列表失败:', e);
+                shownWordIndices = [];
+            }
+        }
+
         // 检查词库是否为空
         if (!vocabLibrary || vocabLibrary.length === 0) {
             console.warn('[initWord] 词库为空，使用默认单词');
             currentWord = { word: 'Welcome', phonetic: '/ˈwelkəm/', meaning: 'n. 欢迎' };
         } else {
-            // 前5个是内置单词，从第6个开始是用户导入的词库
-            const builtinCount = 5;
-            const hasUserVocab = vocabLibrary.length > builtinCount;
+            // 检查是否有保存的当前单词索引和日期
+            const savedIndex = localStorage.getItem('currentWordIndex');
+            const savedDate = localStorage.getItem('currentWordDate');
+            const today = new Date();
+            const todayDate = `${today.getFullYear()}-${today.getMonth() + 1}-${today.getDate()}`;
 
-            let selectedLibrary, index;
+            // 检查是否有用户导入的词库
+            const hasUserVocab = vocabLibrary.length > BUILTIN_WORD_COUNT;
 
-            if (hasUserVocab) {
-                // 有用户导入的词库，只从导入的词库中选择
-                const userVocabLibrary = vocabLibrary.slice(builtinCount);
-                console.log('[initWord] 使用导入词库，共', userVocabLibrary.length, '个单词');
-
-                // 按日期选择单词（同一天总是同一个单词）
-                const today = new Date();
-                const dateKey = `${today.getFullYear()}-${today.getMonth() + 1}-${today.getDate()}`;
-
-                // 生成简单的哈希值
-                let hash = 0;
-                for (let i = 0; i < dateKey.length; i++) {
-                    hash = ((hash << 5) - hash) + dateKey.charCodeAt(i);
-                    hash = hash & hash; // Convert to 32bit integer
+            // 如果有保存的索引，且日期相同，且是用户导入的词库索引，则使用保存的索引
+            if (savedIndex !== null && savedDate === todayDate) {
+                const savedIndexNum = parseInt(savedIndex);
+                // 只恢复用户词库的索引（>= BUILTIN_WORD_COUNT）
+                if (savedIndexNum >= BUILTIN_WORD_COUNT && savedIndexNum < vocabLibrary.length) {
+                    currentWordIndex = savedIndexNum;
+                    currentWord = vocabLibrary[currentWordIndex];
+                    console.log('[initWord] 恢复上次选择的单词:', currentWord.word, '索引:', currentWordIndex);
+                } else {
+                    // 保存的索引无效（可能是内置词库或超出范围），重新选择
+                    console.log('[initWord] 保存的索引无效，重新选择');
+                    await selectRandomUserVocabWord();
                 }
-                index = Math.abs(hash) % userVocabLibrary.length;
-                selectedLibrary = userVocabLibrary;
-
-                currentWord = selectedLibrary[index];
-                console.log('[initWord] 今日单词（导入词库）:', currentWord.word, '索引:', index, '（词库索引:', index + builtinCount, '）');
             } else {
-                // 没有用户导入的词库，使用内置单词
-                console.log('[initWord] 使用内置词库');
-                const today = new Date();
-                const dateKey = `${today.getFullYear()}-${today.getMonth() + 1}-${today.getDate()}`;
-
-                let hash = 0;
-                for (let i = 0; i < dateKey.length; i++) {
-                    hash = ((hash << 5) - hash) + dateKey.charCodeAt(i);
-                    hash = hash & hash;
+                // 没有保存的索引，或日期不同，选择新单词
+                if (hasUserVocab) {
+                    await selectRandomUserVocabWord();
+                } else {
+                    // 没有用户词库，使用内置词库
+                    selectRandomBuiltinWord();
                 }
-                index = Math.abs(hash) % vocabLibrary.length;
-                selectedLibrary = vocabLibrary;
-
-                currentWord = selectedLibrary[index];
-                console.log('[initWord] 今日单词（内置词库）:', currentWord.word, '索引:', index);
             }
 
-            // 如果音标为空，从字典API获取（带超时）
+            // 如果音标为空，从字典API获取
             if (!currentWord.phonetic || currentWord.phonetic.trim() === '') {
                 console.log('[initWord] 获取音标:', currentWord.word);
                 const fetchedPhonetic = await fetchPhoneticFromDictionary(currentWord.word);
                 if (fetchedPhonetic) {
                     currentWord.phonetic = fetchedPhonetic;
                     // 更新vocabLibrary中的音标
-                    if (hasUserVocab) {
-                        // 用户词库索引需要偏移
-                        vocabLibrary[index + builtinCount].phonetic = fetchedPhonetic;
-                    } else {
-                        vocabLibrary[index].phonetic = fetchedPhonetic;
-                    }
+                    vocabLibrary[currentWordIndex].phonetic = fetchedPhonetic;
                     // 保存到localStorage
                     localStorage.setItem('vocabLibrary', JSON.stringify(vocabLibrary));
                 } else {
-                    // 如果API失败，使用默认音标
                     currentWord.phonetic = '/ ... /';
                 }
             }
@@ -773,6 +770,67 @@ async function initWord() {
     }
 }
 
+// 从用户导入的词库中随机选择一个未显示过的单词
+async function selectRandomUserVocabWord() {
+    const userVocabStart = BUILTIN_WORD_COUNT;
+    const userVocabEnd = vocabLibrary.length - 1;
+
+    if (userVocabStart > userVocabEnd) {
+        // 没有用户导入的词库
+        console.warn('[selectRandomUserVocabWord] 没有用户导入的词库');
+        selectRandomBuiltinWord();
+        return;
+    }
+
+    // 找出未显示过的单词
+    const unshownIndices = [];
+    for (let i = userVocabStart; i <= userVocabEnd; i++) {
+        if (!shownWordIndices.includes(i)) {
+            unshownIndices.push(i);
+        }
+    }
+
+    if (unshownIndices.length === 0) {
+        // 所有用户词库单词都已显示过
+        console.warn('[selectRandomUserVocabWord] 词库已学完');
+        showToast('当前词库已学完，可以导入新词库');
+        // 重置已显示列表，重新开始
+        shownWordIndices = [];
+        localStorage.setItem('shownWordIndices', JSON.stringify(shownWordIndices));
+        // 重新选择
+        const randomIndex = Math.floor(Math.random() * (userVocabEnd - userVocabStart + 1)) + userVocabStart;
+        currentWordIndex = randomIndex;
+        currentWord = vocabLibrary[currentWordIndex];
+    } else {
+        // 从未显示过的单词中随机选择
+        const randomPos = Math.floor(Math.random() * unshownIndices.length);
+        currentWordIndex = unshownIndices[randomPos];
+        currentWord = vocabLibrary[currentWordIndex];
+        console.log('[selectRandomUserVocabWord] 选择新单词:', currentWord.word, '索引:', currentWordIndex);
+    }
+
+    // 保存当前单词索引和日期
+    const today = new Date();
+    const todayDate = `${today.getFullYear()}-${today.getMonth() + 1}-${today.getDate()}`;
+    localStorage.setItem('currentWordIndex', currentWordIndex.toString());
+    localStorage.setItem('currentWordDate', todayDate);
+}
+
+// 从内置词库中随机选择
+function selectRandomBuiltinWord() {
+    if (vocabLibrary.length === 0) return;
+
+    currentWordIndex = Math.floor(Math.random() * Math.min(BUILTIN_WORD_COUNT, vocabLibrary.length));
+    currentWord = vocabLibrary[currentWordIndex];
+    console.log('[selectRandomBuiltinWord] 选择内置单词:', currentWord.word, '索引:', currentWordIndex);
+
+    // 保存当前单词索引和日期
+    const today = new Date();
+    const todayDate = `${today.getFullYear()}-${today.getMonth() + 1}-${today.getDate()}`;
+    localStorage.setItem('currentWordIndex', currentWordIndex.toString());
+    localStorage.setItem('currentWordDate', todayDate);
+}
+
 function playWordAudio() {
     // 使用浏览器原生 TTS
     const utterance = new SpeechSynthesisUtterance(currentWord.word);
@@ -792,23 +850,67 @@ function addToVocab() {
 }
 
 async function refreshWord() {
-    // Get a new random word, different from current
-    let newIndex;
-    do {
-        newIndex = Math.floor(Math.random() * vocabLibrary.length);
-    } while (vocabLibrary[newIndex].word === currentWord.word && vocabLibrary.length > 1);
+    const hasUserVocab = vocabLibrary.length > BUILTIN_WORD_COUNT;
 
-    currentWord = vocabLibrary[newIndex];
+    if (!hasUserVocab) {
+        showToast('请先导入词库');
+        return;
+    }
+
+    // 记录当前单词到已显示列表
+    if (currentWordIndex >= BUILTIN_WORD_COUNT && !shownWordIndices.includes(currentWordIndex)) {
+        shownWordIndices.push(currentWordIndex);
+        localStorage.setItem('shownWordIndices', JSON.stringify(shownWordIndices));
+        console.log('[refreshWord] 记录已显示单词:', currentWord.word, '已显示:', shownWordIndices.length, '个');
+    }
+
+    const userVocabStart = BUILTIN_WORD_COUNT;
+    const userVocabEnd = vocabLibrary.length - 1;
+
+    // 找出未显示过的单词
+    const unshownIndices = [];
+    for (let i = userVocabStart; i <= userVocabEnd; i++) {
+        if (!shownWordIndices.includes(i)) {
+            unshownIndices.push(i);
+        }
+    }
+
+    if (unshownIndices.length === 0) {
+        // 所有用户词库单词都已显示过
+        console.warn('[refreshWord] 词库已学完');
+        showToast('当前词库已学完，可以导入新词库');
+        return;
+    }
+
+    // 从未显示过的单词中随机选择
+    const randomPos = Math.floor(Math.random() * unshownIndices.length);
+    currentWordIndex = unshownIndices[randomPos];
+    currentWord = vocabLibrary[currentWordIndex];
+
+    console.log('[refreshWord] 切换到新单词:', currentWord.word, '索引:', currentWordIndex);
+
+    // 记录到已显示列表
+    shownWordIndices.push(currentWordIndex);
+    localStorage.setItem('shownWordIndices', JSON.stringify(shownWordIndices));
+
+    // 保存当前单词索引和日期
+    const today = new Date();
+    const todayDate = `${today.getFullYear()}-${today.getMonth() + 1}-${today.getDate()}`;
+    localStorage.setItem('currentWordIndex', currentWordIndex.toString());
+    localStorage.setItem('currentWordDate', todayDate);
 
     // 如果音标为空，从字典API获取
     if (!currentWord.phonetic || currentWord.phonetic.trim() === '') {
+        console.log('[refreshWord] 获取音标:', currentWord.word);
         const fetchedPhonetic = await fetchPhoneticFromDictionary(currentWord.word);
         if (fetchedPhonetic) {
             currentWord.phonetic = fetchedPhonetic;
             // 更新vocabLibrary中的音标
-            vocabLibrary[newIndex].phonetic = fetchedPhonetic;
+            vocabLibrary[currentWordIndex].phonetic = fetchedPhonetic;
             // 保存到localStorage
             localStorage.setItem('vocabLibrary', JSON.stringify(vocabLibrary));
+        } else {
+            currentWord.phonetic = '/ ... /';
         }
     }
 
