@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>数据诊断工具</title>
+    <style>
+        body {
+            font-family: monospace;
+            padding: 20px;
+            background: #1e1e1e;
+            color: #d4d4d4;
+        }
+        .section {
+            margin: 20px 0;
+            padding: 15px;
+            background: #252526;
+            border-left: 3px solid #007acc;
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+        .status.ok {
+            background: #1e3a1e;
+            color: #4ec9b0;
+        }
+        .status.error {
+            background: #3a1e1e;
+            color: #f48771;
+        }
+        .status.warning {
+            background: #3a3a1e;
+            color: #dcdcaa;
+        }
+        button {
+            background: #007acc;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin: 5px;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        button:hover {
+            background: #005a9e;
+        }
+        pre {
+            background: #1e1e1e;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔍 数据诊断工具</h1>
+
+    <div class="section">
+        <h2>步骤 1: 检查认证状态</h2>
+        <button onclick="checkAuth()">检查认证</button>
+        <div id="auth-result"></div>
+    </div>
+
+    <div class="section">
+        <h2>步骤 2: 检查本地数据</h2>
+        <button onclick="checkLocalData()">检查本地</button>
+        <div id="local-result"></div>
+    </div>
+
+    <div class="section">
+        <h2>步骤 3: 检查云端数据</h2>
+        <button onclick="checkCloudData()">检查云端</button>
+        <div id="cloud-result"></div>
+    </div>
+
+    <div class="section">
+        <h2>步骤 4: 恢复数据</h2>
+        <button onclick="recoverData()">从云端恢复</button>
+        <div id="recover-result"></div>
+    </div>
+
+    <div class="section">
+        <h2>完整诊断日志</h2>
+        <pre id="log"></pre>
+    </div>
+
+    <script>
+        const log = [];
+        function addLog(message) {
+            const timestamp = new Date().toLocaleTimeString();
+            log.push(`[${timestamp}] ${message}`);
+            document.getElementById('log').textContent = log.join('\n');
+            console.log(message);
+        }
+
+        function showStatus(elementId, message, type) {
+            const el = document.getElementById(elementId);
+            el.innerHTML = `<div class="status ${type}">${message}</div>`;
+        }
+
+        function checkAuth() {
+            addLog('=== 检查认证状态 ===');
+            try {
+                const isAuth = window.parent.auth?.isAuthenticated();
+                const isReady = window.parent.dataSync?.isReady;
+
+                addLog(`认证状态: ${isAuth ? '✅ 已登录' : '❌ 未登录'}`);
+                addLog(`同步引擎: ${isReady ? '✅ 就绪' : '❌ 未就绪'}`);
+
+                if (isAuth && isReady) {
+                    showStatus('auth-result', '✅ 认证和同步都正常', 'ok');
+                } else {
+                    showStatus('auth-result', `⚠️ 认证: ${isAuth}, 同步: ${isReady}`, 'warning');
+                }
+            } catch (e) {
+                addLog(`❌ 检查失败: ${e.message}`);
+                showStatus('auth-result', `❌ 错误: ${e.message}`, 'error');
+            }
+        }
+
+        function checkLocalData() {
+            addLog('=== 检查本地数据 ===');
+            try {
+                const data = localStorage.getItem('accountingData');
+                addLog(`本地数据存在: ${data ? '✅ 是' : '❌ 否'}`);
+
+                if (data) {
+                    const parsed = JSON.parse(data);
+                    addLog(`数据类型: ${typeof parsed}`);
+                    addLog(`数据内容: ${JSON.stringify(parsed, null, 2)}`);
+
+                    if (parsed.records) {
+                        addLog(`记录数: ${parsed.records.length}`);
+                    }
+
+                    showStatus('local-result', `✅ 找到本地数据\n${JSON.stringify(parsed, null, 2)}`, 'ok');
+                } else {
+                    showStatus('local-result', '❌ 本地没有数据', 'error');
+                }
+            } catch (e) {
+                addLog(`❌ 检查失败: ${e.message}`);
+                showStatus('local-result', `❌ 错误: ${e.message}`, 'error');
+            }
+        }
+
+        async function checkCloudData() {
+            addLog('=== 检查云端数据 ===');
+            try {
+                const sync = window.parent.dataSync;
+                if (!sync) {
+                    throw new Error('同步引擎未初始化');
+                }
+
+                addLog('正在从云端下载数据...');
+                const result = await sync.downloadData('accountingData');
+
+                addLog(`云端数据存在: ${result.data ? '✅ 是' : '❌ 否'}`);
+                addLog(`云端数据类型: ${typeof result.data}`);
+
+                if (result.data) {
+                    if (Array.isArray(result.data)) {
+                        addLog(`记录数: ${result.data.length}`);
+                    } else if (result.data.records) {
+                        addLog(`记录数: ${result.data.records.length}`);
+                    }
+                    addLog(`数据内容: ${JSON.stringify(result.data, null, 2)}`);
+                    showStatus('cloud-result', `✅ 云端有数据\n${JSON.stringify(result.data, null, 2)}`, 'ok');
+                } else {
+                    showStatus('cloud-result', '❌ 云端没有数据', 'error');
+                }
+            } catch (e) {
+                addLog(`❌ 检查失败: ${e.message}`);
+                showStatus('cloud-result', `❌ 错误: ${e.message}`, 'error');
+            }
+        }
+
+        async function recoverData() {
+            addLog('=== 开始恢复数据 ===');
+            try {
+                const sync = window.parent.dataSync;
+                const auth = window.parent.auth;
+
+                if (!auth?.isAuthenticated()) {
+                    throw new Error('请先登录');
+                }
+
+                addLog('正在从云端下载完整数据...');
+                const result = await sync.downloadData('accountingData');
+
+                if (!result.data || (Array.isArray(result.data) && result.data.length === 0)) {
+                    throw new Error('云端没有数据，无法恢复');
+                }
+
+                addLog('云端数据找到，正在恢复...');
+
+                // 确定数据格式
+                let finalData;
+                if (Array.isArray(result.data)) {
+                    finalData = { records: result.data };
+                    addLog(`数据格式: 数组，转换为对象格式`);
+                } else if (result.data.records) {
+                    finalData = result.data;
+                    addLog(`数据格式: 对象，直接使用`);
+                } else {
+                    throw new Error('未知的数据格式');
+                }
+
+                addLog(`记录数: ${finalData.records.length}`);
+
+                // 保存到 localStorage
+                localStorage.setItem('accountingData', JSON.stringify(finalData));
+                addLog('✅ 数据已保存到 localStorage');
+
+                // 更新父窗口的数据
+                window.parent.accountingData = finalData;
+                addLog('✅ 已更新父窗口数据');
+
+                showStatus('recover-result', '✅ 数据恢复成功！3秒后刷新页面...', 'ok');
+                addLog('=== 数据恢复成功 ===');
+
+                setTimeout(() => {
+                    addLog('正在刷新页面...');
+                    window.parent.location.reload();
+                }, 3000);
+
+            } catch (e) {
+                addLog(`❌ 恢复失败: ${e.message}`);
+                showStatus('recover-result', `❌ 恢复失败: ${e.message}`, 'error');
+            }
+        }
+
+        // 页面加载时自动检查
+        window.addEventListener('load', () => {
+            addLog('诊断工具已就绪');
+            addLog('请依次执行上述步骤');
+        });
+    </script>
+</body>
+</html>
