@@ -682,20 +682,49 @@ async function initWord() {
             console.warn('[initWord] 词库为空，使用默认单词');
             currentWord = { word: 'Welcome', phonetic: '/ˈwelkəm/', meaning: 'n. 欢迎' };
         } else {
-            // 按日期选择单词（同一天总是同一个单词）
-            const today = new Date();
-            const dateKey = `${today.getFullYear()}-${today.getMonth() + 1}-${today.getDate()}`;
+            // 前5个是内置单词，从第6个开始是用户导入的词库
+            const builtinCount = 5;
+            const hasUserVocab = vocabLibrary.length > builtinCount;
 
-            // 生成简单的哈希值
-            let hash = 0;
-            for (let i = 0; i < dateKey.length; i++) {
-                hash = ((hash << 5) - hash) + dateKey.charCodeAt(i);
-                hash = hash & hash; // Convert to 32bit integer
+            let selectedLibrary, index;
+
+            if (hasUserVocab) {
+                // 有用户导入的词库，只从导入的词库中选择
+                const userVocabLibrary = vocabLibrary.slice(builtinCount);
+                console.log('[initWord] 使用导入词库，共', userVocabLibrary.length, '个单词');
+
+                // 按日期选择单词（同一天总是同一个单词）
+                const today = new Date();
+                const dateKey = `${today.getFullYear()}-${today.getMonth() + 1}-${today.getDate()}`;
+
+                // 生成简单的哈希值
+                let hash = 0;
+                for (let i = 0; i < dateKey.length; i++) {
+                    hash = ((hash << 5) - hash) + dateKey.charCodeAt(i);
+                    hash = hash & hash; // Convert to 32bit integer
+                }
+                index = Math.abs(hash) % userVocabLibrary.length;
+                selectedLibrary = userVocabLibrary;
+
+                currentWord = selectedLibrary[index];
+                console.log('[initWord] 今日单词（导入词库）:', currentWord.word, '索引:', index, '（词库索引:', index + builtinCount, '）');
+            } else {
+                // 没有用户导入的词库，使用内置单词
+                console.log('[initWord] 使用内置词库');
+                const today = new Date();
+                const dateKey = `${today.getFullYear()}-${today.getMonth() + 1}-${today.getDate()}`;
+
+                let hash = 0;
+                for (let i = 0; i < dateKey.length; i++) {
+                    hash = ((hash << 5) - hash) + dateKey.charCodeAt(i);
+                    hash = hash & hash;
+                }
+                index = Math.abs(hash) % vocabLibrary.length;
+                selectedLibrary = vocabLibrary;
+
+                currentWord = selectedLibrary[index];
+                console.log('[initWord] 今日单词（内置词库）:', currentWord.word, '索引:', index);
             }
-            const index = Math.abs(hash) % vocabLibrary.length;
-
-            currentWord = vocabLibrary[index];
-            console.log('[initWord] 今日单词:', currentWord.word, '索引:', index);
 
             // 如果音标为空，从字典API获取（带超时）
             if (!currentWord.phonetic || currentWord.phonetic.trim() === '') {
@@ -704,7 +733,12 @@ async function initWord() {
                 if (fetchedPhonetic) {
                     currentWord.phonetic = fetchedPhonetic;
                     // 更新vocabLibrary中的音标
-                    vocabLibrary[index].phonetic = fetchedPhonetic;
+                    if (hasUserVocab) {
+                        // 用户词库索引需要偏移
+                        vocabLibrary[index + builtinCount].phonetic = fetchedPhonetic;
+                    } else {
+                        vocabLibrary[index].phonetic = fetchedPhonetic;
+                    }
                     // 保存到localStorage
                     localStorage.setItem('vocabLibrary', JSON.stringify(vocabLibrary));
                 } else {
