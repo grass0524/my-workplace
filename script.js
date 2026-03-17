@@ -475,15 +475,22 @@ function handleTodoEditKeypress(event, id) {
 }
 
 function saveTodos() {
+    // 保存到本地
     localStorage.setItem('todos', JSON.stringify(todos));
+
+    // 保存时间戳（用于同步时比较新旧数据）
+    localStorage.setItem('todos_timestamp', Date.now().toString());
+
     console.log('[saveTodos] 已保存到本地，待办数量:', todos.length);
-    
+
     if (window.dataSync && window.dataSync.isReady) {
-        console.log('[saveTodos] 触发同步');
-        window.dataSync.syncAll(['todos']).then(() => {
-            console.log('[saveTodos] 同步成功');
+        console.log('[saveTodos] 正在上传到云端...');
+
+        // 使用 uploadData 而不是 syncAll，避免下载旧数据覆盖本地更改
+        window.dataSync.uploadData('todos').then(() => {
+            console.log('[saveTodos] ✅ 已上传到云端');
         }).catch(err => {
-            console.error('[saveTodos] 同步失败:', err);
+            console.error('[saveTodos] ❌ 上传失败:', err);
         });
     } else {
         console.warn('[saveTodos] dataSync未就绪，跳过同步');
