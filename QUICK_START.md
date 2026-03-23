@@ -37,8 +37,8 @@
 
 ```json
 {
-  "url": "你的Project URL",
-  "key": "你的anon public key"
+  "url": "https://aidajdmocdgecwwmzphm.supabase.co",
+  "key": "sb_publishable_BYAXSI16XDU__PZiGnmsIw_dV6ycGp2"
 }
 ```
 

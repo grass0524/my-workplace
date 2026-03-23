@@ -2709,8 +2709,10 @@ function parseAccountingInput(input) {
     
     // 判断是收入还是支出
     let type = 'expense'; // 默认为支出
-    if (trimmed.includes('收入') || trimmed.includes('工资') || trimmed.includes('奖金') || 
-        trimmed.includes('理财') || trimmed.includes('兼职') || trimmed.includes('收益')) {
+    // 说明：这里用关键词快速兜底，确保“股票盈利”等输入能被识别为收入
+    if (trimmed.includes('收入') || trimmed.includes('工资') || trimmed.includes('奖金') ||
+        trimmed.includes('理财') || trimmed.includes('兼职') || trimmed.includes('收益') ||
+        trimmed.includes('盈利')) {
         type = 'income';
     }
     
@@ -2735,7 +2737,7 @@ function parseAccountingInput(input) {
     // 提取备注（去掉金额和分类关键词）
     let note = trimmed
         .replace(amountMatch[0], '')
-        .replace(/[元¥收入支出工资奖金理财兼职]/g, '')
+        .replace(/[元¥收入支出工资奖金理财兼职收益盈利]/g, '')
         .trim();
     
     return {
@@ -3873,7 +3875,8 @@ function parseQuickAccountingInput(text) {
     if (!detail) detail = '其他';
     
     let type = 'expense';
-    const incomeKeywords = ['工资', '奖金', '理财', '收益', '退款', '报销'];
+    // 快速记账：用关键词兜底识别收入，避免“股票盈利”被误判为支出
+    const incomeKeywords = ['工资', '奖金', '理财', '收益', '盈利', '退款', '报销'];
     for (const keyword of incomeKeywords) {
         if (text.includes(keyword)) {
             type = 'income';
