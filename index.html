@@ -2221,23 +2221,37 @@ function testQuickAccounting() {
             // 如果已登录，初始化同步
             if (window.auth.isAuthenticated()) {
                 console.log('[AuthUI] 用户已登录，清理并初始化同步');
-                
-                // 清理可能存在的旧数据
-                const userDataKeys = [
-                    'todos',
-                    'healthRecords',
-                    'myVocab',
-                    'vocabLibrary',
-                    'accountingData',
-                    'moodEntries',
-                    'dailyQuote'
-                ];
-                
-                userDataKeys.forEach(key => {
-                    localStorage.removeItem(key);
-                });
-                
-                console.log('[AuthUI] 旧数据已清理');
+
+                // 仅在“切换到不同用户”时清理本地数据，避免登录后把离线新增覆盖/丢失
+                const AUTH_LAST_USER_ID_KEY = 'auth_last_user_id';
+                const currentUser = window.auth.getCurrentUser();
+                const currentUserId = currentUser?.id || currentUser?.user?.id || null;
+                const prevUserId = localStorage.getItem(AUTH_LAST_USER_ID_KEY);
+                const shouldClearLocal = prevUserId && currentUserId && prevUserId !== currentUserId;
+
+                if (shouldClearLocal) {
+                    const userDataKeys = [
+                        'todos',
+                        'healthRecords',
+                        'myVocab',
+                        'vocabLibrary',
+                        'accountingData',
+                        'moodEntries',
+                        'dailyQuote'
+                    ];
+
+                    userDataKeys.forEach(key => {
+                        localStorage.removeItem(key);
+                    });
+
+                    console.log('[AuthUI] 切换用户，旧数据已清理');
+                } else {
+                    console.log('[AuthUI] 保留本地未同步数据（同用户或首次登录）');
+                }
+
+                if (currentUserId) {
+                    localStorage.setItem(AUTH_LAST_USER_ID_KEY, currentUserId);
+                }
                 
                 // 先初始化同步引擎（不自动同步）
                 dataSync = await initDataSync(false);
@@ -2259,34 +2273,48 @@ function testQuickAccounting() {
                 console.log('[AuthUI] 用户已登录:', user);
                 
                 // 清理旧用户数据（防止数据泄露）
-                console.log('[AuthUI] 清理旧用户数据');
-                const userDataKeys = [
-                    'todos',
-                    'healthRecords',
-                    'myVocab',
-                    'vocabLibrary',
-                    'accountingData',
-                    'moodEntries',
-                    'dailyQuote',
-                    'todos_timestamp',
-                    'healthRecords_timestamp',
-                    'myVocab_timestamp',
-                    'vocabLibrary_timestamp',
-                    'accountingData_timestamp',
-                    'moodEntries_timestamp',
-                    'sync_timestamp_todos',
-                    'sync_timestamp_healthRecords',
-                    'sync_timestamp_myVocab',
-                    'sync_timestamp_vocabLibrary',
-                    'sync_timestamp_accountingData',
-                    'sync_timestamp_moodEntries'
-                ];
-                
-                userDataKeys.forEach(key => {
-                    localStorage.removeItem(key);
-                });
-                
-                console.log('[AuthUI] 旧数据已清理，开始同步新用户数据');
+                // 关键改动：只有在“切换到不同用户”时才清理，避免登录后把离线新增数据覆盖/丢失
+                const AUTH_LAST_USER_ID_KEY = 'auth_last_user_id';
+                const currentUserId = user?.id || user?.user?.id || null;
+                const prevUserId = localStorage.getItem(AUTH_LAST_USER_ID_KEY);
+                const shouldClearLocal = prevUserId && currentUserId && prevUserId !== currentUserId;
+
+                if (shouldClearLocal) {
+                    console.log('[AuthUI] 切换用户，清理旧用户数据');
+                    const userDataKeys = [
+                        'todos',
+                        'healthRecords',
+                        'myVocab',
+                        'vocabLibrary',
+                        'accountingData',
+                        'moodEntries',
+                        'dailyQuote',
+                        'todos_timestamp',
+                        'healthRecords_timestamp',
+                        'myVocab_timestamp',
+                        'vocabLibrary_timestamp',
+                        'accountingData_timestamp',
+                        'moodEntries_timestamp',
+                        'sync_timestamp_todos',
+                        'sync_timestamp_healthRecords',
+                        'sync_timestamp_myVocab',
+                        'sync_timestamp_vocabLibrary',
+                        'sync_timestamp_accountingData',
+                        'sync_timestamp_moodEntries'
+                    ];
+
+                    userDataKeys.forEach(key => {
+                        localStorage.removeItem(key);
+                    });
+
+                    console.log('[AuthUI] 旧数据已清理，开始同步新用户数据');
+                } else {
+                    console.log('[AuthUI] 保留本地未同步数据（同用户或首次登录）');
+                }
+
+                if (currentUserId) {
+                    localStorage.setItem(AUTH_LAST_USER_ID_KEY, currentUserId);
+                }
                 
                 updateAuthUI();
                 
@@ -2310,6 +2338,7 @@ function testQuickAccounting() {
                 
                 // 清理所有用户数据
                 console.log('[AuthUI] 清理本地用户数据');
+                localStorage.removeItem('auth_last_user_id');
                 const userDataKeys = [
                     'todos',
                     'healthRecords',
