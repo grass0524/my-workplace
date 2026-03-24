@@ -79,12 +79,12 @@ class DataSync {
     async uploadData(dataType) {
         if (!this.auth.isAuthenticated()) {
             console.warn('[Sync] 用户未登录，跳过上传');
-            return { error: { message: '用户未登录' } };
+            throw new Error('用户未登录');
         }
 
         const config = this.dataTypes[dataType];
         if (!config) {
-            return { error: { message: '未知的数据类型' } };
+            throw new Error('未知的数据类型');
         }
 
         try {
@@ -140,14 +140,14 @@ class DataSync {
                 if (!navigator.onLine) {
                     this.addToOfflineQueue('upload', dataType, localData);
                 }
-                return { error };
+                throw new Error(error.message || '上传失败');
             }
 
             console.log('[Sync] 上传成功:', dataType);
             return { data, error: null };
         } catch (error) {
             console.error('[Sync] 上传异常:', error);
-            return { error: { message: '上传失败：' + error.message } };
+            throw new Error('上传失败：' + (error?.message || String(error)));
         }
     }
 
@@ -286,7 +286,7 @@ class DataSync {
     /**
      * 双向同步：合并本地和云端数据
      */
-    async syncData(dataType) {
+    async syncData(dataType, mergePolicy = null) {
         if (this.isSyncing) {
             console.warn('[Sync] 正在同步中，跳过');
             return;
@@ -323,12 +323,88 @@ class DataSync {
             let mergedData;
             let needUpload = false;
 
-            if (!cloudData || !cloudData.data) {
+            // 默认空值（用于 cloud/local 覆盖策略）
+            const defaultValues = {
+                'healthRecords': {},
+                'todos': [],
+                'accountingData': { records: [] },
+                'vocabLibrary': {},
+                'myVocab': {},
+                'moodEntries': []
+            };
+            const defaultValueForType = defaultValues[dataType] ?? (config.mergeStrategy === 'append' ? [] : {});
+            let policyHandled = false;
+
+            // 策略覆盖：合并去重（本地 + 云端都保留，基于 id 去重；healthRecords 对同一天使用 OR 合并）
+            if (mergePolicy === 'merge') {
+                if (dataType === 'healthRecords') {
+                    const localObj = (localData && typeof localData === 'object' && !Array.isArray(localData)) ? localData : {};
+                    const cloudObj = (cloudData?.data && typeof cloudData.data === 'object' && !Array.isArray(cloudData.data)) ? cloudData.data : {};
+
+                    const dates = new Set([...Object.keys(localObj), ...Object.keys(cloudObj)]);
+                    const merged = {};
+
+                    dates.forEach(dateKey => {
+                        const lDay = localObj[dateKey] || {};
+                        const cDay = cloudObj[dateKey] || {};
+                        merged[dateKey] = {
+                            water: Boolean(lDay.water || cDay.water),
+                            toilet: Boolean(lDay.toilet || cDay.toilet),
+                            exercise: Boolean(lDay.exercise || cDay.exercise)
+                        };
+                    });
+
+                    mergedData = merged;
+                } else if (dataType === 'accountingData') {
+                    const localArr = localData && localData.records && Array.isArray(localData.records) ? localData.records : [];
+                    const cloudArr = cloudData?.data?.records && Array.isArray(cloudData.data.records) ? cloudData.data.records : [];
+
+                    const mergedArr = this.mergeAppendData(localArr, cloudArr);
+                    mergedData = { records: mergedArr };
+                } else {
+                    const localArr = Array.isArray(localData) ? localData : [];
+                    const cloudArr = Array.isArray(cloudData?.data) ? cloudData.data : [];
+                    mergedData = this.mergeAppendData(localArr, cloudArr);
+                }
+
+                this.saveToLocal(config.localKey, mergedData);
+                needUpload = true;
+                policyHandled = true;
+                console.log(`[Sync] ${dataType} - 策略合并去重`);
+            }
+
+            // 策略覆盖：云端覆盖本地、仅使用本地数据
+            if (mergePolicy === 'cloud') {
+                const cloudPayload = cloudData?.data ?? null;
+                mergedData = cloudPayload ?? defaultValueForType;
+                // accountingData 必须是对象格式
+                if (dataType === 'accountingData' && Array.isArray(mergedData)) {
+                    mergedData = { records: mergedData };
+                }
+                this.saveToLocal(config.localKey, mergedData);
+
+                this.lastSyncTime = new Date();
+                this.saveSyncTimestamp(dataType);
+
+                console.log(`[Sync] ${dataType} - 策略云端覆盖本地`);
+                policyHandled = true;
+            } else if (mergePolicy === 'local') {
+                mergedData = localData;
+                // accountingData 必须是对象格式
+                if (dataType === 'accountingData' && Array.isArray(mergedData)) {
+                    mergedData = { records: mergedData };
+                }
+                this.saveToLocal(config.localKey, mergedData);
+                needUpload = true;
+                policyHandled = true;
+            }
+
+            if (!policyHandled && (!cloudData || !cloudData.data)) {
                 // 云端无数据，直接上传本地数据
                 mergedData = localData;
                 needUpload = true;
                 console.log(`[Sync] ${dataType} - 云端无数据，将上传本地数据`);
-            } else if (!localDataRaw || isLocalEmpty) {
+            } else if (!policyHandled && (!localDataRaw || isLocalEmpty)) {
                 // 本地无数据或数据为空
                 if (localDataRaw && isLocalEmpty) {
                     // 本地显式为空数组/对象，说明用户删除了所有数据
@@ -342,7 +418,7 @@ class DataSync {
                     this.saveToLocal(config.localKey, mergedData);
                     console.log(`[Sync] ${dataType} - 本地无数据（新设备），使用云端数据`);
                 }
-            } else {
+            } else if (!policyHandled) {
                 // 两边都有数据，需要合并
                 const cloudTimestamp = new Date(cloudData.updated_at).getTime();
                 const localTimestamp = this.getLocalDataTimestamp(config.localKey);
@@ -483,7 +559,7 @@ class DataSync {
             return { error: null };
         } catch (error) {
             console.error('[Sync] 同步异常:', error);
-            return { error: { message: '同步失败：' + error.message } };
+            throw new Error('同步失败：' + (error?.message || String(error)));
         } finally {
             this.isSyncing = false;
         }
@@ -493,7 +569,7 @@ class DataSync {
      * 同步所有数据
      * @param {string[]} [dataTypesToSync] - 指定要同步的数据类型，不传则同步所有
      */
-    async syncAll(dataTypesToSync = null) {
+    async syncAll(dataTypesToSync = null, mergePolicy = null) {
         if (!this.auth.isAuthenticated()) {
             console.warn('[Sync] 用户未登录，跳过同步');
             return;
@@ -502,19 +578,42 @@ class DataSync {
         const typesToSync = dataTypesToSync || Object.keys(this.dataTypes);
         console.log('[Sync] 开始同步:', typesToSync);
 
+        const errors = [];
+        const successTypes = [];
         for (const dataType of typesToSync) {
-            await this.syncData(dataType);
+            try {
+                const result = await this.syncData(dataType, mergePolicy);
+                // syncData 在下载失败等场景会 return { error } 而不抛错，需计入失败，否则会误触发 syncComplete
+                if (result && result.error) {
+                    const msg = result.error.message || String(result.error);
+                    errors.push({ dataType, error: msg });
+                } else {
+                    successTypes.push(dataType);
+                }
+            } catch (e) {
+                errors.push({ dataType, error: e?.message || String(e) });
+            }
         }
 
-        console.log('[Sync] 数据同步完成');
-        console.log('[Sync] 准备触发syncComplete事件，时间戳:', this.lastSyncTime);
+        if (errors.length === 0) {
+            console.log('[Sync] 数据同步完成');
+            console.log('[Sync] 准备触发syncComplete事件，时间戳:', this.lastSyncTime);
 
-        // 触发自定义事件
-        const event = new CustomEvent('syncComplete', {
-            detail: { timestamp: this.lastSyncTime }
-        });
-        window.dispatchEvent(event);
-        console.log('[Sync] syncComplete事件已触发');
+            // 触发自定义事件
+            const event = new CustomEvent('syncComplete', {
+                detail: { timestamp: this.lastSyncTime, dataTypes: successTypes }
+            });
+            window.dispatchEvent(event);
+            console.log('[Sync] syncComplete事件已触发');
+        } else {
+            console.warn('[Sync] 数据同步失败:', errors);
+            const event = new CustomEvent('syncError', {
+                detail: { timestamp: new Date(), errors }
+            });
+            window.dispatchEvent(event);
+        }
+
+        return errors;
     }
 
     /**

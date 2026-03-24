@@ -9,6 +9,7 @@ class Auth {
         this.user = null;
         this.session = null;
         this.isInitialized = false;
+        this.isManualLogout = false;
     }
 
     /**
@@ -42,9 +43,16 @@ class Auth {
                     this.session = session;
                     this.onLoginCallback?.(this.user);
                 } else if (event === 'SIGNED_OUT') {
+                    // 断网等场景下可能出现瞬时 SIGNED_OUT，避免误判为主动登出
+                    if (!this.isManualLogout && typeof navigator !== 'undefined' && navigator.onLine === false) {
+                        console.warn('[Auth] 离线状态收到SIGNED_OUT，忽略此次登出事件');
+                        return;
+                    }
+
                     this.user = null;
                     this.session = null;
-                    this.onLogoutCallback?.();
+                    this.onLogoutCallback?.({ manual: this.isManualLogout });
+                    this.isManualLogout = false;
                 }
             });
 
@@ -138,11 +146,13 @@ class Auth {
 
         try {
             console.log('[Auth] 尝试登出');
+            this.isManualLogout = true;
 
             const { error } = await this.supabase.auth.signOut();
 
             if (error) {
                 console.error('[Auth] 登出失败:', error);
+                this.isManualLogout = false;
                 return { error };
             }
 
@@ -153,6 +163,7 @@ class Auth {
             return { error: null };
         } catch (error) {
             console.error('[Auth] 登出异常:', error);
+            this.isManualLogout = false;
             return { error: { message: '登出失败：' + error.message } };
         }
     }

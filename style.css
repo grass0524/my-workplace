@@ -72,6 +72,73 @@ body {
     color: var(--text-light);
 }
 
+/* 顶部待同步失败提示条 */
+.sync-pending-banner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin: 6px 0 14px;
+    padding: 10px 12px;
+    border-radius: 12px;
+    border: 1px solid rgba(237, 137, 54, 0.25);
+    background: #fff7ed;
+    color: #9c4221;
+    box-shadow: var(--neu-shadow-sm);
+}
+
+.sync-pending-banner.hidden {
+    display: none;
+}
+
+.sync-pending-banner-left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.sync-pending-banner-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-sync-pending-retry,
+.btn-sync-pending-close {
+    border: none;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+}
+
+.btn-sync-pending-retry {
+    background: #ed8936;
+    color: #fff;
+    padding: 6px 12px;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.btn-sync-pending-retry:hover {
+    background: #dd6b20;
+}
+
+.btn-sync-pending-close {
+    width: 30px;
+    height: 30px;
+    background: rgba(156, 66, 33, 0.08);
+    color: #9c4221;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-sync-pending-close:hover {
+    background: rgba(156, 66, 33, 0.15);
+}
+
 /* Daily Quote Banner */
 .daily-quote-banner {
     position: relative;
@@ -471,6 +538,15 @@ body {
 }
 
 .todo-item:hover .todo-actions {
+    opacity: 1;
+}
+
+/* 有待同步失败重试按钮时，操作区始终可见（不依赖悬停） */
+.todo-item:has(.btn-retry-sync) .todo-actions {
+    opacity: 1;
+}
+
+.todo-actions.force-visible {
     opacity: 1;
 }
 
@@ -1302,6 +1378,15 @@ input:checked + .mood-icon-wrapper {
 
 .mood-entry:hover .mood-actions,
 .mood-entry:has(.action-edit:not(.hidden)) .mood-actions {
+    opacity: 1;
+}
+
+/* 心情条目有同步重试按钮时，操作区始终可见 */
+.mood-entry:has(.btn-retry-mood) .mood-actions {
+    opacity: 1;
+}
+
+.mood-actions.force-visible {
     opacity: 1;
 }
 
@@ -6097,5 +6182,76 @@ section.holiday-card {
 
 #confirm-modal .modal-footer {
     border: none !important;
+}
+
+/* ==================== 同步失败重试按钮 ==================== */
+.btn-retry-sync {
+    background: var(--bg-color);
+    border: none;
+    cursor: pointer;
+    padding: 6px;
+    width: 34px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    box-shadow: var(--neu-shadow-sm);
+    color: var(--text-light);
+    transition: all 0.3s ease;
+}
+
+.btn-retry-sync:hover {
+    box-shadow: var(--neu-shadow-out);
+    transform: translateY(-1px);
+    color: var(--primary-color);
+}
+
+.health-retry-btn {
+    margin-left: 8px;
+    background: var(--bg-color);
+    border: none;
+    cursor: pointer;
+    padding: 6px 10px;
+    border-radius: 6px;
+    box-shadow: var(--neu-shadow-sm);
+    color: var(--text-light);
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+}
+
+.health-retry-btn:hover {
+    box-shadow: var(--neu-shadow-out);
+    transform: translateY(-1px);
+    color: var(--primary-color);
+}
+
+.accounting-record-retry {
+    margin-left: 8px;
+    background: var(--bg-color);
+    border: none;
+    cursor: pointer;
+    padding: 6px;
+    border-radius: 6px;
+    box-shadow: var(--neu-shadow-sm);
+    color: var(--text-light);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.accounting-record-retry:hover {
+    box-shadow: var(--neu-shadow-out);
+    transform: translateY(-1px);
+    color: var(--primary-color);
+}
+
+.btn-retry-mood {
+    color: var(--text-light);
+}
+
+.btn-retry-mood:hover {
+    color: var(--primary-color);
 }
 

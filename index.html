@@ -7,7 +7,7 @@
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
     <title>My Workplace</title>
-<link rel="stylesheet" href="style.css?v=1773112064">
+<link rel="stylesheet" href="style.css?v=1778000006">
     <!-- 引入 Font Awesome 图标库 (CDN) -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" media="print" onload="this.media='all'">
     <!-- 引入 Lucide 图标库 (pencil设计使用) -->
@@ -96,7 +96,7 @@ input[type="number"] {
 
 .today-expense-summary #today-expense-inline {
     font-size: 13px;
-    color: #e74c3c;
+    color: #27ae60;
     font-weight: 600;
 }
 
@@ -228,7 +228,7 @@ input[type="number"] {
 }
 
 .type-toggle-group .type-toggle-btn.income.active {
-    background: #ecc94b;
+    background: #E4527E;
     color: #ffffff;
     box-shadow: 2px 2px 4px #a3b1c6, -2px -2px 4px #ffffff;
 }
@@ -715,7 +715,7 @@ input[type="number"] {
 /* 收入按钮的icon特殊处理 */
 .type-toggle-btn.income:not(.active) i,
 .type-toggle-btn.income:not(.active) svg {
-    color: #ecc94b !important;
+    color: #E4527E !important;
 }
 
 .type-toggle-btn i,
@@ -835,11 +835,11 @@ input[type="number"] {
 /* 收入模式的分类 - 使用黄色 */
 .accounting-top-container.income-mode .category-item i,
 .accounting-top-container.income-mode .category-item svg {
-    color: #ecc94b !important;
+    color: #E4527E !important;
 }
 
 .accounting-top-container.income-mode .category-item.active {
-    background: #ecc94b !important;
+    background: #E4527E !important;
 }
 
 .accounting-top-container.income-mode .category-item.active i,
@@ -994,7 +994,7 @@ input[type="number"] {
 
 .today-expense-summary #today-expense-inline {
     font-size: 13px;
-    color: #e74c3c;
+    color: #27ae60;
     font-weight: 600;
 }
 
@@ -1142,7 +1142,7 @@ input[type="number"] {
 }
 
 .type-toggle-group .type-toggle-btn.income.active {
-    background: #ecc94b;
+    background: #E4527E;
     color: #ffffff;
     box-shadow: 2px 2px 4px #a3b1c6, -2px -2px 4px #ffffff;
 }
@@ -1438,10 +1438,10 @@ input[type="number"] {
         color: #6b7fff !important;
     }
     .type-toggle-btn.income:not(.active) {
-        color: #ecc94b !important;
+        color: #E4527E !important;
     }
     .type-toggle-btn.income.active {
-        background: #ecc94b !important;
+        background: #E4527E !important;
         color: #ffffff !important;
         box-shadow: var(--neu-shadow-out) !important;
     }
@@ -1452,10 +1452,10 @@ input[type="number"] {
         color: #6b7fff !important;
     }
     .type-toggle-btn.income:not(.active) {
-        color: #ecc94b !important;
+        color: #E4527E !important;
     }
     .type-toggle-btn.income.active {
-        background: #ecc94b !important;
+        background: #E4527E !important;
         color: #ffffff !important;
         box-shadow: var(--neu-shadow-out) !important;
     }
@@ -1472,7 +1472,7 @@ input[type="number"] {
 }
 .type-toggle-btn.income:not(.active) i,
 .type-toggle-btn.income:not(.active) svg {
-    color: #ecc94b !important;
+    color: #E4527E !important;
 }
 .type-toggle-group .type-toggle-btn.expense:not(.active) i,
 .type-toggle-group .type-toggle-btn.expense:not(.active) svg {
@@ -1480,7 +1480,7 @@ input[type="number"] {
 }
 .type-toggle-group .type-toggle-btn.income:not(.active) i,
 .type-toggle-group .type-toggle-btn.income:not(.active) svg {
-    color: #ecc94b !important;
+    color: #E4527E !important;
 }
 
 /* 激活状态下的icon和文字都是白色 */
@@ -1498,7 +1498,7 @@ input[type="number"] {
 }
 .type-toggle-group .type-toggle-btn.income i,
 .type-toggle-group .type-toggle-btn.income svg {
-    color: #ecc94b !important;
+    color: #E4527E !important;
 }
 /* 激活状态下的文字都是白色 */
 .type-toggle-group .type-toggle-btn.expense.active span,
@@ -1534,6 +1534,20 @@ input[type="number"] {
                 </div>
             </div>
         </header>
+
+        <!-- 待同步失败提示条 -->
+        <div class="sync-pending-banner hidden" id="sync-pending-banner" role="status" aria-live="polite">
+            <div class="sync-pending-banner-left">
+                <i class="fas fa-triangle-exclamation"></i>
+                <span id="sync-pending-banner-text">有数据尚未上传云端</span>
+            </div>
+            <div class="sync-pending-banner-actions">
+                <button class="btn-sync-pending-retry" onclick="retryAllFailedSync()">一键重试</button>
+                <button class="btn-sync-pending-close" onclick="dismissSyncPendingBanner()" title="关闭">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>
 
         <!-- 每日一言 -->
         <div class="daily-quote-banner">
@@ -2086,6 +2100,24 @@ input[type="number"] {
         </div>
     </div>
 
+    <!-- 离线数据同步方式选择弹窗 -->
+    <div id="sync-strategy-modal" class="modal hidden">
+        <div class="modal-content modal-sm">
+            <div class="modal-header">
+                <h3>离线数据同步方式</h3>
+                <button class="btn-close" onclick="closeSyncStrategyModal()"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body">
+                <p id="sync-strategy-message">检测到你在未登录时新增的数据，登录后如何同步？</p>
+                <div class="sync-strategy-actions" style="display:flex; flex-direction:column; gap:10px; margin-top:14px;">
+                    <button class="btn-secondary" onclick="chooseSyncStrategy('merge')">1. 本地云端数据合并（合并去重）</button>
+                    <button class="btn-secondary" onclick="chooseSyncStrategy('cloud')">2. 仅使用云端数据（云端覆盖本地）</button>
+                    <button class="btn-primary" onclick="chooseSyncStrategy('local')">3. 仅使用本地数据（本地覆盖云端）</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- 自定义确认弹窗 -->
     <div id="confirm-modal" class="modal hidden">
         <div class="modal-content modal-confirm">
@@ -2116,7 +2148,7 @@ input[type="number"] {
 }
 </script>
 
-<script src="script.js?v=1776999999"></script>
+<script src="script.js?v=1778000011"></script>
 <script>
 // 测试函数
 function testQuickAccounting() {
@@ -2198,9 +2230,9 @@ function testQuickAccounting() {
             "key": "sb_publishable_BYAXSI16XDU__PZiGnmsIw_dV6ycGp2"
         };
     </script>
-    <script src="js/auth.js"></script>
+    <script src="js/auth.js?v=1778000005"></script>
     <!-- 数据同步模块 -->
-    <script src="js/sync.js?v=1773680003"></script>
+    <script src="js/sync.js?v=1778000005"></script>
     <!-- 认证UI逻辑 -->
     <script>
         // 初始化认证和同步
@@ -2212,11 +2244,17 @@ function testQuickAccounting() {
             if (authResult.error) {
                 console.error('[AuthUI] 认证初始化失败:', authResult.error);
                 updateAuthUI();
+                applyOfflineAuthFallback();
+                // 认证服务不可用时仍应显示本地已存数据（离线/CDN 失败）
+                if (typeof refreshAllUserDataFromStorage === 'function') {
+                    refreshAllUserDataFromStorage();
+                }
                 return;
             }
 
             // 更新UI
             updateAuthUI();
+            applyOfflineAuthFallback();
 
             // 如果已登录，初始化同步
             if (window.auth.isAuthenticated()) {
@@ -2263,8 +2301,72 @@ function testQuickAccounting() {
                 if (dataSync) {
                     console.log('[AuthUI] 开始同步数据...');
                     updateSyncStatus('同步中...');
-                    await dataSync.syncAll();
+                    let pendingTypes = (typeof getOfflinePendingTypes === 'function') ? getOfflinePendingTypes() : [];
+                    // 清理“陈旧待同步标记”：若某类型被标记待同步但本地已空，优先恢复云端数据
+                    if (pendingTypes.length > 0 && typeof clearOfflinePendingTypes === 'function') {
+                        const staleTypes = [];
+                        for (const type of pendingTypes) {
+                            const localKey = (window.dataSync?.dataTypes?.[type]?.localKey) || type;
+                            const raw = localStorage.getItem(localKey);
+                            const isEmpty = !raw || raw === 'null' || raw === 'undefined' || raw === '{}' || raw === '[]' || raw === '{"records":[]}';
+                            if (isEmpty) staleTypes.push(type);
+                        }
+                        if (staleTypes.length > 0) {
+                            clearOfflinePendingTypes(staleTypes);
+                            console.log('[AuthUI] 已清理陈旧待同步标记:', staleTypes);
+                            for (const type of staleTypes) {
+                                await dataSync.syncData(type, 'cloud');
+                            }
+                            pendingTypes = (typeof getOfflinePendingTypes === 'function') ? getOfflinePendingTypes() : [];
+                        }
+                    }
+                    // 检测到离线待同步时，恢复同步方式选择弹窗
+                    if (pendingTypes.length > 0) {
+                        updateSyncStatus('有离线待同步', false);
+                        console.log('[AuthUI] 检测到离线待同步数据，弹出同步方式选择');
+                        const strategy = (typeof showSyncStrategyModal === 'function')
+                            ? await showSyncStrategyModal(pendingTypes)
+                            : 'merge';
+                        const mergePolicy = (typeof strategyToMergePolicy === 'function')
+                            ? strategyToMergePolicy(strategy)
+                            : 'merge';
+                        await dataSync.syncAll(null, mergePolicy);
+                    } else {
+                        // 本地已有缓存则优先使用，避免每次刷新都全量拉云端
+                        const cacheTypes = ['todos', 'healthRecords', 'myVocab', 'vocabLibrary', 'accountingData', 'moodEntries'];
+                        const hasLocalCache = cacheTypes.some(type => {
+                            const localKey = (window.dataSync?.dataTypes?.[type]?.localKey) || type;
+                            const raw = localStorage.getItem(localKey);
+                            return raw && raw !== 'null' && raw !== 'undefined' && raw !== '{}' && raw !== '[]' && raw !== '{"records":[]}';
+                        });
+                        if (hasLocalCache) {
+                            updateSyncStatus('已同步');
+                            console.log('[AuthUI] 检测到本地缓存，跳过启动全量拉取');
+                            // 兜底：若记账本地为空，单独补拉云端，避免统计/列表为0条
+                            const accountingRaw = localStorage.getItem('accountingData');
+                            const accountingEmpty = !accountingRaw || accountingRaw === 'null' || accountingRaw === 'undefined' || accountingRaw === '{}' || accountingRaw === '[]' || accountingRaw === '{"records":[]}';
+                            if (accountingEmpty) {
+                                console.log('[AuthUI] 记账本地为空，执行云端补拉');
+                                await dataSync.syncData('accountingData', 'cloud');
+                            }
+                        } else {
+                            await dataSync.syncAll();
+                        }
+                    }
+                    // 统一兜底：无论走了哪条分支，若记账本地为空则强制从云端补拉
+                    {
+                        const accountingRaw = localStorage.getItem('accountingData');
+                        const accountingEmpty = !accountingRaw || accountingRaw === 'null' || accountingRaw === 'undefined' || accountingRaw === '{}' || accountingRaw === '[]' || accountingRaw === '{"records":[]}';
+                        if (accountingEmpty) {
+                            console.log('[AuthUI] 统一兜底：记账本地为空，执行云端补拉');
+                            await dataSync.syncData('accountingData', 'cloud');
+                        }
+                    }
                     console.log('[AuthUI] 数据同步完成');
+                    // 即使跳过云端拉取，也强制用本地缓存回灌一次，避免记账列表空白
+                    if (typeof refreshAllUserDataFromStorage === 'function') {
+                        refreshAllUserDataFromStorage();
+                    }
                 }
             }
 
@@ -2328,13 +2430,85 @@ function testQuickAccounting() {
                 if (dataSync) {
                     console.log('[AuthUI] 开始同步数据...');
                     updateSyncStatus('同步中...');
-                    await dataSync.syncAll();
+                    let pendingTypes = (typeof getOfflinePendingTypes === 'function') ? getOfflinePendingTypes() : [];
+                    // 清理“陈旧待同步标记”：若某类型被标记待同步但本地已空，优先恢复云端数据
+                    if (pendingTypes.length > 0 && typeof clearOfflinePendingTypes === 'function') {
+                        const staleTypes = [];
+                        for (const type of pendingTypes) {
+                            const localKey = (window.dataSync?.dataTypes?.[type]?.localKey) || type;
+                            const raw = localStorage.getItem(localKey);
+                            const isEmpty = !raw || raw === 'null' || raw === 'undefined' || raw === '{}' || raw === '[]' || raw === '{"records":[]}';
+                            if (isEmpty) staleTypes.push(type);
+                        }
+                        if (staleTypes.length > 0) {
+                            clearOfflinePendingTypes(staleTypes);
+                            console.log('[AuthUI] 已清理陈旧待同步标记:', staleTypes);
+                            for (const type of staleTypes) {
+                                await dataSync.syncData(type, 'cloud');
+                            }
+                            pendingTypes = (typeof getOfflinePendingTypes === 'function') ? getOfflinePendingTypes() : [];
+                        }
+                    }
+                    // 检测到离线待同步时，恢复同步方式选择弹窗
+                    if (pendingTypes.length > 0) {
+                        updateSyncStatus('有离线待同步', false);
+                        console.log('[AuthUI] 检测到离线待同步数据，弹出同步方式选择');
+                        const strategy = (typeof showSyncStrategyModal === 'function')
+                            ? await showSyncStrategyModal(pendingTypes)
+                            : 'merge';
+                        const mergePolicy = (typeof strategyToMergePolicy === 'function')
+                            ? strategyToMergePolicy(strategy)
+                            : 'merge';
+                        await dataSync.syncAll(null, mergePolicy);
+                    } else {
+                        // 本地已有缓存则优先使用，避免每次刷新都全量拉云端
+                        const cacheTypes = ['todos', 'healthRecords', 'myVocab', 'vocabLibrary', 'accountingData', 'moodEntries'];
+                        const hasLocalCache = cacheTypes.some(type => {
+                            const localKey = (window.dataSync?.dataTypes?.[type]?.localKey) || type;
+                            const raw = localStorage.getItem(localKey);
+                            return raw && raw !== 'null' && raw !== 'undefined' && raw !== '{}' && raw !== '[]' && raw !== '{"records":[]}';
+                        });
+                        if (hasLocalCache) {
+                            updateSyncStatus('已同步');
+                            console.log('[AuthUI] 检测到本地缓存，跳过启动全量拉取');
+                            // 兜底：若记账本地为空，单独补拉云端，避免统计/列表为0条
+                            const accountingRaw = localStorage.getItem('accountingData');
+                            const accountingEmpty = !accountingRaw || accountingRaw === 'null' || accountingRaw === 'undefined' || accountingRaw === '{}' || accountingRaw === '[]' || accountingRaw === '{"records":[]}';
+                            if (accountingEmpty) {
+                                console.log('[AuthUI] 记账本地为空，执行云端补拉');
+                                await dataSync.syncData('accountingData', 'cloud');
+                            }
+                        } else {
+                            await dataSync.syncAll();
+                        }
+                    }
+                    // 统一兜底：无论走了哪条分支，若记账本地为空则强制从云端补拉
+                    {
+                        const accountingRaw = localStorage.getItem('accountingData');
+                        const accountingEmpty = !accountingRaw || accountingRaw === 'null' || accountingRaw === 'undefined' || accountingRaw === '{}' || accountingRaw === '[]' || accountingRaw === '{"records":[]}';
+                        if (accountingEmpty) {
+                            console.log('[AuthUI] 统一兜底：记账本地为空，执行云端补拉');
+                            await dataSync.syncData('accountingData', 'cloud');
+                        }
+                    }
                     console.log('[AuthUI] 数据同步完成');
+                    // 即使跳过云端拉取，也强制用本地缓存回灌一次，避免记账列表空白
+                    if (typeof refreshAllUserDataFromStorage === 'function') {
+                        refreshAllUserDataFromStorage();
+                    }
                 }
             });
 
-            window.auth.onLogout(() => {
-                console.log('[AuthUI] 用户已登出');
+            window.auth.onLogout((ctx = {}) => {
+                // 非手动登出（例如网络抖动/会话事件）不做本地清空与刷新，避免离线测试被强制退出
+                if (!ctx.manual) {
+                    console.warn('[AuthUI] 检测到非手动登出事件，已忽略清理流程');
+                    updateAuthUI();
+                    applyOfflineAuthFallback();
+                    return;
+                }
+
+                console.log('[AuthUI] 用户已登出（手动）');
                 
                 // 清理所有用户数据
                 console.log('[AuthUI] 清理本地用户数据');
@@ -2377,6 +2551,11 @@ function testQuickAccounting() {
                     dataSync.stopAutoSync();
                 }
             });
+
+            // 同步/认证流程结束后与 localStorage 对齐，避免内存与磁盘不一致导致空白
+            if (typeof refreshAllUserDataFromStorage === 'function') {
+                refreshAllUserDataFromStorage();
+            }
         }
 
         // 更新认证UI
@@ -2394,6 +2573,24 @@ function testQuickAccounting() {
                 if (statusBar) statusBar.style.display = 'none';
                 if (loginBar) loginBar.style.display = 'flex';
             }
+        }
+
+        // 离线刷新时，若本地有已登录痕迹，维持离线模式 UI，避免“看起来被登出”
+        function applyOfflineAuthFallback() {
+            if (navigator.onLine) return;
+            const lastUserId = localStorage.getItem('auth_last_user_id');
+            if (!lastUserId) return;
+
+            const statusBar = document.getElementById('auth-status-bar');
+            const loginBar = document.getElementById('auth-login-bar');
+            const userEmail = document.getElementById('user-email');
+
+            if (userEmail && !userEmail.textContent) {
+                userEmail.textContent = '离线模式';
+            }
+            if (statusBar) statusBar.style.display = 'flex';
+            if (loginBar) loginBar.style.display = 'none';
+            updateSyncStatus('离线', false);
         }
 
         // 设置同步监听器
