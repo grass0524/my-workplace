@@ -2431,13 +2431,13 @@ function testQuickAccounting() {
                     console.log('[AuthUI] 开始同步数据...');
                     updateSyncStatus('同步中...');
                     let pendingTypes = (typeof getOfflinePendingTypes === 'function') ? getOfflinePendingTypes() : [];
-                    // 清理“陈旧待同步标记”：若某类型被标记待同步但本地已空，优先恢复云端数据
+                    // 清理”陈旧待同步标记”：若某类型被标记待同步但本地已空，优先恢复云端数据
                     if (pendingTypes.length > 0 && typeof clearOfflinePendingTypes === 'function') {
                         const staleTypes = [];
                         for (const type of pendingTypes) {
                             const localKey = (window.dataSync?.dataTypes?.[type]?.localKey) || type;
                             const raw = localStorage.getItem(localKey);
-                            const isEmpty = !raw || raw === 'null' || raw === 'undefined' || raw === '{}' || raw === '[]' || raw === '{"records":[]}';
+                            const isEmpty = !raw || raw === 'null' || raw === 'undefined' || raw === '{}' || raw === '[]' || raw === '{“records”:[]}';
                             if (isEmpty) staleTypes.push(type);
                         }
                         if (staleTypes.length > 0) {
@@ -2461,31 +2461,183 @@ function testQuickAccounting() {
                             : 'merge';
                         await dataSync.syncAll(null, mergePolicy);
                     } else {
-                        // 本地已有缓存则优先使用，避免每次刷新都全量拉云端
-                        const cacheTypes = ['todos', 'healthRecords', 'myVocab', 'vocabLibrary', 'accountingData', 'moodEntries'];
-                        const hasLocalCache = cacheTypes.some(type => {
+                        // 检测本地和云端数据是否有差异
+                        console.log('[AuthUI] 检测本地和云端数据差异...');
+                        const dataTypes = ['todos', 'accountingData', 'healthRecords', 'moodEntries'];
+                        const diffTypes = [];
+
+                        for (const type of dataTypes) {
                             const localKey = (window.dataSync?.dataTypes?.[type]?.localKey) || type;
-                            const raw = localStorage.getItem(localKey);
-                            return raw && raw !== 'null' && raw !== 'undefined' && raw !== '{}' && raw !== '[]' && raw !== '{"records":[]}';
-                        });
-                        if (hasLocalCache) {
-                            updateSyncStatus('已同步');
-                            console.log('[AuthUI] 检测到本地缓存，跳过启动全量拉取');
-                            // 兜底：若记账本地为空，单独补拉云端，避免统计/列表为0条
-                            const accountingRaw = localStorage.getItem('accountingData');
-                            const accountingEmpty = !accountingRaw || accountingRaw === 'null' || accountingRaw === 'undefined' || accountingRaw === '{}' || accountingRaw === '[]' || accountingRaw === '{"records":[]}';
-                            if (accountingEmpty) {
-                                console.log('[AuthUI] 记账本地为空，执行云端补拉');
-                                await dataSync.syncData('accountingData', 'cloud');
+                            const localRaw = localStorage.getItem(localKey);
+
+                            // 检查本地是否有数据
+                            if (!localRaw || localRaw === 'null' || localRaw === 'undefined' || localRaw === '{}' || localRaw === '[]' || localRaw === '{“records”:[]}') {
+                                continue; // 本地为空，跳过
                             }
+
+                            // 下载云端数据对比
+                            try {
+                                const tableName = (window.dataSync?.dataTypes?.[type]?.tableName) || type;
+                                const { data: cloudData } = await window.auth.supabase
+                                    .from(tableName)
+                                    .select('data')
+                                    .eq('user_id', window.auth.user.id)
+                                    .single();
+
+                                if (!cloudData || !cloudData.data) {
+                                    // 云端没有数据，本地有数据，需要确认
+                                    console.log('[AuthUI] 检测到差异:', type, '- 本地有数据，云端无数据');
+                                    diffTypes.push(type);
+                                    continue;
+                                }
+
+                                // 对比数据
+                                let localData, cloudDataParsed;
+                                try {
+                                    localData = JSON.parse(localRaw);
+                                    cloudDataParsed = typeof cloudData.data === 'string' ? JSON.parse(cloudData.data) : cloudData.data;
+                                } catch (e) {
+                                    console.error('[AuthUI] 解析数据失败:', type, e);
+                                    continue;
+                                }
+
+                                // 比较数据内容
+                                const localArray = type === 'accountingData' ? (localData.records || []) : (Array.isArray(localData) ? localData : []);
+                                const cloudArray = type === 'accountingData' ? (cloudDataParsed.records || []) : (Array.isArray(cloudDataParsed) ? cloudDataParsed : []);
+
+                                // 提取ID集合对比
+                                const localIds = new Set(localArray.map(item => item.id).filter(id => id));
+                                const cloudIds = new Set(cloudArray.map(item => item.id).filter(id => id));
+
+                                // 检查是否有差异
+                                const localOnly = [...localIds].filter(id => !cloudIds.has(id));
+                                const cloudOnly = [...cloudIds].filter(id => !localIds.has(id));
+
+                                // 比较时间戳判断谁更新
+                                const cloudTimestamp = new Date(cloudData.updated_at).getTime();
+                                const localTimestampKey = (window.dataSync?.dataTypes?.[type]?.localKey + '_timestamp') || (type + '_timestamp');
+                                const localTimestampStr = localStorage.getItem(localTimestampKey);
+                                const localTimestamp = localTimestampStr ? parseInt(localTimestampStr) : 0;
+
+                                console.log('[AuthUI] 时间戳对比:', type, '- 云端:', new Date(cloudTimestamp).toLocaleString(), '本地:', new Date(localTimestamp).toLocaleString());
+
+                                // 只有当本地比云端更新时，才需要弹窗让用户选择
+                                if (localOnly.length > 0 && localTimestamp > cloudTimestamp) {
+                                    // 本地有独有数据且本地更新，可能是离线新增
+                                    console.log('[AuthUI] 检测到差异:', type, `- 本地独有:${localOnly.length}, 本地更新，需要用户选择`);
+                                    diffTypes.push(type);
+                                } else if (localOnly.length > 0 && cloudTimestamp >= localTimestamp) {
+                                    // 本地有独有数据但云端更新，说明云端删除了这些数据
+                                    console.log('[AuthUI] 检测到云端删除:', type, `- 本地独有:${localOnly.length}，云端更新，自动使用云端数据`);
+                                    await dataSync.syncData(type, 'cloud');
+                                    // 强制从 localStorage 重新加载到全局变量
+                                    if (type === 'accountingData') {
+                                        const raw = localStorage.getItem('accountingData');
+                                        if (raw) {
+                                            try {
+                                                const parsed = JSON.parse(raw);
+                                                accountingData = parsed;
+                                                console.log('[AuthUI] 已更新全局变量 accountingData');
+                                            } catch (e) {
+                                                console.error('[AuthUI] 更新全局变量失败:', e);
+                                            }
+                                        }
+                                        if (typeof renderRecentRecords === 'function') {
+                                            renderRecentRecords();
+                                        }
+                                    }
+                                    if (type === 'todos') {
+                                        const raw = localStorage.getItem('todos');
+                                        if (raw) {
+                                            try {
+                                                todos = JSON.parse(raw);
+                                                console.log('[AuthUI] 已更新全局变量 todos');
+                                            } catch (e) {
+                                                console.error('[AuthUI] 更新全局变量失败:', e);
+                                            }
+                                        }
+                                        if (typeof renderTodos === 'function') {
+                                            renderTodos();
+                                        }
+                                    }
+                                } else if (cloudOnly.length > 0) {
+                                    // 只有云端有新数据，直接使用云端数据
+                                    console.log('[AuthUI] 检测到云端更新:', type, `- 云端独有:${cloudOnly.length}，自动使用云端数据`);
+                                    await dataSync.syncData(type, 'cloud');
+                                    // 强制从 localStorage 重新加载到全局变量
+                                    if (type === 'accountingData') {
+                                        const raw = localStorage.getItem('accountingData');
+                                        if (raw) {
+                                            try {
+                                                const parsed = JSON.parse(raw);
+                                                accountingData = parsed;
+                                                console.log('[AuthUI] 已更新全局变量 accountingData');
+                                            } catch (e) {
+                                                console.error('[AuthUI] 更新全局变量失败:', e);
+                                            }
+                                        }
+                                        if (typeof renderRecentRecords === 'function') {
+                                            renderRecentRecords();
+                                        }
+                                    }
+                                    if (type === 'todos') {
+                                        const raw = localStorage.getItem('todos');
+                                        if (raw) {
+                                            try {
+                                                todos = JSON.parse(raw);
+                                                console.log('[AuthUI] 已更新全局变量 todos');
+                                            } catch (e) {
+                                                console.error('[AuthUI] 更新全局变量失败:', e);
+                                            }
+                                        }
+                                        if (typeof renderTodos === 'function') {
+                                            renderTodos();
+                                        }
+                                    }
+                                }
+                            } catch (e) {
+                                console.error('[AuthUI] 检测差异失败:', type, e);
+                            }
+                        }
+
+                        // 如果有差异，弹出选择弹窗
+                        if (diffTypes.length > 0) {
+                            updateSyncStatus('检测到数据差异', false);
+                            console.log('[AuthUI] 检测到数据差异，弹出同步方式选择');
+                            const strategy = (typeof showSyncStrategyModal === 'function')
+                                ? await showSyncStrategyModal(diffTypes)
+                                : 'merge';
+                            const mergePolicy = (typeof strategyToMergePolicy === 'function')
+                                ? strategyToMergePolicy(strategy)
+                                : 'merge';
+                            await dataSync.syncAll(null, mergePolicy);
                         } else {
-                            await dataSync.syncAll();
+                            // 本地已有缓存则优先使用，避免每次刷新都全量拉云端
+                            const cacheTypes = ['todos', 'healthRecords', 'myVocab', 'vocabLibrary', 'accountingData', 'moodEntries'];
+                            const hasLocalCache = cacheTypes.some(type => {
+                                const localKey = (window.dataSync?.dataTypes?.[type]?.localKey) || type;
+                                const raw = localStorage.getItem(localKey);
+                                return raw && raw !== 'null' && raw !== 'undefined' && raw !== '{}' && raw !== '[]' && raw !== '{“records”:[]}';
+                            });
+                            if (hasLocalCache) {
+                                updateSyncStatus('已同步');
+                                console.log('[AuthUI] 检测到本地缓存，跳过启动全量拉取');
+                                // 兜底：若记账本地为空，单独补拉云端，避免统计/列表为0条
+                                const accountingRaw = localStorage.getItem('accountingData');
+                                const accountingEmpty = !accountingRaw || accountingRaw === 'null' || accountingRaw === 'undefined' || accountingRaw === '{}' || accountingRaw === '[]' || accountingRaw === '{“records”:[]}';
+                                if (accountingEmpty) {
+                                    console.log('[AuthUI] 记账本地为空，执行云端补拉');
+                                    await dataSync.syncData('accountingData', 'cloud');
+                                }
+                            } else {
+                                await dataSync.syncAll();
+                            }
                         }
                     }
                     // 统一兜底：无论走了哪条分支，若记账本地为空则强制从云端补拉
                     {
                         const accountingRaw = localStorage.getItem('accountingData');
-                        const accountingEmpty = !accountingRaw || accountingRaw === 'null' || accountingRaw === 'undefined' || accountingRaw === '{}' || accountingRaw === '[]' || accountingRaw === '{"records":[]}';
+                        const accountingEmpty = !accountingRaw || accountingRaw === 'null' || accountingRaw === 'undefined' || accountingRaw === '{}' || accountingRaw === '[]' || accountingRaw === '{“records”:[]}';
                         if (accountingEmpty) {
                             console.log('[AuthUI] 统一兜底：记账本地为空，执行云端补拉');
                             await dataSync.syncData('accountingData', 'cloud');
