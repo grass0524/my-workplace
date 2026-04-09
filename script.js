@@ -37,6 +37,16 @@ document.addEventListener('DOMContentLoaded', () => {
     // 独立兜底：避免认证分支漏走时记账数据不回灌
     setTimeout(ensureAccountingHydratedFromCloud, 1200);
     setTimeout(ensureAccountingRenderedFromLocal, 1800);
+
+    // file:// 打开提示：避免你以为“云端已同步但本地没更新”
+    if (typeof location !== 'undefined' && location?.protocol === 'file:') {
+        const warning = document.getElementById('file-protocol-warning');
+        if (warning) warning.classList.remove('hidden');
+        // 同时给一个 toast，便于移动端/小屏也能看到
+        if (typeof showToast === 'function') {
+            showToast('检测到 file:// 打开页面。建议用终端启动 http://localhost:8080 再打开。', 6000);
+        }
+    }
 });
 
 async function ensureAccountingHydratedFromCloud() {
@@ -3611,6 +3621,9 @@ function deleteAccountingRecord(id) {
 
                 showToast('删除成功！');
 
+                // 通知统计页面刷新数据
+                setTimeout(() => postAccountingDataToStatsIframe(), 100);
+
                 // 立即上传到云端（不下载，避免覆盖）
                 if (window.dataSync && window.dataSync.isReady) {
                     console.log('[deleteAccountingRecord] 正在上传删除后的数据到云端...');
@@ -4118,6 +4131,14 @@ window.addEventListener('message', function(event) {
         } catch (err) {
             console.error('[Main] ❌ 发送响应失败:', err);
         }
+    } else if (event.data.type === 'edit-accounting-record') {
+        // 编辑记账记录
+        console.log('[Main] 收到编辑记录请求:', event.data.recordId);
+        editAccountingRecord(event.data.recordId);
+    } else if (event.data.type === 'delete-accounting-record') {
+        // 删除记账记录
+        console.log('[Main] 收到删除记录请求:', event.data.recordId);
+        deleteAccountingRecord(event.data.recordId);
     }
 });
 
@@ -4671,17 +4692,20 @@ function confirmQuickAccounting() {
         if (record) {
             const typeExpenseBtn = document.getElementById('qa-confirm-type-expense');
             const isExpense = typeExpenseBtn.classList.contains('active');
-            
+
             record.type = isExpense ? 'expense' : 'income';
             record.category = categorySelect.value;
             record.note = detailInput.value.trim() || '无备注';
             record.amount = amount;
             record.date = timeInput.value ? new Date(timeInput.value).toISOString() : new Date().toISOString();
-            
+
             saveAccountingData(record.id);
             updateAccountingSummary();
             renderRecentRecords();
-            
+
+            // 通知统计页面刷新数据
+            setTimeout(() => postAccountingDataToStatsIframe(), 100);
+
             closeQuickAccountingModal();
             showToast('修改成功！');
         }
